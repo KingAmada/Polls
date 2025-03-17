@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>2027 Nigeria Election Poll</title>
+  <!-- Google Font: Montserrat -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* BASIC RESET */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Montserrat", sans-serif;
+      background: #f0f1f2; /* subtle grey */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      color: #333;
+      position: relative;
+      overflow-x: hidden;
+    }
+    /* Watermark behind container */
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Coat_of_arms_of_Nigeria.svg/1200px-Coat_of_arms_of_Nigeria.svg.png")
+        no-repeat center;
+      background-size: 300px 300px;
+      opacity: 0.05;
+      z-index: 0;
+    }
+    /* Main container */
+    .container {
+      width: 95%;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 1rem 2rem 2rem;
+      animation: fadeIn 1.2s ease;
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* HEADER */
+    .header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .header img {
+      max-width: 100px;
+      display: block;
+      margin: 0.5rem auto;
+    }
+    .main-heading {
+      font-size: 2.2rem;
+      font-weight: 900;
+      margin-bottom: 0.2rem;
+      color: #333;
+    }
+    .sub-heading {
+      font-size: 0.95rem;
+      color: #555;
+      max-width: 600px;
+      margin: 0.5rem auto 1rem;
+      line-height: 1.4;
+      text-align: center;
+    }
+    .divider {
+      width: 120px;
+      height: 3px;
+      background: #555;
+      margin: 1rem auto;
+      border-radius: 5px;
+    }
+
+    /* FOOTER */
+    footer {
+      width: 100%;
+      max-width: 1400px;
+      margin: 1rem auto 0;
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #fff;
+      background: #008000;
+      border-radius: 5px;
+    }
+    footer p {
+      margin: 0.5rem 0;
+    }
+    .security-badges {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    .security-badge img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      transition: transform 0.3s;
+    }
+    .security-badge img:hover {
+      transform: scale(1.05);
+    }
+
+    /* SELECTION SECTION */
+    .selection-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+      animation: slideUp 0.8s ease;
+    }
+    @keyframes slideUp {
+      0% { transform: translateY(30px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    .selection-box {
+      flex: 1 1 450px;
+      background: #fafafa;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 1.2rem;
+    }
+    .selection-box h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #333;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+    .candidate-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(3, auto);
+      gap: 0.5rem;
+    }
+    @media (max-width: 600px) {
+      .candidate-list {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        grid-template-rows: auto;
+      }
+    }
+    .candidate-item {
+      background: #fff;
+      border-radius: 8px;
+      padding: 0.4rem;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .candidate-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .candidate-item.selected {
+      background: linear-gradient(145deg, #00c851, #008000);
+      color: #fff !important;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .candidate-item.selected .candidate-name,
+    .candidate-item.selected .candidate-details,
+    .candidate-item.selected .like-container {
+      color: #fff !important;
+    }
+    .candidate-item.selected .candidate-photo {
+      border-color: #eee !important;
+    }
+    .candidate-photo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-bottom: 0.4rem;
+      object-fit: cover;
+      border: 2px solid #ccc;
+      transition: border 0.2s;
+    }
+    .candidate-name {
+      font-size: 0.8rem;
+      text-align: center;
+      margin-bottom: 0.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+    .candidate-details {
+      font-size: 0.65rem;
+      color: #777;
+      line-height: 1.2;
+      margin-bottom: 0.2rem;
+      text-align: center;
+    }
+    .like-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.2rem;
+      font-size: 0.7rem;
+      background: #f9f9f9;
+      border-radius: 10px;
+      padding: 0.3rem 0.5rem;
+      transition: background 0.2s;
+    }
+    .like-container:hover {
+      background: #eee;
+    }
+    .like-btn {
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-weight: bold;
+      color: #008000;
+      transition: transform 0.2s;
+    }
+    .like-btn:hover {
+      transform: scale(1.1);
+    }
+    .like-count {
+      color: #555;
+      font-weight: 600;
+    }
+
+    /* VOTE SECTION */
+    .vote-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .vote-form {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      background: #fafafa;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .vote-form select,
+    .vote-form input {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.85rem;
+    }
+    .vote-button {
+      background: linear-gradient(to right, #008000, #00c851);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 0.6rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.2s;
+      animation: pulse 1.5s infinite;
+    }
+    .vote-button:hover {
+      transform: scale(1.04);
+      opacity: 0.9;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 10px rgba(0,200,81,0.5); }
+      50% { box-shadow: 0 0 20px rgba(0,200,81,0.8); }
+    }
+
+    /* Legend near Vote area */
+    .legend {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    /* RESULTS SECTION */
+    .results-section {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 1rem;
+      width: 100%;
+      margin-top: 1rem;
+    }
+    .chart, .voted-combos {
+      flex: 1 1 45%;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 1rem;
+      position: relative;
+    }
+    .chart h2, .voted-combos h2 {
+      text-align: center;
+      color: #333;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .chart-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+justify-content: space-between; /* Ensures name is fully visible */
+    }
+    .bar-label {
+flex: 1; /* Allows label to take more space */
+  font-size: 0.6rem;
+  font-weight: bold;
+  white-space: nowrap; /* Prevents text wrapping */
+  overflow: visible; /* Allows full display of long names */
+  text-overflow: unset;
+    }
+    .bar-container {
+   flex: 2; /* Gives more space to the bar */
+  background: #f0f0f0;
+  height: 18px;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+    }
+    .bar-fill {
+      height: 18px;
+      transition: width 0.5s;
+      background: linear-gradient(to right, #34e89e, #0f3443);
+    }
+
+    /* COMBO GRID WITH "Votes: X | Comments: Y" */
+    .combo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+    .combo-card {
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 0.5rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+    .combo-card:hover {
+      transform: translateY(-2px);
+    }
+    .combo-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      margin-bottom: 0.25rem;
+    }
+    .combo-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid #ccc;
+    }
+    .combo-title {
+      font-weight: bold;
+      font-size: 0.9rem;
+      color: #333;
+    }
+    .combo-stats {
+      font-size: 0.8rem;
+      margin-top: 0.2rem;
+      color: #555;
+    }
+
+    /* COMMENT SECTION (below results) */
+    .combo-comment-section {
+      margin-top: 1rem;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 1rem;
+      display: none; /* hidden by default */
+    }
+    .combo-comment-section.active {
+      display: block; /* show when user picks a combo */
+    }
+    .combo-comment-title {
+      text-align: center;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+    .combo-comment-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 0.8rem;
+    }
+    .combo-comment-form input, .combo-comment-form textarea {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .combo-comment-btn {
+      align-self: flex-end;
+      background: linear-gradient(to right, #008000, #00c851);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 0.4rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .combo-comment-btn:hover {
+      transform: scale(1.02);
+    }
+    .combo-comment-list {
+      margin-top: 0.5rem;
+    }
+    .combo-comment-item {
+      background: #f9f9f9;
+      border-radius: 6px;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .comment-author {
+      font-weight: 700;
+      color: #006400;
+      margin-bottom: 0.2rem;
+      font-size: 0.9rem;
+    }
+    .comment-text {
+      font-size: 0.85rem;
+      line-height: 1.3;
+      color: #333;
+      margin-bottom: 0.2rem;
+    }
+    .comment-actions {
+      font-size: 0.75rem;
+      color: #008000;
+      cursor: pointer;
+      text-align: right;
+    }
+    .reply-form {
+      background: #eee;
+      margin-top: 0.4rem;
+      border-radius: 6px;
+      padding: 0.4rem;
+      display: none;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .reply-input, .reply-textarea {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 0.4rem;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .reply-btn {
+      align-self: flex-end;
+      background: linear-gradient(to right, #008000, #00c851);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .reply-btn:hover {
+      transform: scale(1.02);
+    }
+    .comment-replies {
+      margin-left: 1rem;
+      margin-top: 0.4rem;
+      border-left: 2px solid #ccc;
+      padding-left: 0.4rem;
+    }
+
+    /* LIGHTBOX for "Add Candidate" */
+    #addCandidateBtn {
+      display: inline-block;
+      background: linear-gradient(to right, #008000, #00c851);
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      border-radius: 50px;
+      padding: 0.6rem 1.2rem;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: transform 0.2s;
+    }
+    #addCandidateBtn:hover {
+      transform: scale(1.02);
+    }
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+    .lightbox-content {
+      background: #fff;
+      width: 90%;
+      max-width: 500px;
+      border-radius: 8px;
+      padding: 1.2rem;
+      position: relative;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 0.5rem;
+      right: 1rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #333;
+      font-weight: bold;
+    }
+    .lightbox-close:hover {
+      color: #555;
+    }
+    .lightbox-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .lightbox-form input {
+      flex: 1;
+      min-width: 130px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 0.4rem;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .lightbox-form button {
+      background: linear-gradient(to right, #008000, #00c851);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    .submit-message {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      color: #008000;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img 
+      src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Coat_of_arms_of_Nigeria.svg/1200px-Coat_of_arms_of_Nigeria.svg.png" 
+      alt="Nigeria Coat of Arms"
+    />
+    <h1 class="main-heading">2027 Nigeria Election Poll</h1>
+    <p class="sub-heading">
+      Select a President and Vice President, then cast your vote. You can also <strong>like</strong> any candidate.
+      Think you can make an impact? <strong>Add yourself</strong> as a candidate.
+    </p>
+    <div class="divider"></div>
+  </div>
+
+  <div class="container">
+    <!-- SELECTION SECTION -->
+    <div class="selection-section">
+      <!-- President -->
+      <div class="selection-box" id="presidentBox">
+        <h2>President</h2>
+        <ul class="candidate-list" id="presidentList"></ul>
+      </div>
+
+      <!-- Vice President -->
+      <div class="selection-box" id="vicePresidentBox">
+        <h2>Vice President</h2>
+        <ul class="candidate-list" id="vicePresidentList"></ul>
+      </div>
+    </div>
+
+    <!-- Vote + Mini Form (Horizontal) -->
+    <div class="vote-section">
+      <div class="vote-form">
+        <input type="tel" placeholder="Phone Number" id="voterPhone" />
+        <select id="voterState">
+          <option disabled selected>State</option>
+          <option>Lagos</option>
+          <option>Abia</option>
+          <option>Adamawa</option>
+          <option>Delta</option>
+          <option>Kaduna</option>
+        </select>
+        <select id="voterCity">
+          <option disabled selected>City</option>
+          <option>Ikeja</option>
+          <option>Umuahia</option>
+          <option>Yola</option>
+          <option>Warri</option>
+          <option>Kaduna</option>
+        </select>
+        <select id="voterGender">
+          <option disabled selected>Gender</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+        <input type="number" placeholder="Age" id="voterAge" style="width:60px;" />
+      </div>
+      <button class="vote-button" id="voteBtn">Vote</button>
+    </div>
+
+    <!-- Legend for abbreviations -->
+    <div class="legend">
+      Legend: Muslim (MS) | Christian (CH) | North Central (NC) | North East (NE) | North West (NW) | South West (SW) | South East (SE) | South (SS).
+    </div>
+
+    <!-- RESULTS SECTION -->
+    <div class="results-section">
+      <!-- Chart -->
+      <div class="chart" id="chart">
+        <h2>Voting Results</h2>
+        <div id="chartBars"></div>
+      </div>
+
+      <!-- Voted Combos -->
+      <div class="voted-combos" id="votedCombosBox">
+        <h2>Voted Combinations</h2>
+        <div class="combo-grid" id="comboGrid"></div>
+      </div>
+    </div>
+
+    <!-- Comments for combos (below the boxes) -->
+    <div class="combo-comment-section" id="comboCommentSection">
+      <div class="combo-comment-title" id="comboCommentTitle"></div>
+      <!-- new comment form -->
+      <div class="combo-comment-form">
+        <input type="text" placeholder="Your Name" id="comboCommentName" />
+        <textarea rows="2" placeholder="Write your comment..." id="comboCommentText"></textarea>
+        <button class="combo-comment-btn" id="comboCommentPostBtn">Post Comment</button>
+      </div>
+      <!-- comment list -->
+      <div class="combo-comment-list" id="comboCommentList"></div>
+    </div>
+
+    <!-- Add Candidate Button -->
+    <div style="text-align:center; margin-top:1rem;">
+      <button id="addCandidateBtn">Add Yourself as Candidate</button>
+    </div>
+  </div>
+
+  <!-- Add Candidate Lightbox -->
+  <div class="lightbox-overlay" id="lightboxOverlay">
+    <div class="lightbox-content">
+      <span class="lightbox-close" id="lightboxClose">X</span>
+      <h2>Add Candidate</h2>
+      <form class="lightbox-form" id="lightboxForm">
+        <input 
+          type="text" 
+          id="lightboxCandidateName" 
+          placeholder="Full Name" 
+          required
+        />
+        <input 
+          type="text" 
+          id="lightboxCandidateImage" 
+          placeholder="Image URL"
+        />
+        <input 
+          type="text" 
+          id="lightboxCandidateReligion" 
+          placeholder="MS/CH"
+          style="width:60px"
+        />
+        <input 
+          type="number" 
+          id="lightboxCandidateAge" 
+          placeholder="67"
+          style="width:60px"
+        />
+        <input 
+          type="text" 
+          id="lightboxCandidateZone" 
+          placeholder="NE"
+          style="width:60px"
+        />
+        <button type="submit">Submit</button>
+      </form>
+      <div class="submit-message" id="lightboxSubmitMsg">
+        Thanks for submitting your candidate for consideration! We will be in touch.
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>All rights reserved © 2027 Nigeria Official Polling Commission</p>
+    <p>Site secured by:</p>
+    <div class="security-badges">
+      <div class="security-badge">
+        <img 
+          src="https://www.usatoday.com/gcdn/-mm-/3e1efaec2a9d17b3b2b39a2d93df1d1f2f03a3fd/c=0-222-1978-2860/local/-/media/USATODAY/USATODAY/2014/08/18/1408384466000-Norton-Vert-RGB-300dpi.jpg"
+          alt="Norton Security"
+        />
+      </div>
+      <div class="security-badge">
+        <img
+          src="https://sm.pcmag.com/t/pcmag_me/review/m/mcafee-tot/mcafee-total-protection-for-mac_vydx.1920.jpg"
+          alt="McAfee Security"
+        />
+      </div>
+      <div class="security-badge">
+        <img
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQs8XdulVX0YZdYqSi38iAXF2ok8fhNqGU33Q&s"
+          alt="Thawte SSL"
+        />
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* 
+      1) Show Legend near the Vote section.
+      2) Reduced .bar-label to 0.8rem + truncated text to prevent wrapping.
+      3) Everything else is same: combos have "Votes: X | Comments: Y" and a nested comment system below the results
+    */
+
+    let candidates=[
+      "Bola Tinubu","Kashim Shettima","Nasir El-Rufai","Peter Obi",
+      "Rabiu Kwankwaso","Atiku Abubakar","Yakubu Dogara","Yemi Osinbajo",
+      "Nyesom Wike","Godswill Akpabio","Bukola Saraki","Rotimi Amaechi",
+      "Aminu Tambuwal","Goodluck Jonathan","Ayuba Wakawa"
+    ];
+let candidateImages = {  "Yakubu Dogara": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjuBvZJoVkod1KbQdOKCSxKVqt9dk7zP6M26tKuy320OLGSuke9AuduxgF8j1G6f7OthrtlQr3MYW12RX8869PyIQQm8c_9EolExIJTu4y2q5JduhahRcnBA_6fCF0F5wDTlARpFAZuVz-L2_RBD-mVTnBcj01I-faMqKBx33v-H4cez3fPk0IdBrvF3uo/s600/Dogara.jpg",
+      "Yemi Osinbajo": "https://thenationonlineng.net/wp-content/uploads/2015/08/Osinbajo.jpg",
+      "Nyesom Wike": "https://dailypost.ng/wp-content/uploads/2024/01/wike.jpg",
+      "Godswill Akpabio": "https://www.citypost.ng/wp-content/uploads/2024/08/IMG-20240827-WA0043.jpg",
+      "Bukola Saraki": "https://leadership.ng/wp-content/uploads/2023/12/Bukola-Saraki-jpg.webp",
+      "Rotimi Amaechi": "https://cdn.vanguardngr.com/wp-content/uploads/2022/04/Rt-Hon.-Chibuike-Rotimi-Amaechi-Image-2022-04-28-at-7.05.36-PM.jpeg",
+      "Aminu Tambuwal": "https://csn-prod-profile-images.s3.amazonaws.com/kHNmjl177dtFve7iYeHvx",
+      "Goodluck Jonathan": "https://upload.wikimedia.org/wikipedia/commons/4/42/Goodluck_Jonathan_World_Economic_Forum_2013.jpg",
+      "Atiku Abubakar": "https://miro.medium.com/v2/resize:fit:2400/0*AZFse8ApInmJg7xf.jpg",
+      "Bola Tinubu": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg",
+      "Kashim Shettima": "https://statehouse.gov.ng/wp-content/uploads/2023/05/FxSvH8TWAAYzC0H-835x1024.jpg",
+      "Nasir El-Rufai": "https://d1jcea4y7xhp7l.cloudfront.net/2018/10/Kaduna_state_Governor.jpg",
+      "Peter Obi": "https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png",
+      "Rabiu Kwankwaso": "https://thetop10magazine.com.ng/wp-content/uploads/2022/09/Rabiu-Musa-Kwankwaso-NNPP.jpg",
+      "Ayuba Wakawa": "https://media.premiumtimesng.com/wp-content/files/2014/04/Ayuba-Wakawa.jpg"};
+    // Short details: e.g. {religion, age, zone}
+    let candidateDetails = {  "Bola Tinubu":     { religion: "CH", age: "70", zone: "SW" },
+      "Kashim Shettima": { religion: "MS", age: "65", zone: "NE" },
+      "Nasir El-Rufai":  { religion: "MS", age: "63", zone: "NW" },
+      "Peter Obi":       { religion: "CH", age: "60", zone: "SE" },
+      "Rabiu Kwankwaso": { religion: "MS", age: "66", zone: "NW" },
+      "Atiku Abubakar":  { religion: "MS", age: "76", zone: "NE" },
+      "Yakubu Dogara":   { religion: "CH", age: "55", zone: "NE" },
+      "Yemi Osinbajo":   { religion: "CH", age: "64", zone: "SW" },
+      "Nyesom Wike":     { religion: "CH", age: "54", zone: "SS" },
+      "Godswill Akpabio":{ religion: "CH", age: "60", zone: "SS" },
+      "Bukola Saraki":   { religion: "MS", age: "60", zone: "NC" },
+      "Rotimi Amaechi":  { religion: "CH", age: "57", zone: "SS" },
+      "Aminu Tambuwal":  { religion: "MS", age: "56", zone: "NW" },
+      "Goodluck Jonathan": { religion: "CH", age: "65", zone: "SS" },
+      "Ayuba Wakawa":    { religion: "MS", age: "59", zone: "NE" } };
+
+    let votesData={};  // { "Tinubu & Shettima": 3, ... }
+    let candidateLikes={};  // { "Tinubu":0, ... }
+    let comboComments={};  // { "Tinubu & Shettima": [ { name, text, replies:[] }, ... ] }
+
+    let selectedPresident=null;
+    let selectedVP=null;
+    let currentCombo=null;
+
+    // DOM Refs
+    const presidentListEl=document.getElementById('presidentList');
+    const vicePresidentListEl=document.getElementById('vicePresidentList');
+    const voteBtn=document.getElementById('voteBtn');
+    const chartBarsEl=document.getElementById('chartBars');
+    const comboGridEl=document.getElementById('comboGrid');
+
+    const comboCommentSection=document.getElementById('comboCommentSection');
+    const comboCommentTitle=document.getElementById('comboCommentTitle');
+    const comboCommentName=document.getElementById('comboCommentName');
+    const comboCommentText=document.getElementById('comboCommentText');
+    const comboCommentPostBtn=document.getElementById('comboCommentPostBtn');
+    const comboCommentList=document.getElementById('comboCommentList');
+
+    // Add Candidate Lightbox
+    const addCandidateBtn=document.getElementById('addCandidateBtn');
+    const lightboxOverlay=document.getElementById('lightboxOverlay');
+    const lightboxClose=document.getElementById('lightboxClose');
+    const lightboxForm=document.getElementById('lightboxForm');
+    const lightboxCandidateName=document.getElementById('lightboxCandidateName');
+    const lightboxCandidateImage=document.getElementById('lightboxCandidateImage');
+    const lightboxCandidateReligion=document.getElementById('lightboxCandidateReligion');
+    const lightboxCandidateAge=document.getElementById('lightboxCandidateAge');
+    const lightboxCandidateZone=document.getElementById('lightboxCandidateZone');
+    const lightboxSubmitMsg=document.getElementById('lightboxSubmitMsg');
+
+    // Initialize likes=0
+    candidates.forEach(c=> candidateLikes[c]=0);
+
+    function init(){
+      populateCandidateList(presidentListEl,candidates,true);
+      populateCandidateList(vicePresidentListEl,candidates,false);
+    }
+    init();
+
+    function populateCandidateList(listEl, candArr, isPresident){
+      listEl.innerHTML='';
+      candArr.forEach(c=>{
+        const li=document.createElement('li');
+        li.className='candidate-item';
+        li.dataset.candidateName=c;
+
+        const img=document.createElement('img');
+        img.className='candidate-photo';
+        img.src=candidateImages[c]||"https://via.placeholder.com/80?text=Photo";
+        img.alt=c;
+
+        const nameDiv=document.createElement('div');
+        nameDiv.className='candidate-name';
+        nameDiv.textContent=c;
+
+        let d=candidateDetails[c]||{religion:"N/A",age:"N/A",zone:"N/A"};
+        const infoDiv=document.createElement('div');
+        infoDiv.className='candidate-details';
+        infoDiv.textContent=`${d.religion}, ${d.age}, ${d.zone}`;
+
+        const likeContainer=document.createElement('div');
+        likeContainer.className='like-container';
+
+        const likeBtn=document.createElement('button');
+        likeBtn.className='like-btn';
+        likeBtn.textContent="Like";
+
+        const likeCountSpan=document.createElement('span');
+        likeCountSpan.className='like-count';
+        likeCountSpan.textContent=candidateLikes[c];
+
+        likeBtn.addEventListener('click',(e)=>{
+          e.stopPropagation();
+          candidateLikes[c]++;
+          updateLikes(c);
+        });
+
+        likeContainer.appendChild(likeBtn);
+        likeContainer.appendChild(likeCountSpan);
+
+        li.appendChild(img);
+        li.appendChild(nameDiv);
+        li.appendChild(infoDiv);
+        li.appendChild(likeContainer);
+
+        li.addEventListener('click',()=>{
+          if(isPresident){
+            selectedPresident=c;
+            highlightSelected(presidentListEl,c);
+          } else {
+            selectedVP=c;
+            highlightSelected(vicePresidentListEl,c);
+          }
+        });
+
+        listEl.appendChild(li);
+      });
+    }
+
+    function highlightSelected(listEl,candidate){
+      const items=listEl.querySelectorAll('.candidate-item');
+      items.forEach(it=>{
+        if(it.dataset.candidateName===candidate) it.classList.add('selected');
+        else it.classList.remove('selected');
+      });
+    }
+    function updateLikes(c){
+      const newVal=candidateLikes[c];
+      document.querySelectorAll(`[data-candidate-name="${c}"]`).forEach(it=>{
+        const sp=it.querySelector('.like-count');
+        if(sp) sp.textContent=newVal;
+      });
+    }
+
+    // VOTING
+    voteBtn.addEventListener('click',()=>{
+      if(!selectedPresident||!selectedVP){
+        alert("Select President and Vice President first!");
+        return;
+      }
+      if(selectedPresident===selectedVP){
+        alert("They must differ!");
+        return;
+      }
+      const comboKey=`${selectedPresident} & ${selectedVP}`;
+      if(!votesData[comboKey]) votesData[comboKey]=0;
+      if(!comboComments[comboKey]) comboComments[comboKey]=[];
+      votesData[comboKey]++;
+
+      renderChart();
+      renderComboGrid();
+    });
+
+    /* RENDER CHART (no comment count) */
+    function renderChart(){
+      chartBarsEl.innerHTML='';
+      const sorted=Object.entries(votesData).sort((a,b)=>b[1]-a[1]);
+      const total=sorted.reduce((s,[_,v])=>s+v,0);
+
+      sorted.forEach(([combo,cnt])=>{
+        const row=document.createElement('div');
+        row.className='chart-bar';
+
+        const label=document.createElement('div');
+        label.className='bar-label';
+        label.textContent=combo;
+
+        const barBg=document.createElement('div');
+        barBg.className='bar-container';
+        const barFill=document.createElement('div');
+        barFill.className='bar-fill';
+        let pct= total? (cnt/total*100).toFixed(1):0;
+        barFill.style.width=pct+'%';
+
+        barBg.appendChild(barFill);
+        row.appendChild(label);
+        row.appendChild(barBg);
+        chartBarsEl.appendChild(row);
+      });
+    }
+
+    /* RENDER COMBO GRID with comment count */
+    function renderComboGrid(){
+      comboGridEl.innerHTML='';
+      const sorted=Object.entries(votesData).sort((a,b)=>b[1]-a[1]);
+      sorted.forEach(([combo,cnt])=>{
+        const card=document.createElement('div');
+        card.className='combo-card';
+        card.dataset.comboKey=combo;
+
+        const top=document.createElement('div');
+        top.className='combo-top';
+
+        const [c1,c2]=combo.split(" & ");
+        const img1=document.createElement('img');
+        img1.className='combo-img';
+        img1.src=candidateImages[c1]||"https://via.placeholder.com/60?text=Photo";
+
+        const img2=document.createElement('img');
+        img2.className='combo-img';
+        img2.src=candidateImages[c2]||"https://via.placeholder.com/60?text=Photo";
+
+        top.appendChild(img1);
+        top.appendChild(img2);
+
+        const title=document.createElement('div');
+        title.className='combo-title';
+        title.textContent=combo;
+
+        const stats=document.createElement('div');
+        stats.className='combo-stats';
+        let cCount= comboComments[combo]? comboComments[combo].length: 0;
+        stats.textContent=`Votes: ${cnt} | Comments: ${cCount}`;
+
+        card.appendChild(top);
+        card.appendChild(title);
+        card.appendChild(stats);
+
+        card.addEventListener('click',()=>{
+          openComboComments(combo);
+        });
+        comboGridEl.appendChild(card);
+      });
+    }
+
+    function openComboComments(comboKey){
+      currentCombo=comboKey;
+      comboCommentSection.classList.add('active');
+      comboCommentTitle.textContent=`Comments for: ${comboKey}`;
+      renderComboComments();
+    }
+
+    function renderComboComments(){
+      comboCommentList.innerHTML='';
+      const arr=comboComments[currentCombo]||[];
+      arr.forEach(cObj=>{
+        const cEl=createCommentElement(cObj, arr);
+        comboCommentList.appendChild(cEl);
+      });
+    }
+
+    // Nested comment item
+    function createCommentElement(commentObj, arrRef){
+      // commentObj={ name, text, replies:[...] }
+      const wrapper=document.createElement('div');
+      wrapper.className='combo-comment-item';
+
+      const author=document.createElement('div');
+      author.className='comment-author';
+      author.textContent=commentObj.name;
+
+      const text=document.createElement('div');
+      text.className='comment-text';
+      text.textContent=commentObj.text;
+
+      // "Reply" link
+      const actions=document.createElement('div');
+      actions.className='comment-actions';
+      actions.textContent='Reply';
+
+      const replyForm=document.createElement('div');
+      replyForm.className='reply-form';
+
+      const rName=document.createElement('input');
+      rName.className='reply-input';
+      rName.type='text';
+      rName.placeholder='Your Name';
+
+      const rText=document.createElement('textarea');
+      rText.className='reply-textarea';
+      rText.rows=2; rText.placeholder='Your reply...';
+
+      const rBtn=document.createElement('button');
+      rBtn.className='reply-btn';
+      rBtn.textContent='Post Reply';
+
+      rBtn.addEventListener('click',()=>{
+        const rn=rName.value.trim();
+        const rt=rText.value.trim();
+        if(!rn||!rt){
+          alert("Enter name and reply!");
+          return;
+        }
+        let newReply={
+          name:rn,
+          text:rt,
+          replies:[]
+        };
+        commentObj.replies.push(newReply);
+        rName.value='';
+        rText.value='';
+        replyForm.style.display='none';
+        renderComboComments();
+      });
+
+      replyForm.appendChild(rName);
+      replyForm.appendChild(rText);
+      replyForm.appendChild(rBtn);
+
+      actions.addEventListener('click',()=>{
+        if(replyForm.style.display==='none') replyForm.style.display='flex';
+        else replyForm.style.display='none';
+      });
+
+      wrapper.appendChild(author);
+      wrapper.appendChild(text);
+      wrapper.appendChild(actions);
+      wrapper.appendChild(replyForm);
+
+      // If it has sub replies
+      if(commentObj.replies && commentObj.replies.length>0){
+        const repliesContainer=document.createElement('div');
+        repliesContainer.className='comment-replies';
+        commentObj.replies.forEach(rObj=>{
+          let replyEl=createCommentElement(rObj, arrRef);
+          repliesContainer.appendChild(replyEl);
+        });
+        wrapper.appendChild(repliesContainer);
+      }
+      return wrapper;
+    }
+
+    /* POST top-level comment */
+    comboCommentPostBtn.addEventListener('click',()=>{
+      if(!currentCombo){
+        alert("No combination selected!");
+        return;
+      }
+      const uname=comboCommentName.value.trim();
+      const utext=comboCommentText.value.trim();
+      if(!uname||!utext){
+        alert("Enter name + comment");
+        return;
+      }
+      if(!comboComments[currentCombo]) comboComments[currentCombo]=[];
+      comboComments[currentCombo].push({ name:uname, text:utext, replies:[] });
+      comboCommentName.value='';
+      comboCommentText.value='';
+      renderComboComments();
+      renderComboGrid(); // update comment counts
+    });
+
+    /* ADD CANDIDATE LIGHTBOX */
+    addCandidateBtn.addEventListener('click',()=>{
+      lightboxOverlay.style.display='flex';
+    });
+    lightboxClose.addEventListener('click',()=>{
+      lightboxOverlay.style.display='none';
+    });
+    lightboxForm.addEventListener('submit',(e)=>{
+      e.preventDefault();
+      const nm=lightboxCandidateName.value.trim();
+      const im=lightboxCandidateImage.value.trim()||"";
+      const rg=lightboxCandidateReligion.value.trim()||"N/A";
+      const ag=lightboxCandidateAge.value.trim()||"N/A";
+      const zn=lightboxCandidateZone.value.trim()||"N/A";
+
+      if(!nm){
+        alert("Please enter full name!");
+        return;
+      }
+      if(!candidates.includes(nm)){
+        candidates.push(nm);
+        candidateLikes[nm]=0;
+      }
+      candidateImages[nm]=im||"https://via.placeholder.com/80?text=Photo";
+      candidateDetails[nm]={religion:rg, age:ag, zone:zn};
+
+      populateCandidateList(presidentListEl, candidates,true);
+      populateCandidateList(vicePresidentListEl, candidates,false);
+
+      lightboxSubmitMsg.style.display='block';
+      lightboxForm.style.display='none';
+      setTimeout(()=>{
+        lightboxOverlay.style.display='none';
+        lightboxSubmitMsg.style.display='none';
+        lightboxForm.style.display='flex';
+        lightboxCandidateName.value="";
+        lightboxCandidateImage.value="";
+        lightboxCandidateReligion.value="";
+        lightboxCandidateAge.value="";
+        lightboxCandidateZone.value="";
+      },3000);
+    });
+  </script>
+</body>
+</html>
