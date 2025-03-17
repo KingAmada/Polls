@@ -219,7 +219,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.2rem;
+      gap: 0.3rem;
       font-size: 0.7rem;
       background: #f9f9f9;
       border-radius: 10px;
@@ -234,11 +234,12 @@
       background: none;
       cursor: pointer;
       font-weight: bold;
-      color: #008000;
+      color: #cc0000; /* Heart color */
+      font-size: 1rem; /* Make heart bigger */
       transition: transform 0.2s;
     }
     .like-btn:hover {
-      transform: scale(1.1);
+      transform: scale(1.2);
     }
     .like-count {
       color: #555;
@@ -324,35 +325,42 @@
       font-weight: 700;
       margin-bottom: 0.5rem;
     }
+    /* We shrink the bar to keep alignment for long names */
     .chart-bar {
       display: flex;
       align-items: center;
       margin-bottom: 0.5rem;
-justify-content: space-between; /* Ensures name is fully visible */
+      justify-content: flex-start;
+      gap: 0.5rem; /* space between name & bar */
     }
     .bar-label {
-flex: 1; /* Allows label to take more space */
-  font-size: 0.6rem;
-  font-weight: bold;
-  white-space: nowrap; /* Prevents text wrapping */
-  overflow: visible; /* Allows full display of long names */
-  text-overflow: unset;
+      width: 250px; /* fixed width for label to keep alignment */
+      font-size: 0.65rem;
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden; /* hide overflow if name too long */
+      text-overflow: ellipsis; /* show ... if too long */
     }
     .bar-container {
-   flex: 2; /* Gives more space to the bar */
-  background: #f0f0f0;
-  height: 18px;
-  border-radius: 10px;
-  overflow: hidden;
-  position: relative;
+      width: 60%; /* fixed width so bars don't sprawl full */
+      background: #f0f0f0;
+      height: 12px; /* smaller height for bar */
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
     }
     .bar-fill {
-      height: 18px;
+      height: 12px;
       transition: width 0.5s;
       background: linear-gradient(to right, #34e89e, #0f3443);
     }
+    .vote-count-label {
+      font-size: 0.6rem;
+      color: #666;
+      margin-left: 4px;
+    }
 
-    /* COMBO GRID WITH "Votes: X | Comments: Y" */
+    /* COMBO GRID */
     .combo-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -366,9 +374,25 @@ flex: 1; /* Allows label to take more space */
       text-align: center;
       transition: transform 0.2s;
       cursor: pointer;
+      position: relative;
     }
     .combo-card:hover {
       transform: translateY(-2px);
+    }
+    /* Move share button top-right */
+    .share-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #008000;
+      font-size: 0.8rem;
+      transition: transform 0.2s;
+    }
+    .share-btn:hover {
+      transform: scale(1.1);
     }
     .combo-top {
       display: flex;
@@ -389,10 +413,24 @@ flex: 1; /* Allows label to take more space */
       font-size: 0.9rem;
       color: #333;
     }
+
+    /* Stats row with hearts & comments (Share is top-right now) */
     .combo-stats {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.6rem; /* bigger gap between items */
+      margin-top: 0.3rem;
       font-size: 0.8rem;
-      margin-top: 0.2rem;
       color: #555;
+    }
+    .vote-heart {
+      color: #cc0000;
+      font-weight: bold;
+    }
+    .comment-icon {
+      color: #008000;
+      font-weight: bold;
     }
 
     /* COMMENT SECTION (below results) */
@@ -596,7 +634,7 @@ flex: 1; /* Allows label to take more space */
     />
     <h1 class="main-heading">2027 Nigeria Election Permutation Poll</h1>
     <p class="sub-heading">
-      Select your preferred President and Vice President, then cast your vote. You can also <strong>like</strong> any candidate.
+      Select your preferred President and Vice President, then cast your vote. You can also <strong>heart</strong> any candidate.
       Think you are a stronger candidate? <strong>Add yourself</strong> as a candidate. Let the polls decide your fate.
     </p>
     <div class="divider"></div>
@@ -757,19 +795,17 @@ flex: 1; /* Allows label to take more space */
   </footer>
 
   <script>
-    /* 
-      1) Show Legend near the Vote section.
-      2) Reduced .bar-label to 0.8rem + truncated text to prevent wrapping.
-      3) Everything else is same: combos have "Votes: X | Comments: Y" and a nested comment system below the results
-    */
-
-    let candidates=[
+    /*******************************
+     *  CANDIDATE CONFIG & DETAILS
+     *******************************/
+    let candidates = [
       "Bola Tinubu","Kashim Shettima","Nasir El-Rufai","Peter Obi",
       "Rabiu Kwankwaso","Atiku Abubakar","Yakubu Dogara","Yemi Osinbajo",
       "Nyesom Wike","Godswill Akpabio","Bukola Saraki","Rotimi Amaechi",
       "Aminu Tambuwal","Goodluck Jonathan","Ayuba Wakawa"
     ];
-let candidateImages = {  "Yakubu Dogara": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjuBvZJoVkod1KbQdOKCSxKVqt9dk7zP6M26tKuy320OLGSuke9AuduxgF8j1G6f7OthrtlQr3MYW12RX8869PyIQQm8c_9EolExIJTu4y2q5JduhahRcnBA_6fCF0F5wDTlARpFAZuVz-L2_RBD-mVTnBcj01I-faMqKBx33v-H4cez3fPk0IdBrvF3uo/s600/Dogara.jpg",
+    let candidateImages = {
+      "Yakubu Dogara": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjuBvZJoVkod1KbQdOKCSxKVqt9dk7zP6M26tKuy320OLGSuke9AuduxgF8j1G6f7OthrtlQr3MYW12RX8869PyIQQm8c_9EolExIJTu4y2q5JduhahRcnBA_6fCF0F5wDTlARpFAZuVz-L2_RBD-mVTnBcj01I-faMqKBx33v-H4cez3fPk0IdBrvF3uo/s600/Dogara.jpg",
       "Yemi Osinbajo": "https://thenationonlineng.net/wp-content/uploads/2015/08/Osinbajo.jpg",
       "Nyesom Wike": "https://dailypost.ng/wp-content/uploads/2024/01/wike.jpg",
       "Godswill Akpabio": "https://www.citypost.ng/wp-content/uploads/2024/08/IMG-20240827-WA0043.jpg",
@@ -783,9 +819,10 @@ let candidateImages = {  "Yakubu Dogara": "https://blogger.googleusercontent.com
       "Nasir El-Rufai": "https://d1jcea4y7xhp7l.cloudfront.net/2018/10/Kaduna_state_Governor.jpg",
       "Peter Obi": "https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png",
       "Rabiu Kwankwaso": "https://thetop10magazine.com.ng/wp-content/uploads/2022/09/Rabiu-Musa-Kwankwaso-NNPP.jpg",
-      "Ayuba Wakawa": "https://media.premiumtimesng.com/wp-content/files/2014/04/Ayuba-Wakawa.jpg"};
-    // Short details: e.g. {religion, age, zone}
-    let candidateDetails = {  "Bola Tinubu":     { religion: "M", age: "70", zone: "SW" },
+      "Ayuba Wakawa": "https://media.premiumtimesng.com/wp-content/files/2014/04/Ayuba-Wakawa.jpg"
+    };
+    let candidateDetails = {
+      "Bola Tinubu":     { religion: "M", age: "70", zone: "SW" },
       "Kashim Shettima": { religion: "M", age: "65", zone: "NE" },
       "Nasir El-Rufai":  { religion: "M", age: "63", zone: "NW" },
       "Peter Obi":       { religion: "C", age: "60", zone: "SE" },
@@ -799,362 +836,439 @@ let candidateImages = {  "Yakubu Dogara": "https://blogger.googleusercontent.com
       "Rotimi Amaechi":  { religion: "C", age: "57", zone: "SS" },
       "Aminu Tambuwal":  { religion: "M", age: "56", zone: "NW" },
       "Goodluck Jonathan": { religion: "C", age: "65", zone: "SS" },
-      "Ayuba Wakawa":    { religion: "C", age: "47", zone: "NE" } };
+      "Ayuba Wakawa":    { religion: "C", age: "47", zone: "NE" }
+    };
 
-    let votesData={};  // { "Tinubu & Shettima": 3, ... }
-    let candidateLikes={};  // { "Tinubu":0, ... }
-    let comboComments={};  // { "Tinubu & Shettima": [ { name, text, replies:[] }, ... ] }
+    /*******************************
+     *  VOTES, LIKES & COMMENTS
+     *******************************/
+    let votesData = {};
+    let candidateLikes = {};
+    let comboComments = {};
 
-    let selectedPresident=null;
-    let selectedVP=null;
-    let currentCombo=null;
+    let selectedPresident = null;
+    let selectedVP = null;
+    let currentCombo = null;
 
     // DOM Refs
-    const presidentListEl=document.getElementById('presidentList');
-    const vicePresidentListEl=document.getElementById('vicePresidentList');
-    const voteBtn=document.getElementById('voteBtn');
-    const chartBarsEl=document.getElementById('chartBars');
-    const comboGridEl=document.getElementById('comboGrid');
+    const presidentListEl     = document.getElementById('presidentList');
+    const vicePresidentListEl = document.getElementById('vicePresidentList');
+    const voteBtn             = document.getElementById('voteBtn');
+    const chartBarsEl         = document.getElementById('chartBars');
+    const comboGridEl         = document.getElementById('comboGrid');
+    const comboCommentSection = document.getElementById('comboCommentSection');
+    const comboCommentTitle   = document.getElementById('comboCommentTitle');
+    const comboCommentName    = document.getElementById('comboCommentName');
+    const comboCommentText    = document.getElementById('comboCommentText');
+    const comboCommentPostBtn = document.getElementById('comboCommentPostBtn');
 
-    const comboCommentSection=document.getElementById('comboCommentSection');
-    const comboCommentTitle=document.getElementById('comboCommentTitle');
-    const comboCommentName=document.getElementById('comboCommentName');
-    const comboCommentText=document.getElementById('comboCommentText');
-    const comboCommentPostBtn=document.getElementById('comboCommentPostBtn');
-    const comboCommentList=document.getElementById('comboCommentList');
+    // Lightbox
+    const addCandidateBtn          = document.getElementById('addCandidateBtn');
+    const lightboxOverlay          = document.getElementById('lightboxOverlay');
+    const lightboxClose            = document.getElementById('lightboxClose');
+    const lightboxForm             = document.getElementById('lightboxForm');
+    const lightboxCandidateName    = document.getElementById('lightboxCandidateName');
+    const lightboxCandidateImage   = document.getElementById('lightboxCandidateImage');
+    const lightboxCandidateReligion= document.getElementById('lightboxCandidateReligion');
+    const lightboxCandidateAge     = document.getElementById('lightboxCandidateAge');
+    const lightboxCandidateZone    = document.getElementById('lightboxCandidateZone');
+    const lightboxSubmitMsg        = document.getElementById('lightboxSubmitMsg');
 
-    // Add Candidate Lightbox
-    const addCandidateBtn=document.getElementById('addCandidateBtn');
-    const lightboxOverlay=document.getElementById('lightboxOverlay');
-    const lightboxClose=document.getElementById('lightboxClose');
-    const lightboxForm=document.getElementById('lightboxForm');
-    const lightboxCandidateName=document.getElementById('lightboxCandidateName');
-    const lightboxCandidateImage=document.getElementById('lightboxCandidateImage');
-    const lightboxCandidateReligion=document.getElementById('lightboxCandidateReligion');
-    const lightboxCandidateAge=document.getElementById('lightboxCandidateAge');
-    const lightboxCandidateZone=document.getElementById('lightboxCandidateZone');
-    const lightboxSubmitMsg=document.getElementById('lightboxSubmitMsg');
-
-    // Initialize likes=0
-    candidates.forEach(c=> candidateLikes[c]=0);
-
-    function init(){
-      populateCandidateList(presidentListEl,candidates,true);
-      populateCandidateList(vicePresidentListEl,candidates,false);
+    /************************************************
+     * FORMAT NUMBER => 1.2K / 2.3M
+     ************************************************/
+    function formatNumber(num) {
+      if(num >= 1000000) {
+        let val = (num / 1000000).toFixed(1).replace(/\.0$/, '');
+        return val + 'M';
+      }
+      else if(num >= 1000) {
+        let val = (num / 1000).toFixed(1).replace(/\.0$/, '');
+        return val + 'K';
+      }
+      return String(num);
     }
-    init();
 
-    function populateCandidateList(listEl, candArr, isPresident){
-      listEl.innerHTML='';
-      candArr.forEach(c=>{
-        const li=document.createElement('li');
-        li.className='candidate-item';
-        li.dataset.candidateName=c;
+    /************************************************
+     * Random Data Setup
+     ************************************************/
+    function initRandomData() {
+      // random likes for each candidate
+      candidates.forEach(c => {
+        candidateLikes[c] = Math.floor(Math.random() * 500000) + 100000; 
+      });
 
-        const img=document.createElement('img');
-        img.className='candidate-photo';
-        img.src=candidateImages[c]||"https://via.placeholder.com/80?text=Photo";
-        img.alt=c;
+      // random combos (16)
+      let usedPairs = new Set();
+      let combosCount = 0;
+      while(combosCount < 16) {
+        let c1 = candidates[Math.floor(Math.random() * candidates.length)];
+        let c2 = candidates[Math.floor(Math.random() * candidates.length)];
+        if(c1 !== c2) {
+          let key = `${c1} & ${c2}`;
+          if(!usedPairs.has(key)) {
+            usedPairs.add(key);
+            votesData[key] = Math.floor(Math.random() * 600000) + 100000;
+            comboComments[key] = [];
+            combosCount++;
+          }
+        }
+      }
+    }
 
-        const nameDiv=document.createElement('div');
-        nameDiv.className='candidate-name';
-        nameDiv.textContent=c;
+    /************************************************
+     * Populate Candidate Lists (Pres/VP)
+     ************************************************/
+    function populateCandidateList(listEl, candArr, isPresident) {
+      listEl.innerHTML = '';
+      candArr.forEach(c => {
+        const li = document.createElement('li');
+        li.className = 'candidate-item';
+        li.dataset.candidateName = c;
 
-        let d=candidateDetails[c]||{religion:"N/A",age:"N/A",zone:"N/A"};
-        const infoDiv=document.createElement('div');
-        infoDiv.className='candidate-details';
-        infoDiv.textContent=`${d.religion}, ${d.age}, ${d.zone}`;
+        const img = document.createElement('img');
+        img.className = 'candidate-photo';
+        img.src = candidateImages[c] || "https://via.placeholder.com/80";
+        img.alt = c;
 
-        const likeContainer=document.createElement('div');
-        likeContainer.className='like-container';
+        const name = document.createElement('div');
+        name.className = 'candidate-name';
+        name.textContent = c;
 
-        const likeBtn=document.createElement('button');
-        likeBtn.className='like-btn';
-        likeBtn.textContent="Like";
+        let d = candidateDetails[c] || { religion:'?', age:'?', zone:'?' };
+        const info = document.createElement('div');
+        info.className = 'candidate-details';
+        info.textContent = `${d.religion}, ${d.age}, ${d.zone}`;
 
-        const likeCountSpan=document.createElement('span');
-        likeCountSpan.className='like-count';
-        likeCountSpan.textContent=candidateLikes[c];
+        // heart for likes
+        const likeContainer = document.createElement('div');
+        likeContainer.className = 'like-container';
+        const likeBtn = document.createElement('button');
+        likeBtn.className = 'like-btn';
+        likeBtn.innerHTML = '♥';
+        const likeCount = document.createElement('span');
+        likeCount.className = 'like-count';
+        likeCount.textContent = formatNumber(candidateLikes[c]);
 
-        likeBtn.addEventListener('click',(e)=>{
+        // on heart click => increment
+        likeBtn.addEventListener('click', e => {
           e.stopPropagation();
           candidateLikes[c]++;
-          updateLikes(c);
+          updateCandidateLikes(c);
         });
 
         likeContainer.appendChild(likeBtn);
-        likeContainer.appendChild(likeCountSpan);
+        likeContainer.appendChild(likeCount);
 
-        li.appendChild(img);
-        li.appendChild(nameDiv);
-        li.appendChild(infoDiv);
-        li.appendChild(likeContainer);
-
-        li.addEventListener('click',()=>{
-          if(isPresident){
-            selectedPresident=c;
-            highlightSelected(presidentListEl,c);
+        // on item click => select
+        li.addEventListener('click', () => {
+          if(isPresident) {
+            selectedPresident = c;
+            highlightSelected(presidentListEl, c);
           } else {
-            selectedVP=c;
-            highlightSelected(vicePresidentListEl,c);
+            selectedVP = c;
+            highlightSelected(vicePresidentListEl, c);
           }
         });
+
+        li.appendChild(img);
+        li.appendChild(name);
+        li.appendChild(info);
+        li.appendChild(likeContainer);
 
         listEl.appendChild(li);
       });
     }
 
-    function highlightSelected(listEl,candidate){
-      const items=listEl.querySelectorAll('.candidate-item');
-      items.forEach(it=>{
-        if(it.dataset.candidateName===candidate) it.classList.add('selected');
+    function highlightSelected(listEl, c) {
+      const items = listEl.querySelectorAll('.candidate-item');
+      items.forEach(it => {
+        if(it.dataset.candidateName === c) it.classList.add('selected');
         else it.classList.remove('selected');
       });
     }
-    function updateLikes(c){
-      const newVal=candidateLikes[c];
-      document.querySelectorAll(`[data-candidate-name="${c}"]`).forEach(it=>{
-        const sp=it.querySelector('.like-count');
-        if(sp) sp.textContent=newVal;
+
+    function updateCandidateLikes(c) {
+      const val = formatNumber(candidateLikes[c]);
+      const items = document.querySelectorAll(`[data-candidate-name="${c}"]`);
+      items.forEach(it => {
+        const span = it.querySelector('.like-count');
+        if(span) span.textContent = val;
       });
     }
 
-    // VOTING
-    voteBtn.addEventListener('click',()=>{
-      if(!selectedPresident||!selectedVP){
-        alert("Select President and Vice President first!");
+    /************************************************
+     * Voting => increments votes for combo
+     ************************************************/
+    voteBtn.addEventListener('click', () => {
+      if(!selectedPresident || !selectedVP) {
+        alert("Please select President & VP first.");
         return;
       }
-      if(selectedPresident===selectedVP){
-        alert("They must differ!");
+      if(selectedPresident === selectedVP) {
+        alert("President and Vice President must differ!");
         return;
       }
-      const comboKey=`${selectedPresident} & ${selectedVP}`;
-      if(!votesData[comboKey]) votesData[comboKey]=0;
-      if(!comboComments[comboKey]) comboComments[comboKey]=[];
-      votesData[comboKey]++;
-
+      const key = `${selectedPresident} & ${selectedVP}`;
+      if(!votesData[key]) {
+        votesData[key] = 0;
+        comboComments[key] = [];
+      }
+      votesData[key]++;
       renderChart();
       renderComboGrid();
+      alert("Vote recorded!");
     });
 
-    /* RENDER CHART (no comment count) */
-    function renderChart(){
-      chartBarsEl.innerHTML='';
-      const sorted=Object.entries(votesData).sort((a,b)=>b[1]-a[1]);
-      const total=sorted.reduce((s,[_,v])=>s+v,0);
+    /************************************************
+     * Chart
+     ************************************************/
+    function renderChart() {
+      chartBarsEl.innerHTML = '';
+      const sorted = Object.entries(votesData).sort((a,b)=> b[1]-a[1]);
+      if(!sorted.length) return;
 
-      sorted.forEach(([combo,cnt])=>{
-        const row=document.createElement('div');
-        row.className='chart-bar';
+      let highest = sorted[0][1]; // for ratio
 
-        const label=document.createElement('div');
-        label.className='bar-label';
-        label.textContent=combo;
+      sorted.forEach(([combo, count]) => {
+        const barRow = document.createElement('div');
+        barRow.className = 'chart-bar';
 
-        const barBg=document.createElement('div');
-        barBg.className='bar-container';
-        const barFill=document.createElement('div');
-        barFill.className='bar-fill';
-        let pct= total? (cnt/total*100).toFixed(1):0;
-        barFill.style.width=pct+'%';
+        const barLabel = document.createElement('div');
+        barLabel.className = 'bar-label';
+        barLabel.textContent = combo;
+
+        const barBg = document.createElement('div');
+        barBg.className = 'bar-container';
+
+        const barFill = document.createElement('div');
+        barFill.className = 'bar-fill';
+        let ratio = (count / highest)*100;
+        barFill.style.width = ratio.toFixed(1)+'%';
+
+        // optional numeric label
+        const lbl = document.createElement('span');
+        lbl.className = 'vote-count-label';
+        lbl.textContent = `(${formatNumber(count)})`;
+        barLabel.appendChild(lbl);
 
         barBg.appendChild(barFill);
-        row.appendChild(label);
-        row.appendChild(barBg);
-        chartBarsEl.appendChild(row);
+        barRow.appendChild(barLabel);
+        barRow.appendChild(barBg);
+        chartBarsEl.appendChild(barRow);
       });
     }
 
-    /* RENDER COMBO GRID with comment count */
-    function renderComboGrid(){
-      comboGridEl.innerHTML='';
-      const sorted=Object.entries(votesData).sort((a,b)=>b[1]-a[1]);
-      sorted.forEach(([combo,cnt])=>{
-        const card=document.createElement('div');
-        card.className='combo-card';
-        card.dataset.comboKey=combo;
+    /************************************************
+     * Voted Combos => grid
+     ************************************************/
+    function renderComboGrid() {
+      comboGridEl.innerHTML = '';
+      const sorted = Object.entries(votesData).sort((a,b)=> b[1]-a[1]);
 
-        const top=document.createElement('div');
-        top.className='combo-top';
+      sorted.forEach(([combo, count]) => {
+        const card = document.createElement('div');
+        card.className = 'combo-card';
+        card.dataset.comboKey = combo;
 
-        const [c1,c2]=combo.split(" & ");
-        const img1=document.createElement('img');
-        img1.className='combo-img';
-        img1.src=candidateImages[c1]||"https://via.placeholder.com/60?text=Photo";
+        // share top-right
+        const shareBtn = document.createElement('button');
+        shareBtn.className = 'share-btn';
+        shareBtn.textContent = '➦';
+        shareBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          alert(`Sharing combo: ${combo}\nInvite your friends to vote!`);
+        });
 
-        const img2=document.createElement('img');
-        img2.className='combo-img';
-        img2.src=candidateImages[c2]||"https://via.placeholder.com/60?text=Photo";
+        card.appendChild(shareBtn);
 
-        top.appendChild(img1);
-        top.appendChild(img2);
+        // top images
+        const topDiv = document.createElement('div');
+        topDiv.className = 'combo-top';
 
-        const title=document.createElement('div');
-        title.className='combo-title';
-        title.textContent=combo;
+        const [c1,c2] = combo.split(" & ");
+        const img1 = document.createElement('img');
+        img1.className = 'combo-img';
+        img1.src = candidateImages[c1] || "https://via.placeholder.com/50";
+        const img2 = document.createElement('img');
+        img2.className = 'combo-img';
+        img2.src = candidateImages[c2] || "https://via.placeholder.com/50";
 
-        const stats=document.createElement('div');
-        stats.className='combo-stats';
-        let cCount= comboComments[combo]? comboComments[combo].length: 0;
-        stats.textContent=`Votes: ${cnt} | Comments: ${cCount}`;
+        topDiv.appendChild(img1);
+        topDiv.appendChild(img2);
 
-        card.appendChild(top);
+        // combo title
+        const title = document.createElement('div');
+        title.className = 'combo-title';
+        title.textContent = combo;
+
+        // stats => hearts & comments (with spacing)
+        const stats = document.createElement('div');
+        stats.className = 'combo-stats';
+
+        const voteSpan = document.createElement('span');
+        voteSpan.className = 'vote-heart';
+        voteSpan.textContent = `♥ ${formatNumber(count)}`;
+
+        let cArr = comboComments[combo]||[];
+        const commentSpan = document.createElement('span');
+        commentSpan.className = 'comment-icon';
+        commentSpan.textContent = `💬 ${formatNumber(cArr.length)}`;
+
+        stats.appendChild(voteSpan);
+        stats.appendChild(commentSpan);
+
+        // clicking card => open comments
+        card.addEventListener('click', () => {
+          openComboComments(combo);
+        });
+
+        card.appendChild(topDiv);
         card.appendChild(title);
         card.appendChild(stats);
 
-        card.addEventListener('click',()=>{
-          openComboComments(combo);
-        });
         comboGridEl.appendChild(card);
       });
     }
 
-    function openComboComments(comboKey){
-      currentCombo=comboKey;
+    /************************************************
+     * Comments => nested replies
+     ************************************************/
+    function openComboComments(comboKey) {
+      currentCombo = comboKey;
       comboCommentSection.classList.add('active');
-      comboCommentTitle.textContent=`Comments for: ${comboKey}`;
+      comboCommentTitle.textContent = `Comments for: ${comboKey}`;
       renderComboComments();
     }
-
-    function renderComboComments(){
-      comboCommentList.innerHTML='';
-      const arr=comboComments[currentCombo]||[];
-      arr.forEach(cObj=>{
-        const cEl=createCommentElement(cObj, arr);
-        comboCommentList.appendChild(cEl);
+    function renderComboComments() {
+      const list = document.getElementById('comboCommentList');
+      list.innerHTML = '';
+      let arr = comboComments[currentCombo]||[];
+      arr.forEach(cObj => {
+        list.appendChild(createCommentElement(cObj));
       });
     }
+    function createCommentElement(obj) {
+      // obj = { name, text, replies:[] }
+      const wrap = document.createElement('div');
+      wrap.className = 'combo-comment-item';
 
-    // Nested comment item
-    function createCommentElement(commentObj, arrRef){
-      // commentObj={ name, text, replies:[...] }
-      const wrapper=document.createElement('div');
-      wrapper.className='combo-comment-item';
+      const auth = document.createElement('div');
+      auth.className = 'comment-author';
+      auth.textContent = obj.name;
 
-      const author=document.createElement('div');
-      author.className='comment-author';
-      author.textContent=commentObj.name;
+      const txt = document.createElement('div');
+      txt.className = 'comment-text';
+      txt.textContent = obj.text;
 
-      const text=document.createElement('div');
-      text.className='comment-text';
-      text.textContent=commentObj.text;
+      const actions = document.createElement('div');
+      actions.className = 'comment-actions';
+      actions.textContent = 'Reply';
 
-      // "Reply" link
-      const actions=document.createElement('div');
-      actions.className='comment-actions';
-      actions.textContent='Reply';
+      const replyForm = document.createElement('div');
+      replyForm.className = 'reply-form';
 
-      const replyForm=document.createElement('div');
-      replyForm.className='reply-form';
+      const rInput = document.createElement('input');
+      rInput.className = 'reply-input';
+      rInput.placeholder = 'Your Name';
 
-      const rName=document.createElement('input');
-      rName.className='reply-input';
-      rName.type='text';
-      rName.placeholder='Your Name';
+      const rText = document.createElement('textarea');
+      rText.className = 'reply-textarea';
+      rText.rows = 2;
+      rText.placeholder = 'Your reply...';
 
-      const rText=document.createElement('textarea');
-      rText.className='reply-textarea';
-      rText.rows=2; rText.placeholder='Your reply...';
+      const rBtn = document.createElement('button');
+      rBtn.className = 'reply-btn';
+      rBtn.textContent = 'Post Reply';
 
-      const rBtn=document.createElement('button');
-      rBtn.className='reply-btn';
-      rBtn.textContent='Post Reply';
-
-      rBtn.addEventListener('click',()=>{
-        const rn=rName.value.trim();
-        const rt=rText.value.trim();
-        if(!rn||!rt){
-          alert("Enter name and reply!");
+      rBtn.addEventListener('click', () => {
+        let rn = rInput.value.trim();
+        let rt = rText.value.trim();
+        if(!rn || !rt) {
+          alert("Please enter name & reply");
           return;
         }
-        let newReply={
-          name:rn,
-          text:rt,
-          replies:[]
-        };
-        commentObj.replies.push(newReply);
-        rName.value='';
-        rText.value='';
-        replyForm.style.display='none';
+        let newReply = { name: rn, text: rt, replies: [] };
+        obj.replies.push(newReply);
+        rInput.value = '';
+        rText.value = '';
+        replyForm.style.display = 'none';
         renderComboComments();
       });
 
-      replyForm.appendChild(rName);
+      actions.addEventListener('click', () => {
+        replyForm.style.display = replyForm.style.display === 'none' ? 'flex' : 'none';
+      });
+
+      replyForm.appendChild(rInput);
       replyForm.appendChild(rText);
       replyForm.appendChild(rBtn);
 
-      actions.addEventListener('click',()=>{
-        if(replyForm.style.display==='none') replyForm.style.display='flex';
-        else replyForm.style.display='none';
-      });
+      wrap.appendChild(auth);
+      wrap.appendChild(txt);
+      wrap.appendChild(actions);
+      wrap.appendChild(replyForm);
 
-      wrapper.appendChild(author);
-      wrapper.appendChild(text);
-      wrapper.appendChild(actions);
-      wrapper.appendChild(replyForm);
-
-      // If it has sub replies
-      if(commentObj.replies && commentObj.replies.length>0){
-        const repliesContainer=document.createElement('div');
-        repliesContainer.className='comment-replies';
-        commentObj.replies.forEach(rObj=>{
-          let replyEl=createCommentElement(rObj, arrRef);
-          repliesContainer.appendChild(replyEl);
+      if(obj.replies && obj.replies.length>0) {
+        const sub = document.createElement('div');
+        sub.className = 'comment-replies';
+        obj.replies.forEach(rp => {
+          sub.appendChild(createCommentElement(rp));
         });
-        wrapper.appendChild(repliesContainer);
+        wrap.appendChild(sub);
       }
-      return wrapper;
+
+      return wrap;
     }
-
-    /* POST top-level comment */
-    comboCommentPostBtn.addEventListener('click',()=>{
-      if(!currentCombo){
-        alert("No combination selected!");
+    comboCommentPostBtn.addEventListener('click', () => {
+      if(!currentCombo) {
+        alert("No combo selected!");
         return;
       }
-      const uname=comboCommentName.value.trim();
-      const utext=comboCommentText.value.trim();
-      if(!uname||!utext){
-        alert("Enter name + comment");
+      let un = comboCommentName.value.trim();
+      let tx = comboCommentText.value.trim();
+      if(!un || !tx) {
+        alert("Enter name & comment");
         return;
       }
-      if(!comboComments[currentCombo]) comboComments[currentCombo]=[];
-      comboComments[currentCombo].push({ name:uname, text:utext, replies:[] });
-      comboCommentName.value='';
-      comboCommentText.value='';
+      if(!comboComments[currentCombo]) comboComments[currentCombo] = [];
+      comboComments[currentCombo].push({ name: un, text: tx, replies: [] });
+      comboCommentName.value = '';
+      comboCommentText.value = '';
       renderComboComments();
-      renderComboGrid(); // update comment counts
+      renderComboGrid();
     });
 
-    /* ADD CANDIDATE LIGHTBOX */
-    addCandidateBtn.addEventListener('click',()=>{
-      lightboxOverlay.style.display='flex';
+    /************************************************
+     * Lightbox => Add Candidate
+     ************************************************/
+    addCandidateBtn.addEventListener('click', () => {
+      lightboxOverlay.style.display = 'flex';
     });
-    lightboxClose.addEventListener('click',()=>{
-      lightboxOverlay.style.display='none';
+    lightboxClose.addEventListener('click', () => {
+      lightboxOverlay.style.display = 'none';
     });
-    lightboxForm.addEventListener('submit',(e)=>{
+    lightboxForm.addEventListener('submit', e => {
       e.preventDefault();
-      const nm=lightboxCandidateName.value.trim();
-      const im=lightboxCandidateImage.value.trim()||"";
-      const rg=lightboxCandidateReligion.value.trim()||"N/A";
-      const ag=lightboxCandidateAge.value.trim()||"N/A";
-      const zn=lightboxCandidateZone.value.trim()||"N/A";
+      let nm = lightboxCandidateName.value.trim();
+      let im = lightboxCandidateImage.value.trim();
+      let rg = lightboxCandidateReligion.value.trim()||"N/A";
+      let ag = lightboxCandidateAge.value.trim()||"N/A";
+      let zn = lightboxCandidateZone.value.trim()||"N/A";
 
-      if(!nm){
-        alert("Please enter full name!");
+      if(!nm) {
+        alert("Enter full name!");
         return;
       }
-      if(!candidates.includes(nm)){
+      if(!candidates.includes(nm)) {
         candidates.push(nm);
-        candidateLikes[nm]=0;
+        candidateLikes[nm] = Math.floor(Math.random() * 500000) + 100000;
       }
-      candidateImages[nm]=im||"https://via.placeholder.com/80?text=Photo";
-      candidateDetails[nm]={religion:rg, age:ag, zone:zn};
+      candidateImages[nm] = im || "https://via.placeholder.com/80";
+      candidateDetails[nm] = {religion:rg, age:ag, zone:zn};
 
-      populateCandidateList(presidentListEl, candidates,true);
-      populateCandidateList(vicePresidentListEl, candidates,false);
+      populateCandidateList(presidentListEl, candidates, true);
+      populateCandidateList(vicePresidentListEl, candidates, false);
 
       lightboxSubmitMsg.style.display='block';
       lightboxForm.style.display='none';
@@ -1162,13 +1276,25 @@ let candidateImages = {  "Yakubu Dogara": "https://blogger.googleusercontent.com
         lightboxOverlay.style.display='none';
         lightboxSubmitMsg.style.display='none';
         lightboxForm.style.display='flex';
-        lightboxCandidateName.value="";
-        lightboxCandidateImage.value="";
-        lightboxCandidateReligion.value="";
-        lightboxCandidateAge.value="";
-        lightboxCandidateZone.value="";
+        lightboxCandidateName.value='';
+        lightboxCandidateImage.value='';
+        lightboxCandidateReligion.value='';
+        lightboxCandidateAge.value='';
+        lightboxCandidateZone.value='';
       },3000);
     });
+
+    /************************************************
+     * Init
+     ************************************************/
+    function init() {
+      initRandomData();
+      populateCandidateList(presidentListEl, candidates, true);
+      populateCandidateList(vicePresidentListEl, candidates, false);
+      renderChart();
+      renderComboGrid();
+    }
+    init();
   </script>
 </body>
 </html>
