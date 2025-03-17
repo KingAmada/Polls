@@ -303,6 +303,41 @@
     }
 
     /* RESULTS SECTION */
+@media (max-width: 768px) {
+  .results-section {
+    flex-direction: column; 
+    align-items: center; 
+  }
+
+  .chart, .voted-combos {
+    width: 90%; /* or 100% if you prefer */
+    margin-bottom: 1rem;
+  }
+}
+@media (max-width: 600px) {
+  .bar-label {
+    width: 120px; /* or 150px */
+  }
+  .bar-container {
+    width: 70%; /* optional tweak to let bars be slightly larger */
+  }
+}
+@media (max-width: 600px) {
+  .candidate-list {
+    /* Let them stack more neatly, e.g. 2 columns on small screens */
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  .candidate-photo {
+    width: 60px;
+    height: 60px;
+  }
+  /* Possibly reduce font-sizes, padding, etc. */
+  .candidate-name {
+    font-size: 0.75rem;
+  }
+}
+
     .results-section {
       display: flex;
       flex-direction: row;
