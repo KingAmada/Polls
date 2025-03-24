@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>2027 Nigeria Election Poll</title>
+  <meta charset="UTF-8" />
+  <title>Independent National Permutation Poll</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- Google Font: Montserrat -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
     rel="stylesheet"
@@ -40,6 +39,7 @@
       opacity: 0.05;
       z-index: 0;
     }
+
     /* Main container */
     .container {
       width: 95%;
@@ -54,8 +54,14 @@
       animation: fadeIn 1.2s ease;
     }
     @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
+      0% {
+        opacity: 0; 
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1; 
+        transform: translateY(0);
+      }
     }
 
     /* HEADER */
@@ -124,18 +130,63 @@
       transform: scale(1.05);
     }
 
+    /* VOTE BUTTON AS PROGRESS BAR */
+    .vote-button {
+      position: relative;
+      width: 220px;
+      height: 50px;
+      border-radius: 50px;
+      border: 0px solid #000000;
+      background: #ccc; /* Grey by default */
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      overflow: hidden;
+      transition: 0.3s;
+    }
+    .vote-button:disabled {
+      cursor: not-allowed;
+    }
+    .vote-button .fill-overlay {
+      position: absolute;
+      left: 0; 
+      top: 0;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to right, #00c851, #008000);
+      transition: width 0.4s;
+      z-index: 1;
+    }
+    .vote-button .vote-text {
+      position: relative;
+      z-index: 2;
+    }
+    .vote-button.bounce {
+      animation: bounce 0.8s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-5px); }
+    }
+
     /* SELECTION SECTION */
     .selection-section {
       display: flex;
-      flex-wrap: wrap;
       gap: 1rem;
       justify-content: center;
       margin-bottom: 1rem;
       animation: slideUp 0.8s ease;
     }
     @keyframes slideUp {
-      0% { transform: translateY(30px); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
+      0% {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
     .selection-box {
       flex: 1 1 450px;
@@ -152,10 +203,9 @@
       font-weight: 700;
     }
     .candidate-list {
-      list-style: none;
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      grid-template-rows: repeat(3, auto);
+      grid-template-columns: repeat(5, 110px);
+      grid-auto-rows: 180px;
       gap: 0.5rem;
     }
     @media (max-width: 600px) {
@@ -165,8 +215,12 @@
       }
     }
     .candidate-item {
+      width: 110px;
       background: #fff;
       border-radius: 8px;
+      border-left: 4px solid #00c851;
+      border-right: 4px solid #00c851;
+      margin: 0 auto;
       padding: 0.4rem;
       text-align: center;
       cursor: pointer;
@@ -204,7 +258,6 @@
     }
     .candidate-name {
       font-size: 0.8rem;
-      text-align: center;
       margin-bottom: 0.2rem;
       font-weight: 600;
       color: #333;
@@ -214,7 +267,6 @@
       color: #777;
       line-height: 1.2;
       margin-bottom: 0.2rem;
-      text-align: center;
     }
     .like-container {
       display: flex;
@@ -235,8 +287,8 @@
       background: none;
       cursor: pointer;
       font-weight: bold;
-      color: #cc0000; /* Heart color */
-      font-size: 1rem; /* Make heart bigger */
+      color: #cc0000;
+      font-size: 1rem;
       transition: transform 0.2s;
     }
     .like-btn:hover {
@@ -273,26 +325,6 @@
       padding: 0.3rem 0.5rem;
       font-size: 0.85rem;
     }
-    .vote-button {
-      background: linear-gradient(to right, #008000, #00c851);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: 0.6rem 1.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-      font-weight: 700;
-      transition: 0.2s;
-      animation: pulse 1.5s infinite;
-    }
-    .vote-button:hover {
-      transform: scale(1.04);
-      opacity: 0.9;
-    }
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 10px rgba(0,200,81,0.5); }
-      50% { box-shadow: 0 0 20px rgba(0,200,81,0.8); }
-    }
 
     /* Legend near Vote area */
     .legend {
@@ -303,84 +335,57 @@
     }
 
     /* RESULTS SECTION */
-@media (max-width: 768px) {
-  .results-section {
-    flex-direction: column; 
-    align-items: center; 
-  }
-
-  .chart, .voted-combos {
-    width: 90%; /* or 100% if you prefer */
-    margin-bottom: 1rem;
-  }
-}
-@media (max-width: 600px) {
-  .bar-label {
-    width: 120px; /* or 150px */
-  }
-  .bar-container {
-    width: 70%; /* optional tweak to let bars be slightly larger */
-  }
-}
-@media (max-width: 600px) {
-  .candidate-list {
-    /* Let them stack more neatly, e.g. 2 columns on small screens */
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  }
-
-  .candidate-photo {
-    width: 60px;
-    height: 60px;
-  }
-  /* Possibly reduce font-sizes, padding, etc. */
-  .candidate-name {
-    font-size: 0.75rem;
-  }
-}
-
+    @media (max-width: 768px) {
+      .results-section {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
     .results-section {
       display: flex;
-      flex-direction: row;
-      justify-content: space-between;
+      flex-wrap: wrap;
       gap: 1rem;
       width: 100%;
       margin-top: 1rem;
+      justify-content: space-between;
     }
-    .chart, .voted-combos {
-      flex: 1 1 45%;
+    .chart,
+    .voted-combos {
+      flex: 1 1 280px;
       background: #fff;
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       padding: 1rem;
       position: relative;
+      min-width: 280px;
     }
-    .chart h2, .voted-combos h2 {
+    .chart h2,
+    .voted-combos h2 {
       text-align: center;
       color: #333;
       font-size: 1.15rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
     }
-    /* We shrink the bar to keep alignment for long names */
     .chart-bar {
       display: flex;
       align-items: center;
       margin-bottom: 0.5rem;
       justify-content: flex-start;
-      gap: 0.5rem; /* space between name & bar */
+      gap: 0.5rem;
     }
     .bar-label {
-      width: 250px; /* fixed width for label to keep alignment */
+      width: 250px;
       font-size: 0.65rem;
       font-weight: bold;
       white-space: nowrap;
-      overflow: hidden; /* hide overflow if name too long */
-      text-overflow: ellipsis; /* show ... if too long */
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .bar-container {
-      width: 60%; /* fixed width so bars don't sprawl full */
+      width: 60%;
       background: #f0f0f0;
-      height: 12px; /* smaller height for bar */
+      height: 12px;
       border-radius: 10px;
       overflow: hidden;
       position: relative;
@@ -388,7 +393,7 @@
     .bar-fill {
       height: 12px;
       transition: width 0.5s;
-      background: linear-gradient(to right, #34e89e, #0f3443);
+      background: linear-gradient(to right, #00c851, #008000);
     }
     .vote-count-label {
       font-size: 0.6rem;
@@ -401,6 +406,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 0.75rem;
+      margin-bottom: 1.5rem;
     }
     .combo-card {
       background: #f9f9f9;
@@ -415,7 +421,6 @@
     .combo-card:hover {
       transform: translateY(-2px);
     }
-    /* Move share button top-right */
     .share-btn {
       position: absolute;
       top: 5px;
@@ -438,8 +443,8 @@
       margin-bottom: 0.25rem;
     }
     .combo-img {
-      width: 50px;
-      height: 50px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       object-fit: cover;
       border: 1px solid #ccc;
@@ -449,13 +454,11 @@
       font-size: 0.9rem;
       color: #333;
     }
-
-    /* Stats row with hearts & comments (Share is top-right now) */
     .combo-stats {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 1.6rem; /* bigger gap between items */
+      gap: 1.6rem;
       margin-top: 0.3rem;
       font-size: 0.8rem;
       color: #555;
@@ -469,17 +472,64 @@
       font-weight: bold;
     }
 
-    /* COMMENT SECTION (below results) */
+    /* TOP 5 COMBOS LOYALISTS */
+    .loyalist-combo-wrap {
+      background: #fafafa;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .loyalist-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      justify-content: flex-start;
+    }
+    .loyalist-images {
+      display: flex;
+      flex-shrink: 0;
+      gap: 0.5rem;
+    }
+    .loyalist-square-img {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid #ccc;
+    }
+    .loyalist-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      text-align: left;
+    }
+    .loyalist-details ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .loyalist-details li {
+      font-size: 0.85rem;
+      color: #444;
+      margin-bottom: 0.2rem;
+    }
+    .loyalist-details li strong {
+      color: #008000;
+      font-weight: bold;
+    }
+
+    /* COMMENT SECTION */
     .combo-comment-section {
       margin-top: 1rem;
       background: #fff;
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       padding: 1rem;
-      display: none; /* hidden by default */
+      display: none;
     }
     .combo-comment-section.active {
-      display: block; /* show when user picks a combo */
+      display: block;
     }
     .combo-comment-title {
       text-align: center;
@@ -494,7 +544,8 @@
       gap: 0.4rem;
       margin-bottom: 0.8rem;
     }
-    .combo-comment-form input, .combo-comment-form textarea {
+    .combo-comment-form input,
+    .combo-comment-form textarea {
       border: 1px solid #ccc;
       border-radius: 6px;
       padding: 0.5rem;
@@ -524,7 +575,7 @@
       border-radius: 6px;
       padding: 0.5rem;
       margin-bottom: 0.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       position: relative;
     }
     .comment-author {
@@ -554,7 +605,8 @@
       flex-direction: column;
       gap: 0.3rem;
     }
-    .reply-input, .reply-textarea {
+    .reply-input,
+    .reply-textarea {
       border: 1px solid #ccc;
       border-radius: 6px;
       padding: 0.4rem;
@@ -583,8 +635,8 @@
       padding-left: 0.4rem;
     }
 
-    /* LIGHTBOX for "Add Candidate" */
-    #addCandidateBtn {
+    /* LIGHTBOX (Contact Us form) */
+    #contactUsBtn {
       display: inline-block;
       background: linear-gradient(to right, #008000, #00c851);
       color: #fff;
@@ -596,13 +648,14 @@
       margin-top: 1.5rem;
       transition: transform 0.2s;
     }
-    #addCandidateBtn:hover {
+    #contactUsBtn:hover {
       transform: scale(1.02);
     }
+
     .lightbox-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       display: none;
       justify-content: center;
       align-items: center;
@@ -630,12 +683,12 @@
     }
     .lightbox-form {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 0.5rem;
+      margin-top: 1rem;
     }
-    .lightbox-form input {
-      flex: 1;
-      min-width: 130px;
+    .lightbox-form input,
+    .lightbox-form textarea {
       border: 1px solid #ccc;
       border-radius: 6px;
       padding: 0.4rem;
@@ -653,6 +706,9 @@
       cursor: pointer;
       margin-top: 0.5rem;
     }
+    .lightbox-form button:hover {
+      transform: scale(1.02);
+    }
     .submit-message {
       text-align: center;
       font-size: 0.9rem;
@@ -660,18 +716,463 @@
       color: #008000;
       display: none;
     }
+
+    /* Hide data tables by default */
+    #candidateDataTable,
+    #comboDataTable,
+    #userDataTable,
+    #loyalistDataTable {
+      display: none;
+    }
+/* Dark overlay filling the screen */
+.wiki-lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;   /* hidden by default */
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;   /* on top of everything */
+}
+
+/* White container for the 400×600 iframe */
+.wiki-lightbox-content {
+  position: relative;
+  width: 400px;
+  height: 600px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 3px 15px rgba(0,0,0,0.5);
+}
+
+/* X-close button in top-right corner */
+.wiki-lightbox-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+}
+.wiki-lightbox-close:hover {
+  color: #999;
+}
+
+/* The iframe inside the box */
+#wikiIframe {
+  width: 100%;
+  height: 100%;
+  border: none; 
+  border-radius: 0 0 10px 10px;
+}
+
   </style>
 </head>
 <body>
+
+  <!-- (A) HIDDEN DATA TABLES WITH COMPLETE DATA -->
+
+  <!-- 1) CANDIDATE DATA -->
+  <table id="candidateDataTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>ImageURL</th>
+        <th>Religion</th>
+        <th>Age</th>
+        <th>Zone</th>
+        <th>Likes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 15 Candidates -->
+      <tr>
+        <td>Bola Tinubu</td>
+        <td>https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg</td>
+        <td>M</td>
+        <td>70</td>
+        <td>SW</td>
+        <td>400000</td>
+      </tr>
+      <tr>
+        <td>Kashim Shettima</td>
+        <td>https://statehouse.gov.ng/wp-content/uploads/2023/05/FxSvH8TWAAYzC0H-835x1024.jpg</td>
+        <td>M</td>
+        <td>65</td>
+        <td>NE</td>
+        <td>350000</td>
+      </tr>
+      <tr>
+        <td>Nasir El-Rufai</td>
+        <td>https://d1jcea4y7xhp7l.cloudfront.net/2018/10/Kaduna_state_Governor.jpg</td>
+        <td>M</td>
+        <td>63</td>
+        <td>NW</td>
+        <td>290000</td>
+      </tr>
+      <tr>
+        <td>Peter Obi</td>
+        <td>https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png</td>
+        <td>C</td>
+        <td>60</td>
+        <td>SE</td>
+        <td>600000</td>
+      </tr>
+      <tr>
+        <td>Rabiu Kwankwaso</td>
+        <td>https://thetop10magazine.com.ng/wp-content/uploads/2022/09/Rabiu-Musa-Kwankwaso-NNPP.jpg</td>
+        <td>M</td>
+        <td>66</td>
+        <td>NW</td>
+        <td>310000</td>
+      </tr>
+      <tr>
+        <td>Atiku Abubakar</td>
+        <td>https://miro.medium.com/v2/resize:fit:2400/0*AZFse8ApInmJg7xf.jpg</td>
+        <td>M</td>
+        <td>76</td>
+        <td>NE</td>
+        <td>450000</td>
+      </tr>
+      <tr>
+        <td>Yakubu Dogara</td>
+        <td>https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjuBvZJoVkod1KbQdOKCSxKVqt9dk7zP6M26tKuy320OLGSuke9AuduxgF8j1G6f7OthrtlQr3MYW12RX8869PyIQQm8c_9EolExIJTu4y2q5JduhahRcnBA_6fCF0F5wDTlARpFAZuVz-L2_RBD-mVTnBcj01I-faMqKBx33v-H4cez3fPk0IdBrvF3uo/s600/Dogara.jpg</td>
+        <td>C</td>
+        <td>55</td>
+        <td>NE</td>
+        <td>92000</td>
+      </tr>
+      <tr>
+        <td>Yemi Osinbajo</td>
+        <td>https://thenationonlineng.net/wp-content/uploads/2015/08/Osinbajo.jpg</td>
+        <td>C</td>
+        <td>64</td>
+        <td>SW</td>
+        <td>250000</td>
+      </tr>
+      <tr>
+        <td>Nyesom Wike</td>
+        <td>https://dailypost.ng/wp-content/uploads/2024/01/wike.jpg</td>
+        <td>C</td>
+        <td>54</td>
+        <td>SS</td>
+        <td>140000</td>
+      </tr>
+      <tr>
+        <td>Godswill Akpabio</td>
+        <td>https://www.citypost.ng/wp-content/uploads/2024/08/IMG-20240827-WA0043.jpg</td>
+        <td>C</td>
+        <td>60</td>
+        <td>SS</td>
+        <td>115000</td>
+      </tr>
+      <tr>
+        <td>Bukola Saraki</td>
+        <td>https://leadership.ng/wp-content/uploads/2023/12/Bukola-Saraki-jpg.webp</td>
+        <td>M</td>
+        <td>60</td>
+        <td>NC</td>
+        <td>290000</td>
+      </tr>
+      <tr>
+        <td>Rotimi Amaechi</td>
+        <td>https://cdn.vanguardngr.com/wp-content/uploads/2022/04/Rt-Hon.-Chibuike-Rotimi-Amaechi-Image-2022-04-28-at-7.05.36-PM.jpeg</td>
+        <td>C</td>
+        <td>57</td>
+        <td>SS</td>
+        <td>110000</td>
+      </tr>
+      <tr>
+        <td>Aminu Tambuwal</td>
+        <td>https://csn-prod-profile-images.s3.amazonaws.com/kHNmjl177dtFve7iYeHvx</td>
+        <td>M</td>
+        <td>56</td>
+        <td>NW</td>
+        <td>73000</td>
+      </tr>
+      <tr>
+        <td>Goodluck Jonathan</td>
+        <td>https://upload.wikimedia.org/wikipedia/commons/4/42/Goodluck_Jonathan_World_Economic_Forum_2013.jpg</td>
+        <td>C</td>
+        <td>65</td>
+        <td>SS</td>
+        <td>380000</td>
+      </tr>
+      <tr>
+        <td>Ayuba Wakawa</td>
+        <td>https://media.premiumtimesng.com/wp-content/files/2014/04/Ayuba-Wakawa.jpg</td>
+        <td>C</td>
+        <td>47</td>
+        <td>NE</td>
+        <td>87000</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 2) COMBO (VOTES) TABLE -->
+  <table id="comboDataTable">
+    <thead>
+      <tr>
+        <th>President</th>
+        <th>VicePresident</th>
+        <th>Votes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Bola Tinubu</td>
+        <td>Kashim Shettima</td>
+        <td>500000</td>
+      </tr>
+      <tr>
+        <td>Peter Obi</td>
+        <td>Yemi Osinbajo</td>
+        <td>620000</td>
+      </tr>
+      <tr>
+        <td>Atiku Abubakar</td>
+        <td>Nyesom Wike</td>
+        <td>410000</td>
+      </tr>
+      <tr>
+        <td>Rabiu Kwankwaso</td>
+        <td>Rotimi Amaechi</td>
+        <td>215000</td>
+      </tr>
+      <tr>
+        <td>Goodluck Jonathan</td>
+        <td>Nasir El-Rufai</td>
+        <td>305000</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 3) USER COMMENTS & VOTER DATA TABLE -->
+  <table id="userDataTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Combo</th>
+        <th>ParentID</th>
+        <th>Name</th>
+        <th>Comment</th>
+        <th>Phone</th>
+        <th>State</th>
+        <th>City</th>
+        <th>Gender</th>
+        <th>Age</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Peter Obi & Yemi Osinbajo</td>
+        <td>0</td>
+        <td>John</td>
+        <td>I love Obi and Osinbajo!</td>
+        <td>08011112222</td>
+        <td>Lagos</td>
+        <td>Ikeja</td>
+        <td>Male</td>
+        <td>30</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Peter Obi & Yemi Osinbajo</td>
+        <td>1</td>
+        <td>Mary</td>
+        <td>@John I agree with you!</td>
+        <td>08033334444</td>
+        <td>Abia</td>
+        <td>Umuahia</td>
+        <td>Female</td>
+        <td>28</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Goodluck Jonathan & Nasir El-Rufai</td>
+        <td>0</td>
+        <td>Ibrahim</td>
+        <td>Strange combo but let's see!</td>
+        <td>08055556666</td>
+        <td>Kaduna</td>
+        <td>Kaduna</td>
+        <td>Male</td>
+        <td>35</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>Bola Tinubu & Kashim Shettima</td>
+        <td>0</td>
+        <td></td>
+        <td></td>
+        <td>08077778888</td>
+        <td>Delta</td>
+        <td>Warri</td>
+        <td>Male</td>
+        <td>45</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>Bola Tinubu & Kashim Shettima</td>
+        <td>4</td>
+        <td>Ngozi</td>
+        <td>You just voted but didn’t say anything!</td>
+        <td>08088889999</td>
+        <td>Lagos</td>
+        <td>Ikeja</td>
+        <td>Female</td>
+        <td>31</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>Rabiu Kwankwaso & Rotimi Amaechi</td>
+        <td>0</td>
+        <td>Chinedu</td>
+        <td>This combo could unify the country!</td>
+        <td>08099990000</td>
+        <td>Adamawa</td>
+        <td>Yola</td>
+        <td>Male</td>
+        <td>29</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>Peter Obi & Yemi Osinbajo</td>
+        <td>0</td>
+        <td></td>
+        <td></td>
+        <td>08043214321</td>
+        <td>Lagos</td>
+        <td>Ikeja</td>
+        <td>Male</td>
+        <td>39</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td>Peter Obi & Yemi Osinbajo</td>
+        <td>2</td>
+        <td>Tade</td>
+        <td>Mary, can you share reasons for your choice?</td>
+        <td>08022223333</td>
+        <td>Abia</td>
+        <td>Umuahia</td>
+        <td>Male</td>
+        <td>24</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 4) LOYALIST DATA TABLE -->
+  <table id="loyalistDataTable">
+    <thead>
+      <tr>
+        <th>ReferralCode</th>
+        <th>LoyalistName</th>
+        <th>City</th>
+        <th>Combo</th>
+        <th>Supporters</th>
+        <th>Donation</th>
+        <th>ComboImg1</th>
+        <th>ComboImg2</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>REF98123</td>
+        <td>Segun</td>
+        <td>Ikeja</td>
+        <td>Peter Obi & Yemi Osinbajo</td>
+        <td>9300</td>
+        <td>1500.00</td>
+        <td>https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png</td>
+        <td>https://thenationonlineng.net/wp-content/uploads/2015/08/Osinbajo.jpg</td>
+      </tr>
+      <tr>
+        <td>REF82776</td>
+        <td>Musa</td>
+        <td>Kaduna</td>
+        <td>Bola Tinubu & Kashim Shettima</td>
+        <td>22000</td>
+        <td>2500.50</td>
+        <td>https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg</td>
+        <td>https://statehouse.gov.ng/wp-content/uploads/2023/05/FxSvH8TWAAYzC0H-835x1024.jpg</td>
+      </tr>
+      <tr>
+        <td>REF55440</td>
+        <td>Nkem</td>
+        <td>Onitsha</td>
+        <td>Peter Obi & Yemi Osinbajo</td>
+        <td>10800</td>
+        <td>400.00</td>
+        <td>https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png</td>
+        <td>https://thenationonlineng.net/wp-content/uploads/2015/08/Osinbajo.jpg</td>
+      </tr>
+      <tr>
+        <td>REF34921</td>
+        <td>Salihu</td>
+        <td>Kano</td>
+        <td>Rabiu Kwankwaso & Rotimi Amaechi</td>
+        <td>15000</td>
+        <td>2000.00</td>
+        <td>https://thetop10magazine.com.ng/wp-content/uploads/2022/09/Rabiu-Musa-Kwankwaso-NNPP.jpg</td>
+        <td>https://cdn.vanguardngr.com/wp-content/uploads/2022/04/Rt-Hon.-Chibuike-Rotimi-Amaechi-Image-2022-04-28-at-7.05.36-PM.jpeg</td>
+      </tr>
+      <tr>
+        <td>REF76218</td>
+        <td>Princess</td>
+        <td>Port Harcourt</td>
+        <td>Goodluck Jonathan & Nasir El-Rufai</td>
+        <td>8100</td>
+        <td>500.00</td>
+        <td>https://upload.wikimedia.org/wikipedia/commons/4/42/Goodluck_Jonathan_World_Economic_Forum_2013.jpg</td>
+        <td>https://d1jcea4y7xhp7l.cloudfront.net/2018/10/Kaduna_state_Governor.jpg</td>
+      </tr>
+      <tr>
+        <td>REF66542</td>
+        <td>Daniel</td>
+        <td>Warri</td>
+        <td>Bola Tinubu & Kashim Shettima</td>
+        <td>11500</td>
+        <td>920.00</td>
+        <td>https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg</td>
+        <td>https://statehouse.gov.ng/wp-content/uploads/2023/05/FxSvH8TWAAYzC0H-835x1024.jpg</td>
+      </tr>
+      <tr>
+        <td>REF20277</td>
+        <td>Khadija</td>
+        <td>Abuja</td>
+        <td>Atiku Abubakar & Nyesom Wike</td>
+        <td>9800</td>
+        <td>300.00</td>
+        <td>https://miro.medium.com/v2/resize:fit:2400/0*AZFse8ApInmJg7xf.jpg</td>
+        <td>https://dailypost.ng/wp-content/uploads/2024/01/wike.jpg</td>
+      </tr>
+      <tr>
+        <td>REF91444</td>
+        <td>Felicia</td>
+        <td>Lagos</td>
+        <td>Peter Obi & Yemi Osinbajo</td>
+        <td>15000</td>
+        <td>1800.00</td>
+        <td>https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png</td>
+        <td>https://thenationonlineng.net/wp-content/uploads/2015/08/Osinbajo.jpg</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- 2) HEADER / Branding -->
   <div class="header">
     <img 
       src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Coat_of_arms_of_Nigeria.svg/1200px-Coat_of_arms_of_Nigeria.svg.png" 
       alt="Nigeria Coat of Arms"
     />
-    <h1 class="main-heading">2027 Nigeria Election Permutation Poll</h1>
+    <h1 class="main-heading">Independent National Permutation Poll</h1>
     <p class="sub-heading">
-      Select your preferred President and Vice President, then cast your vote. You can also <strong>heart</strong> any candidate.
-      Think you are a stronger candidate? <strong>Add yourself</strong> as a candidate. Let the polls decide your fate.
+      Select your preferred President and Vice President, then cast your vote.  
+      If you enter an existing <strong>Referral Code</strong>, that loyalist gets a supporter.  
+      You then receive <strong>your own</strong> new code to share, so <em>you</em> can show up as a loyalist leader!
     </p>
     <div class="divider"></div>
   </div>
@@ -684,7 +1185,6 @@
         <h2>President</h2>
         <ul class="candidate-list" id="presidentList"></ul>
       </div>
-
       <!-- Vice President -->
       <div class="selection-box" id="vicePresidentBox">
         <h2>Vice President</h2>
@@ -692,12 +1192,13 @@
       </div>
     </div>
 
-    <!-- Vote + Mini Form (Horizontal) -->
+    <!-- Vote + Form -->
     <div class="vote-section">
       <div class="vote-form">
-        <input type="tel" placeholder="Phone Number" id="voterPhone" />
+        <input type="text" placeholder="Name (required)" id="voterName" style="width:120px;" />
+        <input type="tel" placeholder="Phone (required)" id="voterPhone" />
         <select id="voterState">
-          <option disabled selected>State</option>
+          <option disabled selected>State (required)</option>
           <option>Lagos</option>
           <option>Abia</option>
           <option>Adamawa</option>
@@ -705,7 +1206,7 @@
           <option>Kaduna</option>
         </select>
         <select id="voterCity">
-          <option disabled selected>City</option>
+          <option disabled selected>City (required)</option>
           <option>Ikeja</option>
           <option>Umuahia</option>
           <option>Yola</option>
@@ -713,97 +1214,100 @@
           <option>Kaduna</option>
         </select>
         <select id="voterGender">
-          <option disabled selected>Gender</option>
+          <option disabled selected>Gender (required)</option>
           <option>Male</option>
           <option>Female</option>
           <option>Other</option>
         </select>
-        <input type="number" placeholder="Age" id="voterAge" style="width:60px;" />
+        <input type="number" placeholder="Age (required)" id="voterAge" style="width:60px;" />
+
+        <!-- Referral code area -->
+        <div style="display:flex; align-items:center; gap:0.3rem;">
+          <label for="voterReferral" style="font-size:0.8rem;">Referral:</label>
+          <input type="text" id="voterReferral" placeholder="(if any)" style="width:100px;" />
+          <span id="autoGenCode" style="font-weight:bold; color:blue;"></span>
+        </div>
       </div>
-      <button class="vote-button" id="voteBtn">Vote</button>
+
+      <!-- The "Progress Bar" button -->
+      <button class="vote-button" id="voteBtn" disabled>
+        <div class="fill-overlay" id="buttonFill"></div>
+        <span class="vote-text">Vote</span>
+      </button>
     </div>
 
-    <!-- Legend for abbreviations -->
+    <!-- Legend -->
     <div class="legend">
-      Legend: Muslim (M) | Christian (C) | North Central (NC) | North East (NE) | North West (NW) | South West (SW) | South East (SE) | South (SS).
+      Legend: NC, NE, NW, SW, SE, SS (North Central, North East, North West, South West, South East, South-South).
     </div>
 
     <!-- RESULTS SECTION -->
     <div class="results-section">
-      <!-- Chart -->
       <div class="chart" id="chart">
         <h2>Voting Results</h2>
         <div id="chartBars"></div>
+        <div id="loyalistCombosContainer"></div>
       </div>
-
-      <!-- Voted Combos -->
       <div class="voted-combos" id="votedCombosBox">
         <h2>Voted Combinations</h2>
         <div class="combo-grid" id="comboGrid"></div>
       </div>
     </div>
 
-    <!-- Comments for combos (below the boxes) -->
+    <!-- Comments -->
     <div class="combo-comment-section" id="comboCommentSection">
       <div class="combo-comment-title" id="comboCommentTitle"></div>
-      <!-- new comment form -->
       <div class="combo-comment-form">
         <input type="text" placeholder="Your Name" id="comboCommentName" />
         <textarea rows="2" placeholder="Write your comment..." id="comboCommentText"></textarea>
         <button class="combo-comment-btn" id="comboCommentPostBtn">Post Comment</button>
       </div>
-      <!-- comment list -->
       <div class="combo-comment-list" id="comboCommentList"></div>
     </div>
 
-    <!-- Add Candidate Button -->
+    <!-- Contact Us Button -->
     <div style="text-align:center; margin-top:1rem;">
-      <button id="addCandidateBtn">Add Yourself as Candidate</button>
+      <button id="contactUsBtn">Have a question or want to add yourself?</button>
     </div>
   </div>
 
-  <!-- Add Candidate Lightbox -->
+  <!-- Lightbox (Contact Form) -->
   <div class="lightbox-overlay" id="lightboxOverlay">
     <div class="lightbox-content">
       <span class="lightbox-close" id="lightboxClose">X</span>
-      <h2>Add Candidate</h2>
+      <h2 style="text-align:center;">Have any question or want to add yourself as a candidate?</h2>
+      <p style="font-size:0.85rem; color:#666; margin-top:0.3rem; text-align:center;">
+        Kindly fill out the form below. We’ll contact you shortly.
+      </p>
       <form class="lightbox-form" id="lightboxForm">
-        <input 
-          type="text" 
-          id="lightboxCandidateName" 
-          placeholder="Full Name" 
-          required
-        />
-        <input 
-          type="text" 
-          id="lightboxCandidateImage" 
-          placeholder="Image URL"
-        />
-        <input 
-          type="text" 
-          id="lightboxCandidateReligion" 
-          placeholder="MS/CH"
-          style="width:60px"
-        />
-        <input 
-          type="number" 
-          id="lightboxCandidateAge" 
-          placeholder="67"
-          style="width:60px"
-        />
-        <input 
-          type="text" 
-          id="lightboxCandidateZone" 
-          placeholder="NE"
-          style="width:60px"
-        />
+        <label for="contactFullName">Full Name (required)</label>
+        <input type="text" id="contactFullName" placeholder="Your Full Name" required />
+
+        <label for="contactPhone">Phone Number</label>
+        <input type="tel" id="contactPhone" placeholder="08012345678" required />
+
+        <label for="contactEmail">Email Address</label>
+        <input type="email" id="contactEmail" placeholder="example@email.com" required />
+
+        <label for="contactMessage">Your Question / Candidate Info</label>
+        <textarea id="contactMessage" rows="3" placeholder="Please type your request..."></textarea>
+
         <button type="submit">Submit</button>
       </form>
       <div class="submit-message" id="lightboxSubmitMsg">
-        Thanks for submitting your candidate for consideration! We will be in touch.
+        Thanks! We will be in touch soon.
       </div>
     </div>
   </div>
+<!-- WIKIPEDIA LIGHTBOX (HIDDEN OVERLAY) -->
+<div class="wiki-lightbox-overlay" id="wikiLightbox">
+  <div class="wiki-lightbox-content">
+    <!-- Close icon -->
+    <span class="wiki-lightbox-close" id="wikiLightboxClose">X</span>
+    <!-- The Wikipedia iframe -->
+    <iframe id="wikiIframe" src="about:blank"></iframe>
+  </div>
+</div>
 
   <footer>
     <p>All rights reserved © 2027 Nigeria Official Polling Commission</p>
@@ -831,506 +1335,756 @@
   </footer>
 
   <script>
-    /*******************************
-     *  CANDIDATE CONFIG & DETAILS
-     *******************************/
-    let candidates = [
-      "Bola Tinubu","Kashim Shettima","Nasir El-Rufai","Peter Obi",
-      "Rabiu Kwankwaso","Atiku Abubakar","Yakubu Dogara","Yemi Osinbajo",
-      "Nyesom Wike","Godswill Akpabio","Bukola Saraki","Rotimi Amaechi",
-      "Aminu Tambuwal","Goodluck Jonathan","Ayuba Wakawa"
-    ];
-    let candidateImages = {
-      "Yakubu Dogara": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjuBvZJoVkod1KbQdOKCSxKVqt9dk7zP6M26tKuy320OLGSuke9AuduxgF8j1G6f7OthrtlQr3MYW12RX8869PyIQQm8c_9EolExIJTu4y2q5JduhahRcnBA_6fCF0F5wDTlARpFAZuVz-L2_RBD-mVTnBcj01I-faMqKBx33v-H4cez3fPk0IdBrvF3uo/s600/Dogara.jpg",
-      "Yemi Osinbajo": "https://thenationonlineng.net/wp-content/uploads/2015/08/Osinbajo.jpg",
-      "Nyesom Wike": "https://dailypost.ng/wp-content/uploads/2024/01/wike.jpg",
-      "Godswill Akpabio": "https://www.citypost.ng/wp-content/uploads/2024/08/IMG-20240827-WA0043.jpg",
-      "Bukola Saraki": "https://leadership.ng/wp-content/uploads/2023/12/Bukola-Saraki-jpg.webp",
-      "Rotimi Amaechi": "https://cdn.vanguardngr.com/wp-content/uploads/2022/04/Rt-Hon.-Chibuike-Rotimi-Amaechi-Image-2022-04-28-at-7.05.36-PM.jpeg",
-      "Aminu Tambuwal": "https://csn-prod-profile-images.s3.amazonaws.com/kHNmjl177dtFve7iYeHvx",
-      "Goodluck Jonathan": "https://upload.wikimedia.org/wikipedia/commons/4/42/Goodluck_Jonathan_World_Economic_Forum_2013.jpg",
-      "Atiku Abubakar": "https://miro.medium.com/v2/resize:fit:2400/0*AZFse8ApInmJg7xf.jpg",
-      "Bola Tinubu": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg",
-      "Kashim Shettima": "https://statehouse.gov.ng/wp-content/uploads/2023/05/FxSvH8TWAAYzC0H-835x1024.jpg",
-      "Nasir El-Rufai": "https://d1jcea4y7xhp7l.cloudfront.net/2018/10/Kaduna_state_Governor.jpg",
-      "Peter Obi": "https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png",
-      "Rabiu Kwankwaso": "https://thetop10magazine.com.ng/wp-content/uploads/2022/09/Rabiu-Musa-Kwankwaso-NNPP.jpg",
-      "Ayuba Wakawa": "https://media.premiumtimesng.com/wp-content/files/2014/04/Ayuba-Wakawa.jpg"
-    };
-    let candidateDetails = {
-      "Bola Tinubu":     { religion: "M", age: "70", zone: "SW" },
-      "Kashim Shettima": { religion: "M", age: "65", zone: "NE" },
-      "Nasir El-Rufai":  { religion: "M", age: "63", zone: "NW" },
-      "Peter Obi":       { religion: "C", age: "60", zone: "SE" },
-      "Rabiu Kwankwaso": { religion: "M", age: "66", zone: "NW" },
-      "Atiku Abubakar":  { religion: "M", age: "76", zone: "NE" },
-      "Yakubu Dogara":   { religion: "C", age: "55", zone: "NE" },
-      "Yemi Osinbajo":   { religion: "C", age: "64", zone: "SW" },
-      "Nyesom Wike":     { religion: "C", age: "54", zone: "SS" },
-      "Godswill Akpabio":{ religion: "C", age: "60", zone: "SS" },
-      "Bukola Saraki":   { religion: "M", age: "60", zone: "NC" },
-      "Rotimi Amaechi":  { religion: "C", age: "57", zone: "SS" },
-      "Aminu Tambuwal":  { religion: "M", age: "56", zone: "NW" },
-      "Goodluck Jonathan": { religion: "C", age: "65", zone: "SS" },
-      "Ayuba Wakawa":    { religion: "C", age: "47", zone: "NE" }
-    };
+const wikiLinks = {
+  "Goodluck Jonathan":  "https://en.wikipedia.org/wiki/Goodluck_Jonathan",
+  "Aminu Tambuwal":     "https://en.wikipedia.org/wiki/Aminu_Tambuwal",
+  "Rotimi Amaechi":     "https://en.wikipedia.org/wiki/Rotimi_Amaechi",
+  "Bukola Saraki":      "https://en.wikipedia.org/wiki/Bukola_Saraki",
+  "Godswill Akpabio":   "https://en.wikipedia.org/wiki/Godswill_Akpabio",
+  "Nyesom Wike":        "https://en.wikipedia.org/wiki/Nyesom_Wike",
+  "Yemi Osinbajo":      "https://en.wikipedia.org/wiki/Yemi_Osinbajo",
+  "Yakubu Dogara":      "https://en.wikipedia.org/wiki/Yakubu_Dogara",
+  "Atiku Abubakar":     "https://en.wikipedia.org/wiki/Atiku_Abubakar",
+  "Rabiu Kwankwaso":    "https://en.wikipedia.org/wiki/Rabiu_Kwankwaso",
+  "Peter Obi":          "https://en.wikipedia.org/wiki/Peter_Obi",
+  "Nasir El-Rufai":     "https://en.wikipedia.org/wiki/Nasir_El-Rufai",
+  "Kashim Shettima":    "https://en.wikipedia.org/wiki/Kashim_Shettima",
+  "Bola Tinubu":        "https://en.wikipedia.org/wiki/Bola_Tinubu"
+  // add more if needed
+};
+const wikiLightbox = document.getElementById('wikiLightbox');
+const wikiIframe   = document.getElementById('wikiIframe');
+const wikiCloseBtn = document.getElementById('wikiLightboxClose');
 
-    /*******************************
-     *  VOTES, LIKES & COMMENTS
-     *******************************/
-    let votesData = {};
-    let candidateLikes = {};
-    let comboComments = {};
+// Show the overlay for a given candidate
+function showWikiLightbox(candidateName) {
+  let link = wikiLinks[candidateName] || "about:blank";
+  wikiIframe.src = link;
+  wikiLightbox.style.display = 'flex';
+}
 
-    let selectedPresident = null;
-    let selectedVP = null;
-    let currentCombo = null;
+// Close the overlay
+wikiCloseBtn.addEventListener('click', () => {
+closeWikiLightbox();
+  wikiLightbox.style.display = 'none';
+  wikiIframe.src = "about:blank"; // optional to clear
+});
 
-    // DOM Refs
+    /************************************************
+     *  FULLY-COMBINED SCRIPT WITH PROGRESS-BUTTON
+     ************************************************/
+    let candidates       = [];
+    let candidateImages  = {};
+    let candidateDetails = {};
+    let candidateLikes   = {};
+
+    let votesData        = {};
+    let comboComments    = {};
+    let loyalists        = {};
+
+    let selectedPresident= null;
+    let selectedVP       = null;
+    let currentCombo     = null;
+    let userIP           = "123.45.67.89"; // mock IP address, for demonstration
+
+    // DOM references
     const presidentListEl     = document.getElementById('presidentList');
     const vicePresidentListEl = document.getElementById('vicePresidentList');
     const voteBtn             = document.getElementById('voteBtn');
+    const buttonFillEl        = document.getElementById('buttonFill');
     const chartBarsEl         = document.getElementById('chartBars');
     const comboGridEl         = document.getElementById('comboGrid');
+    const loyalistCombosEl    = document.getElementById('loyalistCombosContainer');
+
+    const voterNameEl         = document.getElementById('voterName');
+    const voterPhoneEl        = document.getElementById('voterPhone');
+    const voterStateEl        = document.getElementById('voterState');
+    const voterCityEl         = document.getElementById('voterCity');
+    const voterGenderEl       = document.getElementById('voterGender');
+    const voterAgeEl          = document.getElementById('voterAge');
+    const voterReferralEl     = document.getElementById('voterReferral');
+    const autoGenCodeEl       = document.getElementById('autoGenCode');
+
     const comboCommentSection = document.getElementById('comboCommentSection');
     const comboCommentTitle   = document.getElementById('comboCommentTitle');
     const comboCommentName    = document.getElementById('comboCommentName');
     const comboCommentText    = document.getElementById('comboCommentText');
     const comboCommentPostBtn = document.getElementById('comboCommentPostBtn');
 
-    // Lightbox
-    const addCandidateBtn          = document.getElementById('addCandidateBtn');
-    const lightboxOverlay          = document.getElementById('lightboxOverlay');
-    const lightboxClose            = document.getElementById('lightboxClose');
-    const lightboxForm             = document.getElementById('lightboxForm');
-    const lightboxCandidateName    = document.getElementById('lightboxCandidateName');
-    const lightboxCandidateImage   = document.getElementById('lightboxCandidateImage');
-    const lightboxCandidateReligion= document.getElementById('lightboxCandidateReligion');
-    const lightboxCandidateAge     = document.getElementById('lightboxCandidateAge');
-    const lightboxCandidateZone    = document.getElementById('lightboxCandidateZone');
-    const lightboxSubmitMsg        = document.getElementById('lightboxSubmitMsg');
+    const contactUsBtn        = document.getElementById('contactUsBtn');
+    const lightboxOverlay     = document.getElementById('lightboxOverlay');
+    const lightboxClose       = document.getElementById('lightboxClose');
+    const lightboxForm        = document.getElementById('lightboxForm');
+    const contactFullNameEl   = document.getElementById('contactFullName');
+    const contactPhoneEl      = document.getElementById('contactPhone');
+    const contactEmailEl      = document.getElementById('contactEmail');
+    const contactMessageEl    = document.getElementById('contactMessage');
+    const lightboxSubmitMsg   = document.getElementById('lightboxSubmitMsg');
 
-    /************************************************
-     * FORMAT NUMBER => 1.2K / 2.3M
-     ************************************************/
+    // Force phone => digits only, max 11
+    voterPhoneEl.addEventListener('input', () => {
+      voterPhoneEl.value = voterPhoneEl.value.replace(/\D/g, '').slice(0,11);
+      updateProgress();
+    });
+    voterAgeEl.addEventListener('input', () => {
+      voterAgeEl.value = voterAgeEl.value.replace(/\D/g, '');
+      updateProgress();
+    });
+    contactPhoneEl.addEventListener('input', () => {
+      contactPhoneEl.value = contactPhoneEl.value.replace(/\D/g, '').slice(0,11);
+    });
+
+    // Check progress whenever the user changes anything
+    voterNameEl.addEventListener('input', updateProgress);
+    voterStateEl.addEventListener('change', updateProgress);
+    voterCityEl.addEventListener('change', updateProgress);
+    voterGenderEl.addEventListener('change', updateProgress);
+    presidentListEl.addEventListener('click', updateProgress);
+    vicePresidentListEl.addEventListener('click', updateProgress);
+wikiLightbox.addEventListener("click", (event) => {
+  // If the user clicked exactly on the overlay (and not the inner box), close
+  if (event.target === wikiLightbox) {
+    closeWikiLightbox();
+  }
+});
+let wikiTimer = null;  // store the setTimeout ID globally
+
+function showWikiLightbox(candidateName) {
+  // set iframe src
+  wikiIframe.src = wikiLinks[candidateName] || "about:blank";
+  // show the overlay
+  wikiLightbox.style.display = 'flex';
+
+  // Start a 90-second countdown to close
+  wikiTimer = setTimeout(() => {
+    closeWikiLightbox();
+  }, 40000);
+}
+function closeWikiLightbox() {
+  // Hide overlay + clear iframe
+  wikiLightbox.style.display = 'none';
+  wikiIframe.src = "about:blank";
+
+  // If there's an active timer, clear it
+  if (wikiTimer) {
+    clearTimeout(wikiTimer);
+    wikiTimer = null;
+  }
+}
+
+    function updateProgress() {
+      // 8 steps total
+      let steps = 8;
+      let done = 0;
+
+      // 1) President
+      if (selectedPresident) done++;
+      // 2) VP
+      if (selectedVP) done++;
+      // 3) Name
+      if (voterNameEl.value.trim()) done++;
+      // 4) Phone => must be 11 digits
+      if (voterPhoneEl.value.length === 11) done++;
+      // 5) State
+      if (voterStateEl.value !== "State (required)") done++;
+      // 6) City
+      if (voterCityEl.value !== "City (required)") done++;
+      // 7) Gender
+      if (voterGenderEl.value !== "Gender (required)") done++;
+      // 8) Age
+      if (voterAgeEl.value.trim()) done++;
+
+      let ratio = (done/steps)*100;
+      buttonFillEl.style.width = ratio + "%";
+
+      if (done === steps) {
+        voteBtn.disabled = false;
+        voteBtn.classList.add('bounce');
+      } else {
+        voteBtn.disabled = true;
+        voteBtn.classList.remove('bounce');
+      }
+    }
+
     function formatNumber(num) {
-      if(num >= 1000000) {
-        let val = (num / 1000000).toFixed(1).replace(/\.0$/, '');
-        return val + 'M';
-      }
-      else if(num >= 1000) {
-        let val = (num / 1000).toFixed(1).replace(/\.0$/, '');
-        return val + 'K';
-      }
+      if (num >= 1000000) return (num/1000000).toFixed(1).replace(/\.0$/,"") + "M";
+      if (num >= 1000)    return (num/1000).toFixed(1).replace(/\.0$/,"") + "K";
       return String(num);
     }
-
-    /************************************************
-     * Random Data Setup
-     ************************************************/
-    function initRandomData() {
-      // random likes for each candidate
-      candidates.forEach(c => {
-        candidateLikes[c] = Math.floor(Math.random() * 500000) + 100000; 
-      });
-
-      // random combos (16)
-      let usedPairs = new Set();
-      let combosCount = 0;
-      while(combosCount < 16) {
-        let c1 = candidates[Math.floor(Math.random() * candidates.length)];
-        let c2 = candidates[Math.floor(Math.random() * candidates.length)];
-        if(c1 !== c2) {
-          let key = `${c1} & ${c2}`;
-          if(!usedPairs.has(key)) {
-            usedPairs.add(key);
-            votesData[key] = Math.floor(Math.random() * 600000) + 100000;
-            comboComments[key] = [];
-            combosCount++;
-          }
-        }
-      }
+    function generateReferralCode() {
+      return "REF" + Math.floor(Math.random()*100000 + 1000);
     }
 
-    /************************************************
-     * Populate Candidate Lists (Pres/VP)
-     ************************************************/
-    function populateCandidateList(listEl, candArr, isPresident) {
+    // Load from hidden tables
+    function readCandidateTable() {
+      const tbl = document.getElementById('candidateDataTable');
+      const rows= tbl.querySelectorAll('tbody tr');
+      rows.forEach(r => {
+        let c= r.querySelectorAll('td');
+        let nm= c[0].textContent.trim();
+        let im= c[1].textContent.trim();
+        let ag= c[3].textContent.trim();
+        let zn= c[4].textContent.trim();
+        let lk= parseInt(c[5].textContent.trim()) || 0;
+
+        candidates.push(nm);
+        candidateImages[nm] = im;
+        candidateDetails[nm] = { age:ag, zone:zn };
+        candidateLikes[nm]   = lk;
+      });
+    }
+    function readComboTable() {
+      const tbl= document.getElementById('comboDataTable');
+      const rows= tbl.querySelectorAll('tbody tr');
+      rows.forEach(r => {
+        let c= r.querySelectorAll('td');
+        let pres= c[0].textContent.trim();
+        let vp  = c[1].textContent.trim();
+        let vt  = parseInt(c[2].textContent.trim())||0;
+        let key = `${pres} & ${vp}`;
+        votesData[key] = vt;
+      });
+    }
+    function readUserDataTable() {
+      const tbl= document.getElementById('userDataTable');
+      const rows= tbl.querySelectorAll('tbody tr');
+      let all=[];
+      rows.forEach(r => {
+        let c= r.querySelectorAll('td');
+        let id= parseInt(c[0].textContent.trim());
+        let combo= c[1].textContent.trim();
+        let pid= parseInt(c[2].textContent.trim())||0;
+        let nm= c[3].textContent.trim();
+        let tx= c[4].textContent.trim();
+        // ignoring phone/state/city here for comments, but it’s stored in the table if needed
+
+        if (!comboComments[combo]) comboComments[combo] = [];
+        all.push({
+          id,
+          parentID: pid,
+          name: nm,
+          text: tx,
+          comboKey: combo,
+          replies: []
+        });
+      });
+
+      let byId={};
+      all.forEach(e => byId[e.id] = e);
+      all.forEach(e => {
+        if (e.parentID !== 0 && byId[e.parentID]) {
+          byId[e.parentID].replies.push(e);
+        }
+      });
+      all.forEach(e => {
+        if (e.parentID === 0) {
+          comboComments[e.comboKey].push(e);
+        }
+      });
+    }
+    function readLoyalistDataTable() {
+      const tbl= document.getElementById('loyalistDataTable');
+      const rows= tbl.querySelectorAll('tbody tr');
+      rows.forEach(r => {
+        let c= r.querySelectorAll('td');
+        let code= c[0].textContent.trim();
+        let loyName= c[1].textContent.trim();
+        let city= c[2].textContent.trim();
+        let combo= c[3].textContent.trim();
+        let supporters= parseInt(c[4].textContent.trim())||0;
+        let donation= parseFloat(c[5].textContent.trim())||0;
+        let img1= c[6].textContent.trim();
+        let img2= c[7].textContent.trim();
+
+        loyalists[code] = {
+          loyalistName: loyName,
+          city: city,
+          combo: combo,
+          supporters: supporters,
+          donation: donation,
+          comboImg1: img1,
+          comboImg2: img2
+        };
+      });
+    }
+
+    function populateCandidateList(listEl, arr, isPresident) {
       listEl.innerHTML = '';
-      candArr.forEach(c => {
-        const li = document.createElement('li');
-        li.className = 'candidate-item';
-        li.dataset.candidateName = c;
+      arr.forEach(c => {
+        let li= document.createElement('li');
+        li.className= 'candidate-item';
+        li.dataset.candidateName= c;
 
-        const img = document.createElement('img');
-        img.className = 'candidate-photo';
-        img.src = candidateImages[c] || "https://via.placeholder.com/80";
-        img.alt = c;
+        let img= document.createElement('img');
+        img.className= 'candidate-photo';
+        img.src= candidateImages[c] || "https://via.placeholder.com/80";
 
-        const name = document.createElement('div');
-        name.className = 'candidate-name';
-        name.textContent = c;
+        let nm= document.createElement('div');
+        nm.className= 'candidate-name';
+        nm.textContent= c;
 
-        let d = candidateDetails[c] || { religion:'?', age:'?', zone:'?' };
-        const info = document.createElement('div');
-        info.className = 'candidate-details';
-        info.textContent = `${d.religion}, ${d.age}, ${d.zone}`;
+        let d= candidateDetails[c] || { age:'?', zone:'?' };
+        let info= document.createElement('div');
+        info.className= 'candidate-details';
+        info.textContent= `${d.age} - ${d.zone}`;
 
-        // heart for likes
-        const likeContainer = document.createElement('div');
-        likeContainer.className = 'like-container';
-        const likeBtn = document.createElement('button');
-        likeBtn.className = 'like-btn';
-        likeBtn.innerHTML = '♥';
-        const likeCount = document.createElement('span');
-        likeCount.className = 'like-count';
-        likeCount.textContent = formatNumber(candidateLikes[c]);
+        let likeDiv= document.createElement('div');
+        likeDiv.className= 'like-container';
+        let b= document.createElement('button');
+        b.className= 'like-btn';
+        b.innerHTML= '♥';
 
-        // on heart click => increment
-        likeBtn.addEventListener('click', e => {
-          e.stopPropagation();
+        let sp= document.createElement('span');
+        sp.className= 'like-count';
+        sp.textContent= formatNumber(candidateLikes[c] || 0);
+
+        b.addEventListener('click', (ev) => {
+          ev.stopPropagation();
           candidateLikes[c]++;
           updateCandidateLikes(c);
         });
 
-        likeContainer.appendChild(likeBtn);
-        likeContainer.appendChild(likeCount);
+        likeDiv.appendChild(b);
+        likeDiv.appendChild(sp);
 
-        // on item click => select
         li.addEventListener('click', () => {
-          if(isPresident) {
-            selectedPresident = c;
+          if (isPresident) {
+            selectedPresident= c;
             highlightSelected(presidentListEl, c);
+
           } else {
-            selectedVP = c;
+            selectedVP= c;
             highlightSelected(vicePresidentListEl, c);
           }
+          updateProgress();
+showWikiLightbox(c);
         });
 
         li.appendChild(img);
-        li.appendChild(name);
+        li.appendChild(nm);
         li.appendChild(info);
-        li.appendChild(likeContainer);
-
+        li.appendChild(likeDiv);
         listEl.appendChild(li);
       });
     }
-
-    function highlightSelected(listEl, c) {
-      const items = listEl.querySelectorAll('.candidate-item');
-      items.forEach(it => {
-        if(it.dataset.candidateName === c) it.classList.add('selected');
-        else it.classList.remove('selected');
+    function highlightSelected(listEl, cName) {
+      let items= listEl.querySelectorAll('.candidate-item');
+      items.forEach(i => {
+        if (i.dataset.candidateName === cName) i.classList.add('selected');
+        else i.classList.remove('selected');
       });
     }
-
     function updateCandidateLikes(c) {
-      const val = formatNumber(candidateLikes[c]);
-      const items = document.querySelectorAll(`[data-candidate-name="${c}"]`);
+      let val= formatNumber(candidateLikes[c]);
+      let items= document.querySelectorAll(`[data-candidate-name="${c}"]`);
       items.forEach(it => {
-        const span = it.querySelector('.like-count');
-        if(span) span.textContent = val;
+        let sp= it.querySelector('.like-count');
+        if(sp) sp.textContent= val;
       });
     }
 
-    /************************************************
-     * Voting => increments votes for combo
-     ************************************************/
+    // VOTE
     voteBtn.addEventListener('click', () => {
-      if(!selectedPresident || !selectedVP) {
-        alert("Please select President & VP first.");
+      // If it's disabled => user hasn't completed
+      if (voteBtn.disabled) {
+        alert("Please finish all required fields before voting!");
         return;
       }
-      if(selectedPresident === selectedVP) {
-        alert("President and Vice President must differ!");
+      alert("You can submit your vote without a referral code, OR insert a referral code you were given to show support for that loyalist!");
+
+      let nm= voterNameEl.value.trim();
+      let ph= voterPhoneEl.value.trim();
+      let st= voterStateEl.value;
+      let ct= voterCityEl.value;
+      let gd= voterGenderEl.value;
+      let ag= voterAgeEl.value.trim();
+
+      // final check anyway
+      if (!nm || ph.length!==11 ||
+          st==="State (required)" ||
+          ct==="City (required)" ||
+          gd==="Gender (required)" ||
+          !ag ||
+          !selectedPresident || !selectedVP ||
+          selectedPresident===selectedVP) {
+        alert("Something is missing or invalid. Fill all fields!");
         return;
       }
-      const key = `${selectedPresident} & ${selectedVP}`;
-      if(!votesData[key]) {
-        votesData[key] = 0;
-        comboComments[key] = [];
+
+      let comboKey= `${selectedPresident} & ${selectedVP}`;
+      if (!votesData[comboKey]) {
+        votesData[comboKey]= 0;
+        comboComments[comboKey]= [];
       }
-      votesData[key]++;
+      votesData[comboKey]++;
+
+      let typedRef= voterReferralEl.value.trim();
+      if (typedRef && loyalists[typedRef]) {
+        loyalists[typedRef].supporters++;
+      } else if (typedRef) {
+        loyalists[typedRef]= {
+          loyalistName: "(Unknown)",
+          city: "Unknown",
+          combo: "Unknown",
+          supporters: 1,
+          donation: 0,
+          comboImg1: "",
+          comboImg2: ""
+        };
+      }
+
+      let newRef= generateReferralCode();
+      loyalists[newRef]= {
+        loyalistName: nm,
+        city: ct,
+        combo: comboKey,
+        supporters: 1,
+        donation: 0,
+        comboImg1: candidateImages[selectedPresident]||"",
+        comboImg2: candidateImages[selectedVP]||"",
+        userIP: userIP
+      };
+
+      if (typedRef && loyalists[typedRef] && loyalists[typedRef].combo==="Unknown") {
+        loyalists[typedRef].loyalistName= nm;
+        loyalists[typedRef].city= ct;
+        loyalists[typedRef].combo= comboKey;
+        loyalists[typedRef].comboImg1= candidateImages[selectedPresident]||"";
+        loyalists[typedRef].comboImg2= candidateImages[selectedVP]||"";
+      }
+
+      alert(`Vote recorded!\nYour IP: ${userIP}\nYour new referral code: ${newRef}\nShare it so others vote under you.`);
+
       renderChart();
       renderComboGrid();
-      alert("Vote recorded!");
+      renderComboLoyalists();
     });
 
-    /************************************************
-     * Chart
-     ************************************************/
+    // CHART
     function renderChart() {
-      chartBarsEl.innerHTML = '';
-      const sorted = Object.entries(votesData).sort((a,b)=> b[1]-a[1]);
-      if(!sorted.length) return;
+      chartBarsEl.innerHTML= '';
+      let arr= Object.entries(votesData).sort((a,b)=> b[1]-a[1]);
+      if(!arr.length) return;
+      let highest= arr[0][1];
+      arr.forEach(([combo,count]) => {
+        let row= document.createElement('div');
+        row.className= 'chart-bar';
 
-      let highest = sorted[0][1]; // for ratio
+        let lbl= document.createElement('div');
+        lbl.className= 'bar-label';
+        lbl.textContent= combo;
 
-      sorted.forEach(([combo, count]) => {
-        const barRow = document.createElement('div');
-        barRow.className = 'chart-bar';
+        let barBg= document.createElement('div');
+        barBg.className= 'bar-container';
+        let barFill= document.createElement('div');
+        barFill.className= 'bar-fill';
+        let ratio= (count/highest)*100;
+        barFill.style.width= ratio.toFixed(1) + '%';
 
-        const barLabel = document.createElement('div');
-        barLabel.className = 'bar-label';
-        barLabel.textContent = combo;
-
-        const barBg = document.createElement('div');
-        barBg.className = 'bar-container';
-
-        const barFill = document.createElement('div');
-        barFill.className = 'bar-fill';
-        let ratio = (count / highest)*100;
-        barFill.style.width = ratio.toFixed(1)+'%';
-
-        // optional numeric label
-        const lbl = document.createElement('span');
-        lbl.className = 'vote-count-label';
-        lbl.textContent = `(${formatNumber(count)})`;
-        barLabel.appendChild(lbl);
+        let cSpan= document.createElement('span');
+        cSpan.className= 'vote-count-label';
+        cSpan.textContent= `(${formatNumber(count)})`;
+        lbl.appendChild(cSpan);
 
         barBg.appendChild(barFill);
-        barRow.appendChild(barLabel);
-        barRow.appendChild(barBg);
-        chartBarsEl.appendChild(barRow);
+        row.appendChild(lbl);
+        row.appendChild(barBg);
+        chartBarsEl.appendChild(row);
       });
     }
 
-    /************************************************
-     * Voted Combos => grid
-     ************************************************/
+    // Voted combos grid
     function renderComboGrid() {
-      comboGridEl.innerHTML = '';
-      const sorted = Object.entries(votesData).sort((a,b)=> b[1]-a[1]);
+      comboGridEl.innerHTML= '';
+      let arr= Object.entries(votesData).sort((a,b)=> b[1]-a[1]);
+      arr.forEach(([combo,count]) => {
+        let card= document.createElement('div');
+        card.className= 'combo-card';
 
-      sorted.forEach(([combo, count]) => {
-        const card = document.createElement('div');
-        card.className = 'combo-card';
-        card.dataset.comboKey = combo;
-
-        // share top-right
-        const shareBtn = document.createElement('button');
-        shareBtn.className = 'share-btn';
-        shareBtn.textContent = '➦';
-        shareBtn.addEventListener('click', e => {
-          e.stopPropagation();
-          alert(`Sharing combo: ${combo}\nInvite your friends to vote!`);
+        let shareBtn= document.createElement('button');
+        shareBtn.className= 'share-btn';
+        shareBtn.textContent= '➦';
+        shareBtn.addEventListener('click',(ev)=>{
+          ev.stopPropagation();
+          alert(`Share link for: ${combo}\nReferral codes help track supporters!`);
         });
-
         card.appendChild(shareBtn);
 
-        // top images
-        const topDiv = document.createElement('div');
-        topDiv.className = 'combo-top';
+        let topDiv= document.createElement('div');
+        topDiv.className= 'combo-top';
+        let [p1,p2]= combo.split(" & ");
+        let i1= document.createElement('img');
+        i1.className= 'combo-img';
+        i1.src= candidateImages[p1]||"";
+        let i2= document.createElement('img');
+        i2.className= 'combo-img';
+        i2.src= candidateImages[p2]||"";
+        topDiv.appendChild(i1);
+        topDiv.appendChild(i2);
 
-        const [c1,c2] = combo.split(" & ");
-        const img1 = document.createElement('img');
-        img1.className = 'combo-img';
-        img1.src = candidateImages[c1] || "https://via.placeholder.com/50";
-        const img2 = document.createElement('img');
-        img2.className = 'combo-img';
-        img2.src = candidateImages[c2] || "https://via.placeholder.com/50";
+        let titleDiv= document.createElement('div');
+        titleDiv.className= 'combo-title';
+        titleDiv.textContent= combo;
 
-        topDiv.appendChild(img1);
-        topDiv.appendChild(img2);
+        let stats= document.createElement('div');
+        stats.className= 'combo-stats';
+        let vSpan= document.createElement('span');
+        vSpan.className= 'vote-heart';
+        vSpan.textContent= `♥ ${formatNumber(count)}`;
 
-        // combo title
-        const title = document.createElement('div');
-        title.className = 'combo-title';
-        title.textContent = combo;
+        let cArr= comboComments[combo] || [];
+        let totalC= 0;
+        function countC(list) {
+          list.forEach(x => {
+            totalC++;
+            if (x.replies && x.replies.length) countC(x.replies);
+          });
+        }
+        countC(cArr);
+        let cmtSpan= document.createElement('span');
+        cmtSpan.className= 'comment-icon';
+        cmtSpan.textContent= `💬 ${formatNumber(totalC)}`;
 
-        // stats => hearts & comments (with spacing)
-        const stats = document.createElement('div');
-        stats.className = 'combo-stats';
+        stats.appendChild(vSpan);
+        stats.appendChild(cmtSpan);
 
-        const voteSpan = document.createElement('span');
-        voteSpan.className = 'vote-heart';
-        voteSpan.textContent = `♥ ${formatNumber(count)}`;
-
-        let cArr = comboComments[combo]||[];
-        const commentSpan = document.createElement('span');
-        commentSpan.className = 'comment-icon';
-        commentSpan.textContent = `💬 ${formatNumber(cArr.length)}`;
-
-        stats.appendChild(voteSpan);
-        stats.appendChild(commentSpan);
-
-        // clicking card => open comments
-        card.addEventListener('click', () => {
+        card.addEventListener('click',()=>{
           openComboComments(combo);
         });
 
         card.appendChild(topDiv);
-        card.appendChild(title);
+        card.appendChild(titleDiv);
         card.appendChild(stats);
-
         comboGridEl.appendChild(card);
       });
     }
 
-    /************************************************
-     * Comments => nested replies
-     ************************************************/
+    // Loyalists
+    function renderComboLoyalists() {
+      loyalistCombosEl.innerHTML= '';
+      let comboArray= Object.entries(votesData).map(([combo,votes]) => ({ combo,votes }));
+      comboArray.sort((a,b) => b.votes - a.votes);
+      let top5= comboArray.slice(0,5);
+
+      top5.forEach(obj => {
+        let wrap= document.createElement('div');
+        wrap.className= 'loyalist-combo-wrap';
+
+        let row= document.createElement('div');
+        row.className= 'loyalist-row';
+
+        let leftBox= document.createElement('div');
+        leftBox.className= 'loyalist-images';
+
+        let [p1,p2]= obj.combo.split(' & ');
+        let img1= document.createElement('img');
+        img1.className= 'loyalist-square-img';
+        img1.src= candidateImages[p1]||"";
+        let img2= document.createElement('img');
+        img2.className= 'loyalist-square-img';
+        img2.src= candidateImages[p2]||"";
+        leftBox.appendChild(img1);
+        leftBox.appendChild(img2);
+
+        let rightBox= document.createElement('div');
+        rightBox.className= 'loyalist-details';
+
+        let allForThisCombo= Object.entries(loyalists)
+          .filter(([code,data]) => data.combo===obj.combo)
+          .map(([code,data]) => ({
+            name: data.loyalistName || "(NoName)",
+            supporters: data.supporters || 0
+          }));
+
+        allForThisCombo.sort((a,b)=> b.supporters - a.supporters);
+        let top3= allForThisCombo.slice(0,3);
+
+        let ul= document.createElement('ul');
+        top3.forEach((loy,i)=>{
+          let medal= (i===0)? '🥇': (i===1)? '🥈': (i===2)? '🥉': '';
+          let li= document.createElement('li');
+          li.innerHTML= `${medal} <strong>${loy.name}</strong> brought in ${formatNumber(loy.supporters)} voters`;
+          ul.appendChild(li);
+        });
+
+        rightBox.appendChild(ul);
+        row.appendChild(leftBox);
+        row.appendChild(rightBox);
+        wrap.appendChild(row);
+        loyalistCombosEl.appendChild(wrap);
+      });
+    }
+
+    // Comments
     function openComboComments(comboKey) {
-      currentCombo = comboKey;
+      currentCombo= comboKey;
       comboCommentSection.classList.add('active');
-      comboCommentTitle.textContent = `Comments for: ${comboKey}`;
+      comboCommentTitle.textContent= `Comments for: ${comboKey}`;
       renderComboComments();
     }
     function renderComboComments() {
-      const list = document.getElementById('comboCommentList');
-      list.innerHTML = '';
-      let arr = comboComments[currentCombo]||[];
-      arr.forEach(cObj => {
-        list.appendChild(createCommentElement(cObj));
+      let list= document.getElementById('comboCommentList');
+      list.innerHTML= '';
+      let arr= comboComments[currentCombo]||[];
+      arr.forEach(o => {
+        list.appendChild(createCommentElement(o));
       });
     }
-    function createCommentElement(obj) {
-      // obj = { name, text, replies:[] }
-      const wrap = document.createElement('div');
-      wrap.className = 'combo-comment-item';
+    function createCommentElement(o) {
+      let wrap= document.createElement('div');
+      wrap.className= 'combo-comment-item';
 
-      const auth = document.createElement('div');
-      auth.className = 'comment-author';
-      auth.textContent = obj.name;
+      let auth= document.createElement('div');
+      auth.className= 'comment-author';
+      auth.textContent= o.name||"Anonymous";
 
-      const txt = document.createElement('div');
-      txt.className = 'comment-text';
-      txt.textContent = obj.text;
+      let txt= document.createElement('div');
+      txt.className= 'comment-text';
+      txt.textContent= o.text||"(No comment)";
 
-      const actions = document.createElement('div');
-      actions.className = 'comment-actions';
-      actions.textContent = 'Reply';
+      let actions= document.createElement('div');
+      actions.className= 'comment-actions';
+      actions.textContent= 'Reply';
 
-      const replyForm = document.createElement('div');
-      replyForm.className = 'reply-form';
+      let rForm= document.createElement('div');
+      rForm.className= 'reply-form';
 
-      const rInput = document.createElement('input');
-      rInput.className = 'reply-input';
-      rInput.placeholder = 'Your Name';
+      let rInput= document.createElement('input');
+      rInput.className= 'reply-input';
+      rInput.placeholder= 'Your Name';
 
-      const rText = document.createElement('textarea');
-      rText.className = 'reply-textarea';
-      rText.rows = 2;
-      rText.placeholder = 'Your reply...';
+      let rText= document.createElement('textarea');
+      rText.className= 'reply-textarea';
+      rText.rows= 2;
+      rText.placeholder= 'Your reply...';
 
-      const rBtn = document.createElement('button');
-      rBtn.className = 'reply-btn';
-      rBtn.textContent = 'Post Reply';
-
+      let rBtn= document.createElement('button');
+      rBtn.className= 'reply-btn';
+      rBtn.textContent= 'Post Reply';
       rBtn.addEventListener('click', () => {
-        let rn = rInput.value.trim();
-        let rt = rText.value.trim();
-        if(!rn || !rt) {
-          alert("Please enter name & reply");
+        let rn= rInput.value.trim();
+        let rt= rText.value.trim();
+        if(!rn||!rt){
+          alert("Please enter both name & reply");
           return;
         }
-        let newReply = { name: rn, text: rt, replies: [] };
-        obj.replies.push(newReply);
-        rInput.value = '';
-        rText.value = '';
-        replyForm.style.display = 'none';
+        let newReply= {
+          id: Date.now(),
+          parentID: o.id,
+          name: rn,
+          text: rt,
+          replies: []
+        };
+        o.replies.push(newReply);
+        rInput.value= '';
+        rText.value= '';
+        rForm.style.display= 'none';
         renderComboComments();
       });
 
       actions.addEventListener('click', () => {
-        replyForm.style.display = replyForm.style.display === 'none' ? 'flex' : 'none';
+        rForm.style.display= (rForm.style.display==='flex' ? 'none' : 'flex');
       });
 
-      replyForm.appendChild(rInput);
-      replyForm.appendChild(rText);
-      replyForm.appendChild(rBtn);
+      rForm.appendChild(rInput);
+      rForm.appendChild(rText);
+      rForm.appendChild(rBtn);
 
       wrap.appendChild(auth);
       wrap.appendChild(txt);
       wrap.appendChild(actions);
-      wrap.appendChild(replyForm);
+      wrap.appendChild(rForm);
 
-      if(obj.replies && obj.replies.length>0) {
-        const sub = document.createElement('div');
-        sub.className = 'comment-replies';
-        obj.replies.forEach(rp => {
+      // if it has replies
+      if(o.replies && o.replies.length){
+        let sub= document.createElement('div');
+        sub.className= 'comment-replies';
+        o.replies.forEach(rp => {
           sub.appendChild(createCommentElement(rp));
         });
         wrap.appendChild(sub);
       }
-
       return wrap;
     }
     comboCommentPostBtn.addEventListener('click', () => {
-      if(!currentCombo) {
+      if(!currentCombo){
         alert("No combo selected!");
         return;
       }
-      let un = comboCommentName.value.trim();
-      let tx = comboCommentText.value.trim();
-      if(!un || !tx) {
-        alert("Enter name & comment");
+      let un= comboCommentName.value.trim();
+      let tx= comboCommentText.value.trim();
+      if(!un||!tx){
+        alert("Enter name & comment!");
         return;
       }
-      if(!comboComments[currentCombo]) comboComments[currentCombo] = [];
-      comboComments[currentCombo].push({ name: un, text: tx, replies: [] });
-      comboCommentName.value = '';
-      comboCommentText.value = '';
+      if(!comboComments[currentCombo]) comboComments[currentCombo]= [];
+      let newId= Date.now();
+      comboComments[currentCombo].push({
+        id:newId,
+        parentID:0,
+        name:un,
+        text:tx,
+        replies:[]
+      });
+      comboCommentName.value= '';
+      comboCommentText.value= '';
       renderComboComments();
       renderComboGrid();
     });
 
-    /************************************************
-     * Lightbox => Add Candidate
-     ************************************************/
-    addCandidateBtn.addEventListener('click', () => {
-      lightboxOverlay.style.display = 'flex';
+    // CONTACT FORM
+    contactUsBtn.addEventListener('click', ()=> {
+      lightboxOverlay.style.display= 'flex';
     });
-    lightboxClose.addEventListener('click', () => {
-      lightboxOverlay.style.display = 'none';
+    lightboxClose.addEventListener('click', ()=> {
+      lightboxOverlay.style.display= 'none';
     });
-    lightboxForm.addEventListener('submit', e => {
+    lightboxForm.addEventListener('submit', (e)=> {
       e.preventDefault();
-      let nm = lightboxCandidateName.value.trim();
-      let im = lightboxCandidateImage.value.trim();
-      let rg = lightboxCandidateReligion.value.trim()||"N/A";
-      let ag = lightboxCandidateAge.value.trim()||"N/A";
-      let zn = lightboxCandidateZone.value.trim()||"N/A";
+      let fn= contactFullNameEl.value.trim();
+      let ph= contactPhoneEl.value.trim();
+      let em= contactEmailEl.value.trim();
 
-      if(!nm) {
-        alert("Enter full name!");
+      if(!fn || ph.length!==11 || !ph.startsWith('0') || !em.includes('@') || !em.includes('.')){
+        alert("Please fill out all contact form fields correctly!");
         return;
       }
-      if(!candidates.includes(nm)) {
-        candidates.push(nm);
-        candidateLikes[nm] = Math.floor(Math.random() * 500000) + 100000;
-      }
-      candidateImages[nm] = im || "https://via.placeholder.com/80";
-      candidateDetails[nm] = {religion:rg, age:ag, zone:zn};
 
-      populateCandidateList(presidentListEl, candidates, true);
-      populateCandidateList(vicePresidentListEl, candidates, false);
-
-      lightboxSubmitMsg.style.display='block';
-      lightboxForm.style.display='none';
-      setTimeout(()=>{
-        lightboxOverlay.style.display='none';
-        lightboxSubmitMsg.style.display='none';
-        lightboxForm.style.display='flex';
-        lightboxCandidateName.value='';
-        lightboxCandidateImage.value='';
-        lightboxCandidateReligion.value='';
-        lightboxCandidateAge.value='';
-        lightboxCandidateZone.value='';
-      },3000);
+      lightboxSubmitMsg.style.display= 'block';
+      lightboxForm.style.display= 'none';
+      setTimeout(()=> {
+        lightboxOverlay.style.display= 'none';
+        lightboxSubmitMsg.style.display= 'none';
+        lightboxForm.style.display= 'flex';
+        contactFullNameEl.value= '';
+        contactPhoneEl.value= '';
+        contactEmailEl.value= '';
+        contactMessageEl.value= '';
+      },2500);
     });
 
-    /************************************************
-     * Init
-     ************************************************/
-    function init() {
-      initRandomData();
+    function init(){
+      readCandidateTable();
+      readComboTable();
+      readUserDataTable();
+      readLoyalistDataTable();
+
       populateCandidateList(presidentListEl, candidates, true);
       populateCandidateList(vicePresidentListEl, candidates, false);
+
       renderChart();
       renderComboGrid();
+      renderComboLoyalists();
+
+      // Generate an "auto" referral code (just for display)
+      let autoRef= generateReferralCode();
+      autoGenCodeEl.textContent= `Your Code: ${autoRef}`;
+
+      // Check initial progress
+      updateProgress();
     }
     init();
   </script>
+
 </body>
 </html>
