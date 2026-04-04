@@ -865,10 +865,57 @@
       }
       debugLog("share", "Combo share insert succeeded.", { comboKey });
     }
+    async function ensureComboExists(comboKey, presidentName, vicePresidentName) {
+      if (dataBackend !== "supabase" || !supabaseClient) return;
+      if (comboDefinitions.includes(comboKey)) {
+        debugLog("combo", "Combo already known locally.", { comboKey });
+        return;
+      }
+      debugLog("combo", "Ensuring combo exists in combo_stats.", {
+        comboKey,
+        president: presidentName,
+        vicePresident: vicePresidentName
+      });
+      const { data: existingCombo, error: existingError } = await supabaseClient
+        .from("combo_stats")
+        .select("combo_key")
+        .eq("combo_key", comboKey)
+        .maybeSingle();
+      if (existingError) {
+        debugError("combo", "Failed checking existing combo.", existingError);
+        throw existingError;
+      }
+      if (existingCombo?.combo_key) {
+        comboDefinitions.push(comboKey);
+        debugLog("combo", "Combo already exists in database.", { comboKey });
+        return;
+      }
+      const nextDisplayOrder = comboDefinitions.length + 1;
+      const { error: insertError } = await supabaseClient
+        .from("combo_stats")
+        .insert({
+          combo_key: comboKey,
+          president: presidentName,
+          vice_president: vicePresidentName,
+          total_votes: 0,
+          share_count: 0,
+          display_order: nextDisplayOrder
+        });
+      if (insertError) {
+        debugError("combo", "Failed creating combo.", insertError);
+        throw insertError;
+      }
+      comboDefinitions.push(comboKey);
+      votesData[comboKey] = votesData[comboKey] || 0;
+      comboShares[comboKey] = comboShares[comboKey] || 0;
+      debugLog("combo", "Combo created successfully.", { comboKey, displayOrder: nextDisplayOrder });
+    }
     async function persistVoteRecord(votePayload) {
       if (dataBackend !== "supabase" || !supabaseClient) return;
       const comboKey = votePayload.combo;
       debugLog("vote", "Persisting vote payload.", votePayload);
+      const [presidentName, vicePresidentName] = comboKey.split(" & ");
+      await ensureComboExists(comboKey, presidentName, vicePresidentName);
       const voteInsert = {
         voter_name: votePayload.name,
         phone: votePayload.phone,
