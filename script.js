@@ -80,6 +80,36 @@
       if (!DEBUG_MODE) return;
       console.error(`[DEBUG:${scope}]`, message, error);
     }
+    async function fetchAllSupabaseRows(tableName, selectClause, options = {}) {
+      if (!supabaseClient) return { data: [], error: new Error("Supabase client missing") };
+      const pageSize = options.pageSize || 1000;
+      const orderBy = options.orderBy || null;
+      const ascending = options.ascending ?? true;
+      let from = 0;
+      let allRows = [];
+      while (true) {
+        let query = supabaseClient.from(tableName).select(selectClause).range(from, from + pageSize - 1);
+        if (orderBy) {
+          query = query.order(orderBy, { ascending });
+        }
+        const { data, error } = await query;
+        if (error) {
+          debugError("fetchAllSupabaseRows", `Failed fetching ${tableName} rows.`, error);
+          return { data: allRows, error };
+        }
+        const pageRows = data || [];
+        allRows = allRows.concat(pageRows);
+        debugLog("fetchAllSupabaseRows", `Fetched page for ${tableName}.`, {
+          from,
+          pageSize,
+          pageRows: pageRows.length,
+          totalRows: allRows.length
+        });
+        if (pageRows.length < pageSize) break;
+        from += pageSize;
+      }
+      return { data: allRows, error: null };
+    }
     const MOCK_DATA = {
       candidates: [
         { name: "Bola Tinubu", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg", age: 70, zone: "SW", likes: 500000 },
@@ -742,11 +772,11 @@
       ] = await Promise.all([
         supabaseClient.from("candidate_profiles").select("*").order("display_order", { ascending: true }),
         supabaseClient.from("combo_stats").select("*").order("display_order", { ascending: true }),
-        supabaseClient.from("comments").select("*").order("created_at", { ascending: true }),
+        fetchAllSupabaseRows("comments", "*", { orderBy: "created_at", ascending: true }),
         supabaseClient.from("loyalists").select("*").order("created_at", { ascending: true }),
-        supabaseClient.from("votes").select("state, combo_key, referral_code_used").order("created_at", { ascending: true }),
-        supabaseClient.from("candidate_likes").select("candidate_name"),
-        supabaseClient.from("combo_shares").select("combo_key"),
+        fetchAllSupabaseRows("votes", "state, combo_key, referral_code_used", { orderBy: "created_at", ascending: true }),
+        fetchAllSupabaseRows("candidate_likes", "candidate_name"),
+        fetchAllSupabaseRows("combo_shares", "combo_key"),
         supabaseClient.from("social_proofs").select("*").order("display_order", { ascending: true })
       ]);
       debugLog("loadSupabaseData", "Query results received.", {
