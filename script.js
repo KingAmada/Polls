@@ -641,6 +641,7 @@
         parentID: commentRow.parent_id || 0,
         name: commentRow.author_name || "Anonymous",
         text: commentRow.body || "",
+        createdAt: commentRow.created_at || null,
         replies: []
       };
     }
@@ -1174,10 +1175,20 @@
       const safeName = encodeURIComponent(name || "Anonymous");
       return `https://ui-avatars.com/api/?name=${safeName}&background=e8efe9&color=173725&bold=true&rounded=true&size=96`;
     }
-    function getCommentTimeLabel(commentId) {
-      const seed = String(commentId || "").length;
-      const timeLabels = ["2w", "1w", "5d", "3d", "1d"];
-      return timeLabels[seed % timeLabels.length];
+    function getCommentTimeLabel(createdAt) {
+      if (!createdAt) return "Just now";
+      const createdTime = new Date(createdAt).getTime();
+      if (Number.isNaN(createdTime)) return "Just now";
+      const diffMs = Math.max(0, Date.now() - createdTime);
+      const minute = 60 * 1000;
+      const hour = 60 * minute;
+      const day = 24 * hour;
+      const week = 7 * day;
+      if (diffMs < minute) return "Just now";
+      if (diffMs < hour) return `${Math.floor(diffMs / minute)}m`;
+      if (diffMs < day) return `${Math.floor(diffMs / hour)}h`;
+      if (diffMs < week) return `${Math.floor(diffMs / day)}d`;
+      return `${Math.floor(diffMs / week)}w`;
     }
     function updateComboModalHeader(comboKey) {
       if (!comboKey) return;
@@ -1939,7 +1950,7 @@ function renderComboLoyalists() {
         authorDiv.textContent = commentData.name || "Anonymous";
         const timeDiv = document.createElement('span');
         timeDiv.className = 'comment-time';
-        timeDiv.textContent = getCommentTimeLabel(commentData.id);
+        timeDiv.textContent = getCommentTimeLabel(commentData.createdAt);
         const metaDiv = document.createElement('div');
         metaDiv.className = 'comment-meta';
         metaDiv.appendChild(authorDiv);

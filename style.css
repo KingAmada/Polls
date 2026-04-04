@@ -1567,6 +1567,7 @@ body::before {
 }
 .combo-comment-modal {
   width: min(1120px, 100%);
+  height: min(760px, calc(100vh - 2.5rem));
   min-height: min(760px, calc(100vh - 2.5rem));
   max-height: calc(100vh - 2.5rem);
   display: grid;
@@ -1676,6 +1677,7 @@ body::before {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
   background: #ffffff;
 }
 .combo-comment-topbar {
@@ -1766,8 +1768,13 @@ body::before {
 .combo-comment-list {
   margin-top: 0;
   flex: 1;
+  height: 100%;
   min-height: 0;
+  max-height: 100%;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
   padding: 0.35rem 1.25rem 1.1rem;
 }
 .combo-comment-item {
@@ -2260,6 +2267,7 @@ body::before {
   }
   .combo-comment-modal {
     grid-template-columns: 1fr;
+    height: calc(100vh - 1.5rem);
     min-height: auto;
     max-height: calc(100vh - 1.5rem);
   }
@@ -2284,8 +2292,7 @@ body::before {
   .candidate-list,
   #chartBars,
   #loyalistCombosContainer,
-  #comboGrid,
-  #comboCommentList {
+  #comboGrid {
     max-height: 45vh;
     overflow-y: auto;
     padding-bottom: 1rem;
@@ -2293,24 +2300,24 @@ body::before {
   .candidate-list::-webkit-scrollbar,
   #chartBars::-webkit-scrollbar,
   #loyalistCombosContainer::-webkit-scrollbar,
-  #comboGrid::-webkit-scrollbar,
-  #comboCommentList::-webkit-scrollbar {
+  #comboGrid::-webkit-scrollbar {
     width: 6px;
   }
   .candidate-list::-webkit-scrollbar-thumb,
   #chartBars::-webkit-scrollbar-thumb,
   #loyalistCombosContainer::-webkit-scrollbar-thumb,
-  #comboGrid::-webkit-scrollbar-thumb,
-  #comboCommentList::-webkit-scrollbar-thumb {
+  #comboGrid::-webkit-scrollbar-thumb {
     background-color: #ccc;
     border-radius: 3px;
   }
   .candidate-list::-webkit-scrollbar-track,
   #chartBars::-webkit-scrollbar-track,
   #loyalistCombosContainer::-webkit-scrollbar-track,
-  #comboGrid::-webkit-scrollbar-track,
-  #comboCommentList::-webkit-scrollbar-track {
+  #comboGrid::-webkit-scrollbar-track {
     background-color: #f0f0f0;
+  }
+  #comboCommentList {
+    max-height: none;
   }
   .selection-box .candidate-list {
     max-height: 50vh;
