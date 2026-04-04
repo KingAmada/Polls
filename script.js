@@ -867,37 +867,24 @@
     async function incrementCandidateLikeInStore(candidateName) {
       if (dataBackend !== "supabase" || !supabaseClient) return;
       debugLog("like", "Persisting candidate like.", { candidateName });
-      const [insertRes, updateRes] = await Promise.all([
-        supabaseClient
-          .from("candidate_likes")
-          .insert({ candidate_name: candidateName }),
-        supabaseClient
-          .from("candidate_profiles")
-          .update({ likes: (candidateLikes[candidateName] || 0) + 1 })
-          .eq("name", candidateName)
-      ]);
-      if (insertRes.error || updateRes.error) {
-        debugError("like", "Candidate like write failed.", [insertRes.error, updateRes.error].filter(Boolean));
-        throw new Error([insertRes.error, updateRes.error].filter(Boolean).map((item) => item.message).join(" | "));
+      const { error } = await supabaseClient
+        .from("candidate_likes")
+        .insert({ candidate_name: candidateName });
+      if (error) {
+        debugError("like", "Candidate like insert failed.", error);
+        throw error;
       }
       debugLog("like", "Candidate like insert succeeded.", { candidateName });
     }
     async function persistShareCount(comboKey) {
       if (dataBackend !== "supabase" || !supabaseClient) return;
       debugLog("share", "Persisting combo share.", { comboKey });
-      const nextShareCount = (comboShares[comboKey] || 0) + 1;
-      const [insertRes, updateRes] = await Promise.all([
-        supabaseClient
-          .from("combo_shares")
-          .insert({ combo_key: comboKey }),
-        supabaseClient
-          .from("combo_stats")
-          .update({ share_count: nextShareCount })
-          .eq("combo_key", comboKey)
-      ]);
-      if (insertRes.error || updateRes.error) {
-        debugError("share", "Combo share write failed.", [insertRes.error, updateRes.error].filter(Boolean));
-        throw new Error([insertRes.error, updateRes.error].filter(Boolean).map((item) => item.message).join(" | "));
+      const { error } = await supabaseClient
+        .from("combo_shares")
+        .insert({ combo_key: comboKey });
+      if (error) {
+        debugError("share", "Combo share insert failed.", error);
+        throw error;
       }
       debugLog("share", "Combo share insert succeeded.", { comboKey });
     }
@@ -951,80 +938,22 @@
       const comboKey = votePayload.combo;
       debugLog("vote", "Persisting vote payload.", votePayload);
       const [presidentName, vicePresidentName] = comboKey.split(" & ");
-      await ensureComboExists(comboKey, presidentName, vicePresidentName);
-      const voteInsert = {
-        voter_name: votePayload.name,
-        phone: votePayload.phone,
-        state: votePayload.state,
-        city: votePayload.city,
-        gender: votePayload.gender,
-        age: votePayload.age,
-        combo_key: comboKey,
-        referral_code_used: votePayload.referralCodeUsed || null
-      };
-      const referralCode = votePayload.referralCodeUsed?.toUpperCase() || null;
-      const nextTotalVotes = (votesData[comboKey] || 0) + 1;
-      const existingStateRow = mapStatesData.find((row) => (
-        normalizeStateName(row.state) === normalizeStateName(votePayload.state) && row.combo_key === comboKey
-      ));
-      const nextStateVotes = (existingStateRow?.votes || 0) + 1;
-      const requests = [
-        supabaseClient.from("votes").insert(voteInsert).select("id, combo_key, state, city, created_at").single(),
-        supabaseClient.from("combo_stats").update({ total_votes: nextTotalVotes }).eq("combo_key", comboKey)
-      ];
-      if (existingStateRow) {
-        requests.push(
-          supabaseClient
-            .from("state_combo_votes")
-            .update({ votes: nextStateVotes })
-            .eq("state", normalizeStateName(votePayload.state))
-            .eq("combo_key", comboKey)
-        );
-      } else {
-        requests.push(
-          supabaseClient
-            .from("state_combo_votes")
-            .insert({ state: normalizeStateName(votePayload.state), combo_key: comboKey, votes: 1 })
-        );
+      const { data, error } = await supabaseClient.rpc("submit_vote", {
+        p_voter_name: votePayload.name,
+        p_phone: votePayload.phone,
+        p_state: normalizeStateName(votePayload.state),
+        p_city: votePayload.city,
+        p_gender: votePayload.gender,
+        p_age: votePayload.age,
+        p_president: presidentName,
+        p_vice_president: vicePresidentName,
+        p_referral_code_used: votePayload.referralCodeUsed || null
+      });
+      if (error) {
+        debugError("vote", "Vote persistence failed.", error);
+        throw error;
       }
-      if (referralCode) {
-        const referralRecord = loyalists[referralCode];
-        if (!referralRecord) {
-          const nextInfluencerCount = Object.values(loyalists).filter((entry) => entry.combo === comboKey).length + 1;
-          requests.push(
-            supabaseClient.from("loyalists").insert({
-              referral_code: referralCode,
-              loyalist_name: "Referral User",
-              city: votePayload.city,
-              combo_key: comboKey,
-              supporters: 1,
-              total_influencers: nextInfluencerCount,
-              donation: 0,
-              combo_img1: candidateImages[presidentName] || null,
-              combo_img2: candidateImages[vicePresidentName] || null
-            })
-          );
-        } else {
-          requests.push(
-            supabaseClient
-              .from("loyalists")
-              .update({ supporters: (referralRecord.supporters || 0) + 1 })
-              .eq("referral_code", referralCode)
-          );
-        }
-      }
-      const results = await Promise.all(requests);
-      debugLog("vote", "Vote-related write responses received.", results.map((item, index) => ({
-        requestIndex: index,
-        error: item.error?.message || null,
-        rows: Array.isArray(item.data) ? item.data.length : (item.data ? 1 : 0)
-      })));
-      const errors = results.map((item) => item.error).filter(Boolean);
-      if (errors.length) {
-        debugError("vote", "Vote persistence failed.", errors);
-        throw new Error(errors.map((item) => item.message).join(" | "));
-      }
-      const insertedVote = results[0]?.data || null;
+      const insertedVote = data || null;
       debugLog("vote", "Vote persistence succeeded.", {
         comboKey,
         referralCodeUsed: votePayload.referralCodeUsed || null,
@@ -1683,9 +1612,12 @@
         });
       } catch (error) {
         debugError("submitVote", "Vote persistence error.", error);
+        const message = /already voted/i.test(error?.message || "")
+          ? "This phone number has already been used to vote."
+          : "Your vote could not be saved to the database. No local counts were changed.";
         openNoticeModal({
           title: "Vote Failed",
-          message: "Your vote could not be saved to the database. No local counts were changed.",
+          message,
           kicker: "Database"
         });
       }
