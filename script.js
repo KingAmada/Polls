@@ -926,7 +926,7 @@
         combo_key: comboKey,
         referral_code_used: votePayload.referralCodeUsed || null
       };
-      const requests = [supabaseClient.from("votes").insert(voteInsert)];
+      const requests = [supabaseClient.from("votes").insert(voteInsert).select("id, combo_key, state, city, created_at").single()];
       if (votePayload.referralCodeUsed) {
         const code = votePayload.referralCodeUsed.toUpperCase();
         const referralRecord = loyalists[code];
@@ -957,7 +957,25 @@
         debugError("vote", "Vote persistence failed.", errors);
         throw new Error(errors.map((item) => item.message).join(" | "));
       }
-      debugLog("vote", "Vote persistence succeeded.", { comboKey, referralCodeUsed: votePayload.referralCodeUsed || null });
+      const insertedVote = results[0]?.data || null;
+      debugLog("vote", "Vote persistence succeeded.", {
+        comboKey,
+        referralCodeUsed: votePayload.referralCodeUsed || null,
+        insertedVote
+      });
+      const { data: verificationRows, error: verificationError } = await supabaseClient
+        .from("votes")
+        .select("id, combo_key, state, city, created_at")
+        .eq("phone", votePayload.phone)
+        .eq("combo_key", comboKey)
+        .order("id", { ascending: false })
+        .limit(3);
+      if (verificationError) {
+        debugError("vote", "Post-insert verification query failed.", verificationError);
+      } else {
+        debugLog("vote", "Post-insert verification rows.", verificationRows);
+      }
+      return insertedVote;
     }
     async function persistComment(commentPayload) {
       if (dataBackend !== "supabase" || !supabaseClient) return null;
@@ -1504,8 +1522,15 @@
         referralCodeUsed: typedReferral
       });
       try {
-        await persistVoteRecord(votePayload);
+        const insertedVote = await persistVoteRecord(votePayload);
         await refreshDataFromDatabase();
+        debugLog("submitVote", "Post-refresh verification.", {
+          insertedVoteId: insertedVote?.id || null,
+          comboKey,
+          comboVotesAfterRefresh: votesData[comboKey] || 0,
+          stateRowsAfterRefresh: mapStatesData.filter((row) => normalizeStateName(row.state) === normalizeStateName(state)),
+          totalVotesAfterRefresh: Object.values(votesData).reduce((sum, count) => sum + count, 0)
+        });
         openNoticeModal({
           title: "Vote Submitted",
           message: `Your vote for ${comboKey} has been recorded successfully.`,
