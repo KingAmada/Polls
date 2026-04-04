@@ -66,7 +66,7 @@
       : null;
     let socialProofMessages = [];
     let dataBackend = "mock";
-    const DEBUG_MODE = true;
+    const DEBUG_MODE = new URLSearchParams(window.location.search).get('debug') === '1';
     function debugLog(scope, message, details) {
       if (!DEBUG_MODE) return;
       const prefix = `[DEBUG:${scope}]`;
@@ -765,18 +765,14 @@
         combosRes,
         commentsRes,
         loyalistsRes,
-        votesRes,
-        likesRes,
-        sharesRes,
+        stateVotesRes,
         proofsRes
       ] = await Promise.all([
         supabaseClient.from("candidate_profiles").select("*").order("display_order", { ascending: true }),
         supabaseClient.from("combo_stats").select("*").order("display_order", { ascending: true }),
         fetchAllSupabaseRows("comments", "*", { orderBy: "created_at", ascending: true }),
         supabaseClient.from("loyalists").select("*").order("created_at", { ascending: true }),
-        fetchAllSupabaseRows("votes", "state, combo_key, referral_code_used", { orderBy: "created_at", ascending: true }),
-        fetchAllSupabaseRows("candidate_likes", "candidate_name"),
-        fetchAllSupabaseRows("combo_shares", "combo_key"),
+        supabaseClient.from("state_combo_votes").select("state, combo_key, votes"),
         supabaseClient.from("social_proofs").select("*").order("display_order", { ascending: true })
       ]);
       debugLog("loadSupabaseData", "Query results received.", {
@@ -784,9 +780,7 @@
         comboStats: { rows: combosRes.data?.length || 0, error: combosRes.error?.message || null },
         comments: { rows: commentsRes.data?.length || 0, error: commentsRes.error?.message || null },
         loyalists: { rows: loyalistsRes.data?.length || 0, error: loyalistsRes.error?.message || null },
-        votes: { rows: votesRes.data?.length || 0, error: votesRes.error?.message || null },
-        candidateLikes: { rows: likesRes.data?.length || 0, error: likesRes.error?.message || null },
-        comboShares: { rows: sharesRes.data?.length || 0, error: sharesRes.error?.message || null },
+        stateComboVotes: { rows: stateVotesRes.data?.length || 0, error: stateVotesRes.error?.message || null },
         socialProofs: { rows: proofsRes.data?.length || 0, error: proofsRes.error?.message || null }
       });
       const errors = [
@@ -794,9 +788,7 @@
         combosRes.error,
         commentsRes.error,
         loyalistsRes.error,
-        votesRes.error,
-        likesRes.error,
-        sharesRes.error,
+        stateVotesRes.error,
         proofsRes.error
       ].filter(Boolean);
       if (candidatesRes.error || combosRes.error) {
@@ -819,19 +811,20 @@
       comboComments = {};
       socialProofMessages = ((proofsRes.error ? [] : proofsRes.data) || []).map((row) => row.message).filter(Boolean);
 
-      const voteRows = votesRes.error ? [] : (votesRes.data || []);
-      const likeCounts = groupCounts(likesRes.error ? [] : (likesRes.data || []), (row) => row.candidate_name);
-      const shareCounts = groupCounts(sharesRes.error ? [] : (sharesRes.data || []), (row) => row.combo_key);
-      const voteCounts = groupCounts(voteRows, (row) => row.combo_key);
-      const referralCounts = groupCounts(voteRows, (row) => (row.referral_code_used || "").toUpperCase());
+      const stateVoteRows = stateVotesRes.error ? [] : (stateVotesRes.data || []);
+      const voteCounts = Object.fromEntries(((combosRes.error ? [] : combosRes.data) || []).map((row) => [row.combo_key, row.total_votes || 0]));
       const comboInfluencerCounts = groupCounts(loyalistsRes.error ? [] : (loyalistsRes.data || []), (row) => row.combo_key);
-      mapStatesData = buildStateVoteRows(voteRows);
+      mapStatesData = stateVoteRows.map((row) => ({
+        state: normalizeStateName(row.state),
+        combo_key: row.combo_key,
+        votes: row.votes || 0
+      }));
 
       (candidatesRes.data || []).forEach((row) => {
         candidates.push(row.name);
         candidateImages[row.name] = row.image_url || 'https://placehold.co/80x80/cccccc/ffffff?text=N/A';
         candidateDetails[row.name] = { age: row.age ?? '?', zone: row.zone ?? '?' };
-        candidateLikes[row.name] = likeCounts[row.name] || 0;
+        candidateLikes[row.name] = row.likes || 0;
         if (row.wiki_url) {
           wikiLinks[row.name] = row.wiki_url;
         }
@@ -839,8 +832,8 @@
 
       (combosRes.data || []).forEach((row) => {
         comboDefinitions.push(row.combo_key);
-        votesData[row.combo_key] = voteCounts[row.combo_key] || 0;
-        comboShares[row.combo_key] = shareCounts[row.combo_key] || 0;
+        votesData[row.combo_key] = row.total_votes || 0;
+        comboShares[row.combo_key] = row.share_count || 0;
       });
       buildCandidateRoleVotes(combosRes.data || [], voteCounts);
 
@@ -852,8 +845,8 @@
           loyalistName: row.loyalist_name || "Anonymous",
           city: row.city || "",
           combo: row.combo_key || "",
-          supporters: referralCounts[code] || 0,
-          totalInfluencers: comboInfluencerCounts[row.combo_key] || 0,
+          supporters: row.supporters || 0,
+          totalInfluencers: comboInfluencerCounts[row.combo_key] || row.total_influencers || 0,
           donation: row.donation ?? 0,
           comboImg1: row.combo_img1 || 'https://placehold.co/50x50/cccccc/ffffff?text=N/A',
           comboImg2: row.combo_img2 || 'https://placehold.co/50x50/cccccc/ffffff?text=N/A'
@@ -874,24 +867,37 @@
     async function incrementCandidateLikeInStore(candidateName) {
       if (dataBackend !== "supabase" || !supabaseClient) return;
       debugLog("like", "Persisting candidate like.", { candidateName });
-      const { error } = await supabaseClient
-        .from("candidate_likes")
-        .insert({ candidate_name: candidateName });
-      if (error) {
-        debugError("like", "Candidate like insert failed.", error);
-        throw error;
+      const [insertRes, updateRes] = await Promise.all([
+        supabaseClient
+          .from("candidate_likes")
+          .insert({ candidate_name: candidateName }),
+        supabaseClient
+          .from("candidate_profiles")
+          .update({ likes: (candidateLikes[candidateName] || 0) + 1 })
+          .eq("name", candidateName)
+      ]);
+      if (insertRes.error || updateRes.error) {
+        debugError("like", "Candidate like write failed.", [insertRes.error, updateRes.error].filter(Boolean));
+        throw new Error([insertRes.error, updateRes.error].filter(Boolean).map((item) => item.message).join(" | "));
       }
       debugLog("like", "Candidate like insert succeeded.", { candidateName });
     }
     async function persistShareCount(comboKey) {
       if (dataBackend !== "supabase" || !supabaseClient) return;
       debugLog("share", "Persisting combo share.", { comboKey });
-      const { error } = await supabaseClient
-        .from("combo_shares")
-        .insert({ combo_key: comboKey });
-      if (error) {
-        debugError("share", "Combo share insert failed.", error);
-        throw error;
+      const nextShareCount = (comboShares[comboKey] || 0) + 1;
+      const [insertRes, updateRes] = await Promise.all([
+        supabaseClient
+          .from("combo_shares")
+          .insert({ combo_key: comboKey }),
+        supabaseClient
+          .from("combo_stats")
+          .update({ share_count: nextShareCount })
+          .eq("combo_key", comboKey)
+      ]);
+      if (insertRes.error || updateRes.error) {
+        debugError("share", "Combo share write failed.", [insertRes.error, updateRes.error].filter(Boolean));
+        throw new Error([insertRes.error, updateRes.error].filter(Boolean).map((item) => item.message).join(" | "));
       }
       debugLog("share", "Combo share insert succeeded.", { comboKey });
     }
@@ -956,23 +962,54 @@
         combo_key: comboKey,
         referral_code_used: votePayload.referralCodeUsed || null
       };
-      const requests = [supabaseClient.from("votes").insert(voteInsert).select("id, combo_key, state, city, created_at").single()];
-      if (votePayload.referralCodeUsed) {
-        const code = votePayload.referralCodeUsed.toUpperCase();
-        const referralRecord = loyalists[code];
+      const referralCode = votePayload.referralCodeUsed?.toUpperCase() || null;
+      const nextTotalVotes = (votesData[comboKey] || 0) + 1;
+      const existingStateRow = mapStatesData.find((row) => (
+        normalizeStateName(row.state) === normalizeStateName(votePayload.state) && row.combo_key === comboKey
+      ));
+      const nextStateVotes = (existingStateRow?.votes || 0) + 1;
+      const requests = [
+        supabaseClient.from("votes").insert(voteInsert).select("id, combo_key, state, city, created_at").single(),
+        supabaseClient.from("combo_stats").update({ total_votes: nextTotalVotes }).eq("combo_key", comboKey)
+      ];
+      if (existingStateRow) {
+        requests.push(
+          supabaseClient
+            .from("state_combo_votes")
+            .update({ votes: nextStateVotes })
+            .eq("state", normalizeStateName(votePayload.state))
+            .eq("combo_key", comboKey)
+        );
+      } else {
+        requests.push(
+          supabaseClient
+            .from("state_combo_votes")
+            .insert({ state: normalizeStateName(votePayload.state), combo_key: comboKey, votes: 1 })
+        );
+      }
+      if (referralCode) {
+        const referralRecord = loyalists[referralCode];
         if (!referralRecord) {
+          const nextInfluencerCount = Object.values(loyalists).filter((entry) => entry.combo === comboKey).length + 1;
           requests.push(
             supabaseClient.from("loyalists").insert({
-              referral_code: code,
+              referral_code: referralCode,
               loyalist_name: "Referral User",
               city: votePayload.city,
               combo_key: comboKey,
-              supporters: 0,
-              total_influencers: 0,
+              supporters: 1,
+              total_influencers: nextInfluencerCount,
               donation: 0,
-              combo_img1: candidateImages[selectedPresident] || null,
-              combo_img2: candidateImages[selectedVP] || null
+              combo_img1: candidateImages[presidentName] || null,
+              combo_img2: candidateImages[vicePresidentName] || null
             })
+          );
+        } else {
+          requests.push(
+            supabaseClient
+              .from("loyalists")
+              .update({ supporters: (referralRecord.supporters || 0) + 1 })
+              .eq("referral_code", referralCode)
           );
         }
       }
@@ -1458,7 +1495,8 @@
           likeBtn.disabled = true;
           try {
             await incrementCandidateLikeInStore(candidateName);
-            await refreshDataFromDatabase();
+            candidateLikes[candidateName] = (candidateLikes[candidateName] || 0) + 1;
+            updateCandidateLikesUI(candidateName);
             showHeartBlast(event);
           } catch (error) {
             console.error("Like sync error:", error);
@@ -1512,6 +1550,83 @@
             span.textContent = formattedLikes;
         });
     }
+    function updateStateVoteRow(stateName, comboKey, incrementBy = 1) {
+      const normalizedState = normalizeStateName(stateName);
+      if (!normalizedState || !comboKey) return;
+      const existingRow = mapStatesData.find((row) => (
+        normalizeStateName(row.state) === normalizedState && row.combo_key === comboKey
+      ));
+      if (existingRow) {
+        existingRow.votes = (existingRow.votes || 0) + incrementBy;
+        return;
+      }
+      mapStatesData.push({ state: normalizedState, combo_key: comboKey, votes: incrementBy });
+    }
+    function appendCommentToLocalState(comment) {
+      if (!comment?.comboKey || !comment.id) return;
+      if (!comboComments[comment.comboKey]) comboComments[comment.comboKey] = [];
+      if (comment.parentID && comment.parentID !== 0) {
+        const attachReply = (items) => {
+          for (const item of items) {
+            if (item.id === comment.parentID) {
+              item.replies = item.replies || [];
+              item.replies.push(comment);
+              return true;
+            }
+            if (item.replies?.length && attachReply(item.replies)) return true;
+          }
+          return false;
+        };
+        if (!attachReply(comboComments[comment.comboKey])) {
+          comboComments[comment.comboKey].push(comment);
+        }
+        return;
+      }
+      comboComments[comment.comboKey].push(comment);
+    }
+    function upsertLoyalistFromVote(votePayload) {
+      const referralCode = votePayload.referralCodeUsed?.toUpperCase();
+      if (!referralCode) return;
+      const [presName, vpName] = votePayload.combo.split(" & ");
+      if (!loyalists[referralCode]) {
+        loyalists[referralCode] = {
+          loyalistName: "Referral User",
+          city: votePayload.city,
+          combo: votePayload.combo,
+          supporters: 0,
+          totalInfluencers: 0,
+          donation: 0,
+          comboImg1: candidateImages[presName] || 'https://placehold.co/50x50/cccccc/ffffff?text=N/A',
+          comboImg2: candidateImages[vpName] || 'https://placehold.co/50x50/cccccc/ffffff?text=N/A'
+        };
+      }
+      loyalists[referralCode].supporters = (loyalists[referralCode].supporters || 0) + 1;
+      const comboInfluencerCount = Object.values(loyalists).filter((entry) => entry.combo === votePayload.combo).length;
+      Object.values(loyalists).forEach((entry) => {
+        if (entry.combo === votePayload.combo) {
+          entry.totalInfluencers = comboInfluencerCount;
+        }
+      });
+    }
+    function applyVoteToLocalState(votePayload) {
+      const comboKey = votePayload.combo;
+      const [presidentName, vicePresidentName] = comboKey.split(" & ");
+      if (!comboDefinitions.includes(comboKey)) comboDefinitions.push(comboKey);
+      votesData[comboKey] = (votesData[comboKey] || 0) + 1;
+      comboShares[comboKey] = comboShares[comboKey] || 0;
+      candidateRoleVotes.president[presidentName] = (candidateRoleVotes.president[presidentName] || 0) + 1;
+      candidateRoleVotes.vicePresident[vicePresidentName] = (candidateRoleVotes.vicePresident[vicePresidentName] || 0) + 1;
+      updateStateVoteRow(votePayload.state, comboKey, 1);
+      upsertLoyalistFromVote(votePayload);
+      updateCandidateRoleVotesUI(presidentName, true);
+      updateCandidateRoleVotesUI(vicePresidentName, false);
+      renderChart();
+      renderComboGrid();
+      renderComboLoyalists();
+      renderMap();
+      renderPieChart();
+      if (currentCombo === comboKey) updateComboModalHeader(comboKey);
+    }
     /********************************************
      * VOTING LOGIC
      ********************************************/
@@ -1553,13 +1668,13 @@
       });
       try {
         const insertedVote = await persistVoteRecord(votePayload);
-        await refreshDataFromDatabase();
-        debugLog("submitVote", "Post-refresh verification.", {
+        applyVoteToLocalState(votePayload);
+        debugLog("submitVote", "Post-write local verification.", {
           insertedVoteId: insertedVote?.id || null,
           comboKey,
-          comboVotesAfterRefresh: votesData[comboKey] || 0,
-          stateRowsAfterRefresh: mapStatesData.filter((row) => normalizeStateName(row.state) === normalizeStateName(state)),
-          totalVotesAfterRefresh: Object.values(votesData).reduce((sum, count) => sum + count, 0)
+          comboVotesAfterWrite: votesData[comboKey] || 0,
+          stateRowsAfterWrite: mapStatesData.filter((row) => normalizeStateName(row.state) === normalizeStateName(state)),
+          totalVotesAfterWrite: Object.values(votesData).reduce((sum, count) => sum + count, 0)
         });
         openNoticeModal({
           title: "Vote Submitted",
@@ -1670,7 +1785,9 @@
                 try {
                   await shareVoteLink({ comboKey: combo });
                   await persistShareCount(combo);
-                  await refreshDataFromDatabase();
+                  comboShares[combo] = (comboShares[combo] || 0) + 1;
+                  renderComboGrid();
+                  if (currentCombo === combo) updateComboModalHeader(combo);
                 } catch (error) {
                   console.error('Error sharing combo link:', error);
                   openNoticeModal({ title: "Share Failed", message: "Unable to save this share to the database.", kicker: "Database" });
@@ -1898,10 +2015,6 @@ function renderComboLoyalists() {
         const textDiv = document.createElement('div');
         textDiv.className = 'comment-text';
         textDiv.textContent = commentData.text || "(No comment)";
-        const likeGhost = document.createElement('button');
-        likeGhost.className = 'comment-like-btn';
-        likeGhost.type = 'button';
-        likeGhost.textContent = '♡';
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'comment-actions';
         actionsDiv.textContent = 'Reply';
@@ -1945,8 +2058,8 @@ function renderComboLoyalists() {
                 comboKey: commentData.comboKey
             };
             try {
-              await persistComment(replyPayload);
-              await refreshDataFromDatabase();
+              const savedReply = await persistComment(replyPayload);
+              appendCommentToLocalState(savedReply);
             } catch (error) {
               console.error("Reply persistence error:", error);
               openNoticeModal({ title: "Reply Failed", message: "Unable to save your reply to the database.", kicker: "Database" });
@@ -1982,7 +2095,6 @@ function renderComboLoyalists() {
             contentDiv.appendChild(repliesContainer);
         }
         bodyDiv.appendChild(contentDiv);
-        bodyDiv.appendChild(likeGhost);
         wrap.appendChild(avatarImg);
         wrap.appendChild(bodyDiv);
         return wrap;
@@ -2007,8 +2119,8 @@ function renderComboLoyalists() {
             parentID: 0, name: name, text: text, comboKey: currentCombo
           };
           try {
-            await persistComment(commentPayload);
-            await refreshDataFromDatabase();
+            const savedComment = await persistComment(commentPayload);
+            appendCommentToLocalState(savedComment);
           } catch (error) {
             console.error("Comment persistence error:", error);
             openNoticeModal({ title: "Comment Failed", message: "Unable to save your comment to the database.", kicker: "Database" });
