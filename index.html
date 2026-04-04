@@ -3,1419 +3,239 @@
 <head>
   <meta charset="UTF-8" />
   <title>2027 Nigeria Election Poll (Gamified)</title>
+  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Coat_of_arms_of_Nigeria.svg/1200px-Coat_of_arms_of_Nigeria.svg.png" type="image/x-icon">
+  <meta name="description" content="Vote for your preferred 2027 Nigerian presidential and vice-presidential combo. View charts, breakdowns, and loyalty leaderboards in this gamified poll experience." />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Google Font: Montserrat -->
   <link
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
     rel="stylesheet"
   />
-  <!-- amCharts 5 core + map + charts libraries + Nigeria geodata -->
   <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/geodata/nigeriaLow.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
-  <script src="https://apis.google.com/js/api.js"></script>
-  <script src="https://accounts.google.com/gsi/client"></script>
-
-  <style>
-    /* BASIC RESET */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: "Montserrat", sans-serif;
-      background: #f0f1f2; /* subtle grey */
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-      color: #333;
-      position: relative;
-      overflow-x: hidden;
-    }
-    /* Watermark behind container */
-    body::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Coat_of_arms_of_Nigeria.svg/1200px-Coat_of_arms_of_Nigeria.svg.png")
-        no-repeat center;
-      background-size: 300px 300px;
-      opacity: 0.05;
-      z-index: 0;
-    }
-
-    /* Floating countdown timer */
-    #countdownTimer {
-      position: fixed;
-      top: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #cc0000; /* red background */
-      color: #fff;
-      font-weight: bold;
-      padding: 0.6rem 1rem;
-      border-radius: 50px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      z-index: 999999;
-      font-size: 0.95rem;
-    }
-
-    /* Main container */
-    .container {
-      width: 95%;
-      max-width: 1400px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      padding: 1rem 2rem 2rem;
-      animation: fadeIn 1.2s ease;
-    }
-    @keyframes fadeIn {
-      0% {
-        opacity: 0; 
-        transform: translateY(20px);
-      }
-      100% {
-        opacity: 1; 
-        transform: translateY(0);
-      }
-    }
-
-    /* HEADER */
-    .header {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-    .header img {
-      max-width: 100px;
-      display: block;
-      margin: 0.5rem auto;
-    }
-    .main-heading {
-      font-size: 2.2rem;
-      font-weight: 900;
-      margin-bottom: 0.2rem;
-      color: #333;
-    }
-    .sub-heading {
-      font-size: 0.95rem;
-      color: #555;
-      max-width: 600px;
-      margin: 0.5rem auto 1rem;
-      line-height: 1.4;
-      text-align: center;
-    }
-    .divider {
-      width: 120px;
-      height: 3px;
-      background: #555;
-      margin: 1rem auto;
-      border-radius: 5px;
-    }
-
-    /* FOOTER */
-    footer {
-      width: 100%;
-      max-width: 1400px;
-      margin: 1rem auto 0;
-      padding: 1rem;
-      text-align: center;
-      font-size: 0.8rem;
-      color: #fff;
-      background: #008000;
-      border-radius: 5px;
-    }
-    footer p {
-      margin: 0.5rem 0;
-    }
-    .security-badges {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 0.5rem;
-    }
-    .security-badge img {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      object-fit: cover;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-      transition: transform 0.3s;
-    }
-    .security-badge img:hover {
-      transform: scale(1.05);
-    }
-
-    /* VOTE BUTTON AS PROGRESS BAR */
-    .vote-button {
-      position: relative;
-      width: 220px;
-      height: 50px;
-      border-radius: 50px;
-      border: 0px solid #000000;
-      background: #ccc; /* Grey by default */
-      font-size: 1rem;
-      font-weight: 700;
-      color: #fff;
-      cursor: pointer;
-      overflow: hidden;
-      transition: 0.3s;
-    }
-    .vote-button:disabled {
-      cursor: not-allowed;
-    }
-    .vote-button .fill-overlay {
-      position: absolute;
-      left: 0; 
-      top: 0;
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(to right, #00c851, #008000);
-      transition: width 0.4s;
-      z-index: 1;
-    }
-    .vote-button .vote-text {
-      position: relative;
-      z-index: 2;
-    }
-    .vote-button.bounce {
-      animation: bounce 0.8s infinite;
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-5px); }
-    }
-
-    /* SELECTION SECTION */
-    .selection-section {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      margin-bottom: 1rem;
-      animation: slideUp 0.8s ease;
-    }
-    @keyframes slideUp {
-      0% {
-        transform: translateY(30px);
-        opacity: 0;
-      }
-      100% {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-    .selection-box {
-      flex: 1 1 450px;
-      background: #fafafa;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      padding: 1.2rem;
-    }
-    .selection-box h2 {
-      text-align: center;
-      margin-bottom: 1rem;
-      color: #333;
-      font-size: 1.15rem;
-      font-weight: 700;
-    }
-    .candidate-list {
-      display: grid;
-      grid-template-columns: repeat(5, 110px);
-      grid-auto-rows: 180px;
-      gap: 0.5rem;
-    }
-    @media (max-width: 600px) {
-      .candidate-list {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        grid-template-rows: auto;
-      }
-    }
-    .candidate-item {
-      width: 110px;
-      background: #fff;
-      border-radius: 8px;
-      border-left: 4px solid #00c851;
-      border-right: 4px solid #00c851;
-      margin: 0 auto;
-      padding: 0.4rem;
-      text-align: center;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .candidate-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    .candidate-item.selected {
-      background: linear-gradient(145deg, #00c851, #008000);
-      color: #fff !important;
-      font-weight: bold;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-    .candidate-item.selected .candidate-name,
-    .candidate-item.selected .candidate-details,
-    .candidate-item.selected .like-container {
-      color: #fff !important;
-    }
-    .candidate-item.selected .candidate-photo {
-      border-color: #eee !important;
-    }
-    .candidate-photo {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      margin-bottom: 0.4rem;
-      object-fit: cover;
-      border: 2px solid #ccc;
-      transition: border 0.2s;
-    }
-    .candidate-name {
-      font-size: 0.8rem;
-      margin-bottom: 0.2rem;
-      font-weight: 600;
-      color: #333;
-    }
-    .candidate-details {
-      font-size: 0.65rem;
-      color: #777;
-      line-height: 1.2;
-      margin-bottom: 0.2rem;
-    }
-    .like-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.3rem;
-      font-size: 0.7rem;
-      background: #f9f9f9;
-      border-radius: 10px;
-      padding: 0.3rem 0.5rem;
-      transition: background 0.2s;
-    }
-    .like-container:hover {
-      background: #eee;
-    }
-    .like-btn {
-      border: none;
-      background: none;
-      cursor: pointer;
-      font-weight: bold;
-      color: #cc0000;
-      font-size: 1rem;
-      transition: transform 0.2s;
-    }
-    .like-btn:hover {
-      transform: scale(1.2);
-    }
-    .like-count {
-      color: #555;
-      font-weight: 600;
-    }
-
-    /* VOTE SECTION */
-    .vote-section {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      margin-bottom: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .vote-form {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      background: #fafafa;
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .vote-form select,
-    .vote-form input {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 0.3rem 0.5rem;
-      font-size: 0.85rem;
-    }
-
-    /* Legend near Vote area */
-    .legend {
-      font-size: 0.75rem;
-      color: #666;
-      margin-top: 0.5rem;
-      text-align: center;
-    }
-
-    /* RESULTS SECTION */
-    @media (max-width: 768px) {
-      .results-section {
-        flex-direction: column;
-        align-items: center;
-      }
-    }
-    .results-section {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      width: 100%;
-      margin-top: 1rem;
-      justify-content: space-between;
-    }
-    .chart,
-    .voted-combos {
-      flex: 1 1 280px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      padding: 1rem;
-      position: relative;
-      min-width: 280px;
-    }
-    .chart h2,
-    .voted-combos h2 {
-      text-align: center;
-      color: #333;
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-    .chart-bar {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.5rem;
-      justify-content: flex-start;
-      gap: 0.5rem;
-    }
-    .bar-label {
-      width: 250px;
-      font-size: 0.65rem;
-      font-weight: bold;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .bar-container {
-      width: 60%;
-      background: #f0f0f0;
-      height: 12px;
-      border-radius: 10px;
-      overflow: hidden;
-      position: relative;
-    }
-    .bar-fill {
-      height: 12px;
-      transition: width 0.5s;
-      background: linear-gradient(to right, #00c851, #008000);
-    }
-    .vote-count-label {
-      font-size: 0.6rem;
-      color: #666;
-      margin-left: 4px;
-    }
-
-    /* COMBO GRID */
-    .combo-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-    }
-    .combo-card {
-      background: #f9f9f9;
-      border-radius: 8px;
-      padding: 0.5rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      text-align: center;
-      transition: transform 0.2s;
-      cursor: pointer;
-      position: relative;
-    }
-    .combo-card:hover {
-      transform: translateY(-2px);
-    }
-    .share-btn {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      border: none;
-      background: none;
-      cursor: pointer;
-      color: #008000;
-      font-size: 0.8rem;
-      transition: transform 0.2s;
-    }
-    .share-btn:hover {
-      transform: scale(1.1);
-    }
-    .combo-top {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.3rem;
-      margin-bottom: 0.25rem;
-    }
-    .combo-img {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1px solid #ccc;
-    }
-    .combo-title {
-      font-weight: bold;
-      font-size: 0.9rem;
-      color: #333;
-    }
-    .combo-stats {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1.6rem;
-      margin-top: 0.3rem;
-      font-size: 0.8rem;
-      color: #555;
-    }
-    .vote-heart {
-      color: #cc0000;
-      font-weight: bold;
-    }
-    .comment-icon {
-      color: #008000;
-      font-weight: bold;
-    }
-
-    /* MAP CONTAINER INSIDE "Voted Combinations" box */
-    .map-heading {
-      text-align: center;
-      margin-top: 1rem;
-      font-size: 1.1rem;
-      font-weight: 700;
-    }
-    #nigeriaMap {
-      width: 100%;
-      height: 500px;
-      margin-top: 0.5rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-
-    /* TOP 5 COMBOS LOYALISTS */
-    .loyalist-heading {
-      text-align: center;
-      margin-top: 1rem;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #333;
-    }
-    .loyalist-combo-wrap {
-      background: #fafafa;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      padding: 0.5rem;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    }
-    .loyalist-row {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      justify-content: flex-start;
-    }
-    .loyalist-images {
-      display: flex;
-      flex-shrink: 0;
-      gap: 0.5rem;
-    }
-    .loyalist-square-img {
-      width: 60px;
-      height: 60px;
-      border-radius: 10px;
-      object-fit: cover;
-      border: 1px solid #ccc;
-    }
-    .loyalist-details {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-      text-align: left;
-    }
-    .loyalist-details ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-    .loyalist-details li {
-      font-size: 0.85rem;
-      color: #444;
-      margin-bottom: 0.2rem;
-    }
-    .loyalist-details li strong {
-      color: #008000;
-      font-weight: bold;
-    }
-
-    /* Extra chart container after loyalists */
-    .extra-chart-container {
-      margin-top: 1rem;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      padding: 1rem;
-    }
-    .extra-chart-container h3 {
-      text-align: center;
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      color: #333;
-    }
-    #popularityPie {
-      width: 100%;
-      height: 400px;
-    }
-
-    /* COMMENT SECTION */
-    .combo-comment-section {
-      margin-top: 1rem;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      padding: 1rem;
-      display: none;
-    }
-    .combo-comment-section.active {
-      display: block;
-    }
-    .combo-comment-title {
-      text-align: center;
-      font-weight: 700;
-      font-size: 1rem;
-      color: #333;
-      margin-bottom: 0.5rem;
-    }
-    .combo-comment-form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      margin-bottom: 0.8rem;
-    }
-    .combo-comment-form input,
-    .combo-comment-form textarea {
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 0.5rem;
-      font-size: 0.9rem;
-      outline: none;
-    }
-    .combo-comment-btn {
-      align-self: flex-end;
-      background: linear-gradient(to right, #008000, #00c851);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: 0.4rem 1rem;
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .combo-comment-btn:hover {
-      transform: scale(1.02);
-    }
-    .combo-comment-list {
-      margin-top: 0.5rem;
-    }
-    .combo-comment-item {
-      background: #f9f9f9;
-      border-radius: 6px;
-      padding: 0.5rem;
-      margin-bottom: 0.5rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      position: relative;
-    }
-    .comment-author {
-      font-weight: 700;
-      color: #006400;
-      margin-bottom: 0.2rem;
-      font-size: 0.9rem;
-    }
-    .comment-text {
-      font-size: 0.85rem;
-      line-height: 1.3;
-      color: #333;
-      margin-bottom: 0.2rem;
-    }
-    .comment-actions {
-      font-size: 0.75rem;
-      color: #008000;
-      cursor: pointer;
-      text-align: right;
-    }
-    .reply-form {
-      background: #eee;
-      margin-top: 0.4rem;
-      border-radius: 6px;
-      padding: 0.4rem;
-      display: none;
-      flex-direction: column;
-      gap: 0.3rem;
-    }
-    .reply-input,
-    .reply-textarea {
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 0.4rem;
-      font-size: 0.85rem;
-      outline: none;
-    }
-    .reply-btn {
-      align-self: flex-end;
-      background: linear-gradient(to right, #008000, #00c851);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: 0.3rem 0.8rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .reply-btn:hover {
-      transform: scale(1.02);
-    }
-    .comment-replies {
-      margin-left: 1rem;
-      margin-top: 0.4rem;
-      border-left: 2px solid #ccc;
-      padding-left: 0.4rem;
-    }
-
-    /* LIGHTBOX (Contact Us form) */
-    #contactUsBtn {
-      display: inline-block;
-      background: linear-gradient(to right, #008000, #00c851);
-      color: #fff;
-      font-weight: 700;
-      border: none;
-      border-radius: 50px;
-      padding: 0.6rem 1.2rem;
-      cursor: pointer;
-      margin-top: 1.5rem;
-      transition: transform 0.2s;
-    }
-    #contactUsBtn:hover {
-      transform: scale(1.02);
-    }
-
-    .lightbox-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-    .lightbox-content {
-      background: #fff;
-      width: 90%;
-      max-width: 500px;
-      border-radius: 8px;
-      padding: 1.2rem;
-      position: relative;
-    }
-    .lightbox-close {
-      position: absolute;
-      top: 0.5rem;
-      right: 1rem;
-      font-size: 1.2rem;
-      cursor: pointer;
-      color: #333;
-      font-weight: bold;
-    }
-    .lightbox-close:hover {
-      color: #555;
-    }
-    .lightbox-form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-    .lightbox-form input,
-    .lightbox-form textarea {
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 0.4rem;
-      font-size: 0.9rem;
-      outline: none;
-    }
-    .lightbox-form button {
-      background: linear-gradient(to right, #008000, #00c851);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: 0.6rem 1.2rem;
-      font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 0.5rem;
-    }
-    .lightbox-form button:hover {
-      transform: scale(1.02);
-    }
-    .submit-message {
-      text-align: center;
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
-      color: #008000;
-      display: none;
-    }
-
-    /* Hide data tables by default */
-    #candidateDataTable,
-    #comboDataTable,
-    #userDataTable,
-    #loyalistDataTable {
-      display: none;
-    }
-
-    /* Wikipedia Lightbox overlay */
-    .wiki-lightbox-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.7);
-      display: none;   /* hidden by default */
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;   /* on top of everything */
-    }
-    .wiki-lightbox-content {
-      position: relative;
-      width: 400px;
-      height: 600px;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 3px 15px rgba(0,0,0,0.5);
-    }
-    .wiki-lightbox-close {
-      position: absolute;
-      top: 0.5rem;
-      right: 1rem;
-      font-size: 1.2rem;
-      font-weight: bold;
-      cursor: pointer;
-      color: #333;
-    }
-    .wiki-lightbox-close:hover {
-      color: #999;
-    }
-    #wikiIframe {
-      width: 100%;
-      height: 100%;
-      border: none; 
-      border-radius: 0 0 10px 10px;
-    }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
+  <div id="countdownTimer">Poll Ends in ...</div>
+  <div class="social-proof-toast" id="socialProofToast" aria-live="polite">
+    <div class="social-proof-kicker">Live activity</div>
+    <div class="social-proof-message" id="socialProofMessage"></div>
+  </div>
 
-  <!-- Floating Red Countdown Timer -->
-  <div id="countdownTimer">Poll Ends in 3 Days, 2 Hours, 3 Minutes, 45 Seconds</div>
+  <button id="mobileMenuBtn" aria-label="Open Menu">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
 
-  <!-- (A) HIDDEN DATA TABLES WITH COMPLETE DATA -->
-  <!-- 1) CANDIDATE DATA -->
-  <table id="candidateDataTable">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>ImageURL</th>
-        <th>Religion</th>
-        <th>Age</th>
-        <th>Zone</th>
-        <th>Likes</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- 15+ Candidates -->
-      <tr>
-        <td>Bola Tinubu</td>
-        <td>https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg</td>
-        <td>M</td>
-        <td>70</td>
-        <td>SW</td>
-        <td>400000</td>
-      </tr>
-      <tr>
-        <td>Kashim Shettima</td>
-        <td>https://statehouse.gov.ng/wp-content/uploads/2023/05/FxSvH8TWAAYzC0H-835x1024.jpg</td>
-        <td>M</td>
-        <td>65</td>
-        <td>NE</td>
-        <td>350000</td>
-      </tr>
-      <tr>
-        <td>Nasir El-Rufai</td>
-        <td>https://d1jcea4y7xhp7l.cloudfront.net/2018/10/Kaduna_state_Governor.jpg</td>
-        <td>M</td>
-        <td>63</td>
-        <td>NW</td>
-        <td>290000</td>
-      </tr>
-      <tr>
-        <td>Peter Obi</td>
-        <td>https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png</td>
-        <td>C</td>
-        <td>60</td>
-        <td>SE</td>
-        <td>600000</td>
-      </tr>
-      <tr>
-        <td>Rabiu Kwankwaso</td>
-        <td>https://thetop10magazine.com.ng/wp-content/uploads/2022/09/Rabiu-Musa-Kwankwaso-NNPP.jpg</td>
-        <td>M</td>
-        <td>66</td>
-        <td>NW</td>
-        <td>310000</td>
-      </tr>
-      <tr>
-        <td>Atiku Abubakar</td>
-        <td>https://miro.medium.com/v2/resize:fit:2400/0*AZFse8ApInmJg7xf.jpg</td>
-        <td>M</td>
-        <td>76</td>
-        <td>NE</td>
-        <td>450000</td>
-      </tr>
-      <tr>
-        <td>Yakubu Dogara</td>
-        <td>https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjuBvZJoVkod1KbQdOKCSxKVqt9dk7zP6M26tKuy320OLGSuke9AuduxgF8j1G6f7OthrtlQr3MYW12RX8869PyIQQm8c_9EolExIJTu4y2q5JduhahRcnBA_6fCF0F5wDTlARpFAZuVz-L2_RBD-mVTnBcj01I-faMqKBx33v-H4cez3fPk0IdBrvF3uo/s600/Dogara.jpg</td>
-        <td>C</td>
-        <td>55</td>
-        <td>NE</td>
-        <td>92000</td>
-      </tr>
-      <tr>
-        <td>Yemi Osinbajo</td>
-        <td>https://thenationonlineng.net/wp-content/uploads/2015/08/Osinbajo.jpg</td>
-        <td>C</td>
-        <td>64</td>
-        <td>SW</td>
-        <td>250000</td>
-      </tr>
-      <tr>
-        <td>Nyesom Wike</td>
-        <td>https://dailypost.ng/wp-content/uploads/2024/01/wike.jpg</td>
-        <td>C</td>
-        <td>54</td>
-        <td>SS</td>
-        <td>140000</td>
-      </tr>
-      <tr>
-        <td>Godswill Akpabio</td>
-        <td>https://www.citypost.ng/wp-content/uploads/2024/08/IMG-20240827-WA0043.jpg</td>
-        <td>C</td>
-        <td>60</td>
-        <td>SS</td>
-        <td>115000</td>
-      </tr>
-      <tr>
-        <td>Bukola Saraki</td>
-        <td>https://leadership.ng/wp-content/uploads/2023/12/Bukola-Saraki-jpg.webp</td>
-        <td>M</td>
-        <td>60</td>
-        <td>NC</td>
-        <td>290000</td>
-      </tr>
-      <tr>
-        <td>Rotimi Amaechi</td>
-        <td>https://cdn.vanguardngr.com/wp-content/uploads/2022/04/Rt-Hon.-Chibuike-Rotimi-Amaechi-Image-2022-04-28-at-7.05.36-PM.jpeg</td>
-        <td>C</td>
-        <td>57</td>
-        <td>SS</td>
-        <td>110000</td>
-      </tr>
-      <tr>
-        <td>Aminu Tambuwal</td>
-        <td>https://csn-prod-profile-images.s3.amazonaws.com/kHNmjl177dtFve7iYeHvx</td>
-        <td>M</td>
-        <td>56</td>
-        <td>NW</td>
-        <td>73000</td>
-      </tr>
-      <tr>
-        <td>Goodluck Jonathan</td>
-        <td>https://upload.wikimedia.org/wikipedia/commons/4/42/Goodluck_Jonathan_World_Economic_Forum_2013.jpg</td>
-        <td>C</td>
-        <td>65</td>
-        <td>SS</td>
-        <td>380000</td>
-      </tr>
-      <tr>
-        <td>Ayuba Wakawa</td>
-        <td>https://media.premiumtimesng.com/wp-content/files/2014/04/Ayuba-Wakawa.jpg</td>
-        <td>C</td>
-        <td>47</td>
-        <td>NE</td>
-        <td>87000</td>
-      </tr>
-    </tbody>
-  </table>
+  <div id="mobileNavPanel">
+    <button class="menu-close-btn" aria-label="Close Menu">&times;</button>
+    <nav>
+      <ul>
+        <li><a href="#selectionSection">Select Candidates</a></li>
+        <li><a href="#voteSection">Vote</a></li>
+        <li><a href="#resultsSection">Results</a></li>
+        <li><a href="#popularitySection">Popularity</a></li>
+        <li><a href="#commentsSection">Comments</a></li>
+      </ul>
+    </nav>
+  </div>
 
-  <!-- 2) COMBO (VOTES) TABLE -->
-  <table id="comboDataTable">
-    <thead>
-      <tr>
-        <th>President</th>
-        <th>VicePresident</th>
-        <th>Votes</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Bola Tinubu</td>
-        <td>Kashim Shettima</td>
-        <td>500000</td>
-      </tr>
-      <tr>
-        <td>Peter Obi</td>
-        <td>Yemi Osinbajo</td>
-        <td>620000</td>
-      </tr>
-      <tr>
-        <td>Atiku Abubakar</td>
-        <td>Nyesom Wike</td>
-        <td>410000</td>
-      </tr>
-      <tr>
-        <td>Rabiu Kwankwaso</td>
-        <td>Rotimi Amaechi</td>
-        <td>215000</td>
-      </tr>
-      <tr>
-        <td>Goodluck Jonathan</td>
-        <td>Nasir El-Rufai</td>
-        <td>305000</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- 3) USER COMMENTS & VOTER DATA TABLE -->
-  <table id="userDataTable">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Combo</th>
-        <th>ParentID</th>
-        <th>Name</th>
-        <th>Comment</th>
-        <th>Phone</th>
-        <th>State</th>
-        <th>City</th>
-        <th>Gender</th>
-        <th>Age</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Lagos, Abia, Adamawa, Delta, Kaduna already exist. Let's add Ebonyi, Enugu, Rivers. -->
-      <tr>
-        <td>1</td>
-        <td>Peter Obi & Yemi Osinbajo</td>
-        <td>0</td>
-        <td>John</td>
-        <td>I love Obi and Osinbajo!</td>
-        <td>08011112222</td>
-        <td>Lagos</td>
-        <td>Ikeja</td>
-        <td>Male</td>
-        <td>30</td>
-      </tr>
-      <tr>
-        <td>2</td>
-        <td>Peter Obi & Yemi Osinbajo</td>
-        <td>1</td>
-        <td>Mary</td>
-        <td>@John I agree with you!</td>
-        <td>08033334444</td>
-        <td>Abia</td>
-        <td>Umuahia</td>
-        <td>Female</td>
-        <td>28</td>
-      </tr>
-      <tr>
-        <td>3</td>
-        <td>Goodluck Jonathan & Nasir El-Rufai</td>
-        <td>0</td>
-        <td>Ibrahim</td>
-        <td>Strange combo but let's see!</td>
-        <td>08055556666</td>
-        <td>Kaduna</td>
-        <td>Kaduna</td>
-        <td>Male</td>
-        <td>35</td>
-      </tr>
-      <tr>
-        <td>4</td>
-        <td>Bola Tinubu & Kashim Shettima</td>
-        <td>0</td>
-        <td></td>
-        <td></td>
-        <td>08077778888</td>
-        <td>Delta</td>
-        <td>Warri</td>
-        <td>Male</td>
-        <td>45</td>
-      </tr>
-      <tr>
-        <td>5</td>
-        <td>Bola Tinubu & Kashim Shettima</td>
-        <td>4</td>
-        <td>Ngozi</td>
-        <td>You just voted but didn’t say anything!</td>
-        <td>08088889999</td>
-        <td>Lagos</td>
-        <td>Ikeja</td>
-        <td>Female</td>
-        <td>31</td>
-      </tr>
-      <tr>
-        <td>6</td>
-        <td>Rabiu Kwankwaso & Rotimi Amaechi</td>
-        <td>0</td>
-        <td>Chinedu</td>
-        <td>This combo could unify the country!</td>
-        <td>08099990000</td>
-        <td>Adamawa</td>
-        <td>Yola</td>
-        <td>Male</td>
-        <td>29</td>
-      </tr>
-      <tr>
-        <td>7</td>
-        <td>Peter Obi & Yemi Osinbajo</td>
-        <td>0</td>
-        <td></td>
-        <td></td>
-        <td>08043214321</td>
-        <td>Lagos</td>
-        <td>Ikeja</td>
-        <td>Male</td>
-        <td>39</td>
-      </tr>
-      <tr>
-        <td>8</td>
-        <td>Peter Obi & Yemi Osinbajo</td>
-        <td>2</td>
-        <td>Tade</td>
-        <td>Mary, can you share reasons for your choice?</td>
-        <td>08022223333</td>
-        <td>Abia</td>
-        <td>Umuahia</td>
-        <td>Male</td>
-        <td>24</td>
-      </tr>
-      <!-- NEW: Ebonyi, Enugu, Rivers -->
-      <tr>
-        <td>9</td>
-        <td>Atiku Abubakar & Nyesom Wike</td>
-        <td>0</td>
-        <td>Rose</td>
-        <td>I want to see a big merge!</td>
-        <td>08055557777</td>
-        <td>Ebonyi</td>
-        <td>Abakaliki</td>
-        <td>Female</td>
-        <td>27</td>
-      </tr>
-      <tr>
-        <td>10</td>
-        <td>Goodluck Jonathan & Nasir El-Rufai</td>
-        <td>0</td>
-        <td>Emeka</td>
-        <td>Interesting pairing</td>
-        <td>08066668888</td>
-        <td>Enugu</td>
-        <td>Enugu</td>
-        <td>Male</td>
-        <td>33</td>
-      </tr>
-      <tr>
-        <td>11</td>
-        <td>Peter Obi & Yemi Osinbajo</td>
-        <td>0</td>
-        <td>Boma</td>
-        <td>We need fresh ideas</td>
-        <td>08077770000</td>
-        <td>Rivers</td>
-        <td>Port Harcourt</td>
-        <td>Female</td>
-        <td>30</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- 4) LOYALIST DATA TABLE -->
-  <table id="loyalistDataTable">
-    <thead>
-      <tr>
-        <th>ReferralCode</th>
-        <th>LoyalistName</th>
-        <th>City</th>
-        <th>Combo</th>
-        <th>Supporters</th>
-        <th>Donation</th>
-        <th>ComboImg1</th>
-        <th>ComboImg2</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>REF98123</td>
-        <td>Segun</td>
-        <td>Ikeja</td>
-        <td>Peter Obi & Yemi Osinbajo</td>
-        <td>9300</td>
-        <td>1500.00</td>
-        <td>https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png</td>
-        <td>https://thenationonlineng.net/wp-content/uploads/2015/08/Osinbajo.jpg</td>
-      </tr>
-      <tr>
-        <td>REF82776</td>
-        <td>Musa</td>
-        <td>Kaduna</td>
-        <td>Bola Tinubu & Kashim Shettima</td>
-        <td>22000</td>
-        <td>2500.50</td>
-        <td>https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg</td>
-        <td>https://statehouse.gov.ng/wp-content/uploads/2023/05/FxSvH8TWAAYzC0H-835x1024.jpg</td>
-      </tr>
-      <tr>
-        <td>REF55440</td>
-        <td>Nkem</td>
-        <td>Onitsha</td>
-        <td>Peter Obi & Yemi Osinbajo</td>
-        <td>10800</td>
-        <td>400.00</td>
-        <td>https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png</td>
-        <td>https://thenationonlineng.net/wp-content/uploads/2015/08/Osinbajo.jpg</td>
-      </tr>
-      <tr>
-        <td>REF34921</td>
-        <td>Salihu</td>
-        <td>Kano</td>
-        <td>Rabiu Kwankwaso & Rotimi Amaechi</td>
-        <td>15000</td>
-        <td>2000.00</td>
-        <td>https://thetop10magazine.com.ng/wp-content/uploads/2022/09/Rabiu-Musa-Kwankwaso-NNPP.jpg</td>
-        <td>https://cdn.vanguardngr.com/wp-content/uploads/2022/04/Rt-Hon.-Chibuike-Rotimi-Amaechi-Image-2022-04-28-at-7.05.36-PM.jpeg</td>
-      </tr>
-      <tr>
-        <td>REF76218</td>
-        <td>Princess</td>
-        <td>Port Harcourt</td>
-        <td>Goodluck Jonathan & Nasir El-Rufai</td>
-        <td>8100</td>
-        <td>500.00</td>
-        <td>https://upload.wikimedia.org/wikipedia/commons/4/42/Goodluck_Jonathan_World_Economic_Forum_2013.jpg</td>
-        <td>https://d1jcea4y7xhp7l.cloudfront.net/2018/10/Kaduna_state_Governor.jpg</td>
-      </tr>
-      <tr>
-        <td>REF66542</td>
-        <td>Daniel</td>
-        <td>Warri</td>
-        <td>Bola Tinubu & Kashim Shettima</td>
-        <td>11500</td>
-        <td>920.00</td>
-        <td>https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg</td>
-        <td>https://statehouse.gov.ng/wp-content/uploads/2023/05/FxSvH8TWAAYzC0H-835x1024.jpg</td>
-      </tr>
-      <tr>
-        <td>REF20277</td>
-        <td>Khadija</td>
-        <td>Abuja</td>
-        <td>Atiku Abubakar & Nyesom Wike</td>
-        <td>9800</td>
-        <td>300.00</td>
-        <td>https://miro.medium.com/v2/resize:fit:2400/0*AZFse8ApInmJg7xf.jpg</td>
-        <td>https://dailypost.ng/wp-content/uploads/2024/01/wike.jpg</td>
-      </tr>
-      <tr>
-        <td>REF91444</td>
-        <td>Felicia</td>
-        <td>Lagos</td>
-        <td>Peter Obi & Yemi Osinbajo</td>
-        <td>15000</td>
-        <td>1800.00</td>
-        <td>https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png</td>
-        <td>https://thenationonlineng.net/wp-content/uploads/2015/08/Osinbajo.jpg</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- 2) HEADER / Branding -->
   <div class="header">
-    <img 
-      src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Coat_of_arms_of_Nigeria.svg/1200px-Coat_of_arms_of_Nigeria.svg.png" 
-      alt="Nigeria Coat of Arms"
-    />
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Coat_of_arms_of_Nigeria.svg/1200px-Coat_of_arms_of_Nigeria.svg.png" alt="Nigeria Coat of Arms"/>
     <h1 class="main-heading">2027 Nigeria Election Permutation Poll</h1>
     <p class="sub-heading">
-      Select your preferred President and Vice President, then cast your vote.  
-      If you enter an existing <strong>Referral Code</strong>, that loyalist gets a supporter.  
-      You then receive <strong>your own</strong> new code to share, so <em>you</em> can show up as a loyalist leader!
+      Select your preferred President and Vice President, then cast your vote. Use a referral code if someone shared one with you!
     </p>
     <div class="divider"></div>
   </div>
 
   <div class="container">
-    <!-- SELECTION SECTION -->
-    <div class="selection-section">
-      <!-- President -->
+    <div class="selection-section" id="selectionSection">
       <div class="selection-box" id="presidentBox">
         <h2>President</h2>
+        <p class="section-subtitle">Select who should be the president</p>
         <ul class="candidate-list" id="presidentList"></ul>
       </div>
-      <!-- Vice President -->
       <div class="selection-box" id="vicePresidentBox">
         <h2>Vice President</h2>
+        <p class="section-subtitle">Select who should be the VP</p>
         <ul class="candidate-list" id="vicePresidentList"></ul>
       </div>
     </div>
 
-    <!-- Vote + Form -->
-    <div class="vote-section">
+    <div class="vote-section" id="voteSection">
+      <p class="section-subtitle vote-subtitle">Input required fields to be able to vote</p>
       <div class="vote-form">
-        <input type="text" placeholder="Name (required)" id="voterName" style="width:120px;" />
-        <input type="tel" placeholder="Phone (required)" id="voterPhone" />
+        <input type="text" placeholder="Name *" id="voterName" />
+        <input type="tel" placeholder="Phone *" id="voterPhone" />
         <select id="voterState">
-          <option disabled selected>State (required)</option>
-          <option>Lagos</option>
-          <option>Abia</option>
-          <option>Adamawa</option>
-          <option>Delta</option>
-          <option>Kaduna</option>
-          <option>Ebonyi</option>
-          <option>Enugu</option>
-          <option>Rivers</option>
+          <option disabled selected value="">State *</option>
         </select>
         <select id="voterCity">
-          <option disabled selected>City (required)</option>
-          <option>Ikeja</option>
-          <option>Umuahia</option>
-          <option>Yola</option>
-          <option>Warri</option>
-          <option>Kaduna</option>
-          <option>Abakaliki</option>
-          <option>Enugu</option>
-          <option>Port Harcourt</option>
+          <option disabled selected value="">City *</option>
         </select>
         <select id="voterGender">
-          <option disabled selected>Gender (required)</option>
-          <option>Male</option>
-          <option>Female</option>
-          <option>Other</option>
+          <option disabled selected value="">Gender *</option>
+          <option>Male</option><option>Female</option><option>Other</option>
         </select>
-        <input type="number" placeholder="Age (required)" id="voterAge" style="width:60px;" />
-
-        <!-- Referral code area -->
-        <div style="display:flex; align-items:center; gap:0.3rem;">
-          <label for="voterReferral" style="font-size:0.8rem;">Referral:</label>
-          <input type="text" id="voterReferral" placeholder="(if any)" style="width:100px;" />
-          <span id="autoGenCode" style="font-weight:bold; color:blue;"></span>
+        <input type="number" placeholder="Age *" id="voterAge" />
+        <div class="referral-inline">
+          <input type="text" id="voterReferral" placeholder="Referral Code" />
         </div>
       </div>
-
-      <!-- The "Progress Bar" button -->
-      <button class="vote-button" id="voteBtn" disabled>
-        <div class="fill-overlay" id="buttonFill"></div>
-        <span class="vote-text">Vote</span>
-      </button>
+      <div class="vote-action" id="voteAction">
+        <button class="vote-button" id="voteBtn" disabled>
+          <div class="fill-overlay" id="buttonFill"></div>
+          <span class="vote-text">Vote</span>
+        </button>
+        <div class="vote-tooltip" id="voteTooltip" aria-live="polite"></div>
+      </div>
     </div>
 
-    <!-- Legend -->
     <div class="legend">
       Legend: NC, NE, NW, SW, SE, SS (North Central, North East, North West, South West, South East, South-South).
     </div>
 
-    <!-- RESULTS SECTION -->
-    <div class="results-section">
+    <div class="results-section" id="resultsSection">
       <div class="chart" id="chart">
         <h2>Voting Results</h2>
+        <p class="section-subtitle">This shows a chart of the leading combos</p>
         <div id="chartBars"></div>
-
-        <!-- Add a new heading for the Loyalist combos -->
-        <h3 class="loyalist-heading">Combo Peddler</h3>
+        <div class="referral-info">
+          Want to become a <strong>Top Combo Influencer</strong> for your chosen combo? Request your unique referral code! Share it with friends - every vote using your code boosts your ranking on the leaderboard.
+          <br><button id="getReferralCodeBtn">Become a Top Combo Influencer-Get Code</button>
+        </div>
+        <h3 class="loyalist-heading">Top Combo Influencers</h3>
+        <p class="loyalist-meta" id="loyalistMeta"></p>
         <div id="loyalistCombosContainer"></div>
       </div>
-
       <div class="voted-combos" id="votedCombosBox">
         <h2>Voted Combinations</h2>
-        <!-- Grid of combos -->
+        <p class="section-subtitle">Click a combo card to view/add comments</p>
         <div class="combo-grid" id="comboGrid"></div>
-
-        <!-- The MAP heading + MAP of Nigeria (top combos by state) -->
-        <h3 class="map-heading">Most voted combo per state</h3>
+        <h3 class="map-heading">Most Voted Combo Per State</h3>
+        <p class="section-subtitle">Hover over a state to see its top combo</p>
         <div id="nigeriaMap"></div>
       </div>
     </div>
 
-    <!-- An extra chart container after the loyalists, showing another style (Pie) -->
-    <div class="extra-chart-container">
+    <div class="extra-chart-container" id="popularitySection">
       <h3>Popularity Breakdown</h3>
+      <p class="section-subtitle">Pie chart of the most voted combos</p>
       <div id="popularityPie"></div>
     </div>
 
-    <!-- Comments -->
-    <div class="combo-comment-section" id="comboCommentSection">
-      <div class="combo-comment-title" id="comboCommentTitle"></div>
-      <div class="combo-comment-form">
-        <input type="text" placeholder="Your Name" id="comboCommentName" />
-        <textarea rows="2" placeholder="Write your comment..." id="comboCommentText"></textarea>
-        <button class="combo-comment-btn" id="comboCommentPostBtn">Post Comment</button>
-      </div>
-      <div class="combo-comment-list" id="comboCommentList"></div>
-    </div>
-
-    <!-- Contact Us Button -->
-    <div style="text-align:center; margin-top:1rem;">
+    <div style="text-align:center; margin-top:1.5rem;">
       <button id="contactUsBtn">Have a question or want to add yourself?</button>
     </div>
   </div>
 
-  <!-- Lightbox (Contact Form) -->
+  <div class="combo-comment-section" id="commentsSection">
+    <div class="combo-comment-modal">
+      <button class="combo-comment-close" id="comboCommentClose" aria-label="Close comments">&times;</button>
+      <div class="combo-comment-media">
+        <div class="combo-comment-images">
+          <img class="combo-modal-image primary" id="comboModalImage1" src="" alt="First candidate" />
+          <img class="combo-modal-image secondary" id="comboModalImage2" src="" alt="Second candidate" />
+        </div>
+        <div class="combo-modal-meta">
+          <div class="combo-modal-kicker">Voted Combination</div>
+          <h3 class="combo-modal-name" id="comboModalComboName">Comments</h3>
+          <div class="combo-modal-stats">
+            <span id="comboModalVotes">♥ 0</span>
+            <span id="comboModalComments">💬 0</span>
+          </div>
+        </div>
+      </div>
+      <div class="combo-comment-panel">
+        <div class="combo-comment-topbar">
+          <div class="combo-comment-brand">
+            <div class="combo-comment-brand-icon">◎</div>
+            <div>
+              <div class="combo-comment-brand-name" id="comboCommentTitle">Comments</div>
+            </div>
+          </div>
+        </div>
+        <div class="combo-comment-form">
+          <input type="text" placeholder="Your Name" id="comboCommentName" />
+          <textarea rows="3" placeholder="Write your comment..." id="comboCommentText"></textarea>
+          <button class="combo-comment-btn" id="comboCommentPostBtn">Post Comment</button>
+        </div>
+        <div class="combo-comment-list" id="comboCommentList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loyalist-modal-overlay" id="loyalistModal">
+    <div class="loyalist-modal">
+      <button class="loyalist-modal-close" id="loyalistModalClose" aria-label="Close influencer list">&times;</button>
+      <div class="loyalist-modal-preview">
+        <div class="loyalist-modal-images">
+          <img id="loyalistModalImage1" class="loyalist-modal-image primary" src="" alt="First candidate" />
+          <img id="loyalistModalImage2" class="loyalist-modal-image secondary" src="" alt="Second candidate" />
+        </div>
+        <div class="loyalist-modal-preview-copy">
+          <div class="loyalist-modal-kicker">Top Combo Influencers</div>
+          <h3 id="loyalistModalTitle">Top Combo Influencers</h3>
+          <p id="loyalistModalMeta"></p>
+        </div>
+      </div>
+      <div class="loyalist-modal-panel">
+        <div class="loyalist-modal-header">
+          <h4>Influencer Ranking</h4>
+        </div>
+        <div class="loyalist-modal-list" id="loyalistModalList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice-modal-overlay" id="noticeModal">
+    <div class="notice-modal">
+      <button class="notice-modal-close" id="noticeModalClose" aria-label="Close notice">&times;</button>
+      <div class="notice-modal-kicker" id="noticeModalKicker">Notice</div>
+      <h3 class="notice-modal-title" id="noticeModalTitle">Update</h3>
+      <p class="notice-modal-message" id="noticeModalMessage"></p>
+      <button class="notice-modal-btn" id="noticeModalBtn" type="button">OK</button>
+    </div>
+  </div>
+
+  <div class="notice-modal-overlay" id="referralPromptModal">
+    <div class="notice-modal referral-prompt-modal">
+      <button class="notice-modal-close" id="referralPromptClose" aria-label="Close referral prompt">&times;</button>
+      <div class="notice-modal-kicker">Before You Vote</div>
+      <h3 class="notice-modal-title">Do you have a referral code?</h3>
+      <p class="notice-modal-message">If someone shared a referral code with you, enter it below before submitting your vote.</p>
+      <input type="text" id="referralPromptInput" class="referral-prompt-input" placeholder="Enter referral code" />
+      <div class="referral-prompt-actions">
+        <button class="notice-modal-btn" id="referralPromptContinue" type="button">Continue With Code</button>
+        <button class="notice-modal-btn secondary" id="referralPromptSkip" type="button">I don't have referral code, proceed</button>
+      </div>
+    </div>
+  </div>
+
   <div class="lightbox-overlay" id="lightboxOverlay">
     <div class="lightbox-content">
       <span class="lightbox-close" id="lightboxClose">X</span>
-      <h2 style="text-align:center;">Have any question or want to add yourself as a candidate?</h2>
+      <h2 style="text-align:center; font-size: 1.2rem;">Contact / Add Candidate</h2>
       <p style="font-size:0.85rem; color:#666; margin-top:0.3rem; text-align:center;">
-        Kindly fill out the form below. We’ll contact you shortly.
+        Kindly fill out the form below.
       </p>
       <form class="lightbox-form" id="lightboxForm">
         <label for="contactFullName">Full Name (required)</label>
         <input type="text" id="contactFullName" placeholder="Your Full Name" required />
-
         <label for="contactPhone">Phone Number</label>
         <input type="tel" id="contactPhone" placeholder="08012345678" required />
-
         <label for="contactEmail">Email Address</label>
         <input type="email" id="contactEmail" placeholder="example@email.com" required />
-
         <label for="contactMessage">Your Question / Candidate Info</label>
-        <textarea id="contactMessage" rows="3" placeholder="Please type your request..."></textarea>
-
+        <textarea id="contactMessage" rows="4" placeholder="Please type your request..."></textarea>
         <button type="submit">Submit</button>
       </form>
       <div class="submit-message" id="lightboxSubmitMsg">
@@ -1424,1135 +244,55 @@
     </div>
   </div>
 
-  <!-- WIKIPEDIA LIGHTBOX (HIDDEN OVERLAY) -->
-  <div class="wiki-lightbox-overlay" id="wikiLightbox">
-    <div class="wiki-lightbox-content">
-      <!-- Close icon -->
-      <span class="wiki-lightbox-close" id="wikiLightboxClose">X</span>
-      <!-- The Wikipedia iframe -->
-      <iframe id="wikiIframe" src="about:blank"></iframe>
+  <div class="lightbox-overlay" id="referralLightbox">
+    <div class="lightbox-content">
+      <span class="lightbox-close" id="referralLightboxClose">X</span>
+      <h2 style="text-align:center; font-size: 1.2rem;">Request Referral Code</h2>
+      <p style="font-size:0.85rem; color:#666; margin-top:0.3rem; text-align:center;">
+        Fill out the form to request your unique code. Share it to climb the leaderboard and position yourself as a top influencer with strong chances of future ministerial or political appointments.
+        <br><strong>The fee to get a code and be part of this leadership poll is non-refundable N1,000,000.</strong>
+      </p>
+      <form class="lightbox-form" id="referralRequestForm">
+        <label for="referralName">Your Name (required)</label>
+        <input type="text" id="referralName" placeholder="Your Full Name" required />
+        <label for="referralContact">Phone or Email (required)</label>
+        <input type="text" id="referralContact" placeholder="Phone or Email for code delivery" required />
+        <button type="submit">Request Code</button>
+      </form>
+      <div class="submit-message" id="referralSubmitMsg">
+        Thanks! Your request has been submitted. We'll process it shortly.
+      </div>
     </div>
   </div>
 
-  <footer>
-    <p>All rights reserved © 2027 Nigeria Official Polling Commission</p>
-    <p>Site secured by:</p>
-    <div class="security-badges">
-      <div class="security-badge">
-        <img 
-          src="https://www.usatoday.com/gcdn/-mm-/3e1efaec2a9d17b3b2b39a2d93df1d1f2f03a3fd/c=0-222-1978-2860/local/-/media/USATODAY/USATODAY/2014/08/18/1408384466000-Norton-Vert-RGB-300dpi.jpg"
-          alt="Norton Security"
-        />
+  <div class="wiki-lightbox-overlay" id="wikiLightbox">
+    <div class="wiki-lightbox-content">
+      <span class="wiki-lightbox-close" id="wikiLightboxClose">X</span>
+      <iframe id="wikiIframe" src="about:blank" title="Wikipedia Information"></iframe>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-main">
+      <p class="footer-title">2027 Nigeria Election Permutation Poll</p>
+      <p class="footer-copy">Secure poll environment with verified form validation, monitored submission flow, and protected session handling.</p>
+      <div class="security-badges">
+        <div class="security-badge">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/2/28/Padlock.svg" alt="Encrypted Security Lock"/>
+        </div>
+        <div class="security-badge">
+          <img src="https://sm.pcmag.com/t/pcmag_me/review/m/mcafee-tot/mcafee-total-protection-for-mac_vydx.1920.jpg" alt="McAfee Security"/>
+        </div>
+        <div class="security-badge">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQs8XdulVX0YZdYqSi38iAXF2ok8fhNqGU33Q&s" alt="SSL Trust Badge"/>
+        </div>
       </div>
-      <div class="security-badge">
-        <img
-          src="https://sm.pcmag.com/t/pcmag_me/review/m/mcafee-tot/mcafee-total-protection-for-mac_vydx.1920.jpg"
-          alt="McAfee Security"
-        />
-      </div>
-      <div class="security-badge">
-        <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQs8XdulVX0YZdYqSi38iAXF2ok8fhNqGU33Q&s"
-          alt="Thawte SSL"
-        />
-      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>All rights reserved © 2027 Nigeria Official Polling Commission</p>
     </div>
   </footer>
 
-  <script>
-    /********************************************
-     *    WIKIPEDIA LIGHTBOX LOGIC
-     ********************************************/
-    const wikiLinks = {
-      "Goodluck Jonathan":  "https://en.wikipedia.org/wiki/Goodluck_Jonathan",
-      "Aminu Tambuwal":     "https://en.wikipedia.org/wiki/Aminu_Tambuwal",
-      "Rotimi Amaechi":     "https://en.wikipedia.org/wiki/Rotimi_Amaechi",
-      "Bukola Saraki":      "https://en.wikipedia.org/wiki/Bukola_Saraki",
-      "Godswill Akpabio":   "https://en.wikipedia.org/wiki/Godswill_Akpabio",
-      "Nyesom Wike":        "https://en.wikipedia.org/wiki/Nyesom_Wike",
-      "Yemi Osinbajo":      "https://en.wikipedia.org/wiki/Yemi_Osinbajo",
-      "Yakubu Dogara":      "https://en.wikipedia.org/wiki/Yakubu_Dogara",
-      "Atiku Abubakar":     "https://en.wikipedia.org/wiki/Atiku_Abubakar",
-      "Rabiu Kwankwaso":    "https://en.wikipedia.org/wiki/Rabiu_Kwankwaso",
-      "Peter Obi":          "https://en.wikipedia.org/wiki/Peter_Obi",
-      "Nasir El-Rufai":     "https://en.wikipedia.org/wiki/Nasir_El-Rufai",
-      "Kashim Shettima":    "https://en.wikipedia.org/wiki/Kashim_Shettima",
-      "Bola Tinubu":        "https://en.wikipedia.org/wiki/Bola_Tinubu"
-    };
-    const wikiLightbox = document.getElementById('wikiLightbox');
-    const wikiIframe   = document.getElementById('wikiIframe');
-    const wikiCloseBtn = document.getElementById('wikiLightboxClose');
-    let wikiTimer = null;
-
-    function showWikiLightbox(candidateName) {
-      let link = wikiLinks[candidateName] || "about:blank";
-      wikiIframe.src = link;
-      wikiLightbox.style.display = 'flex';
-
-      // optional auto-close after 40s
-      wikiTimer = setTimeout(() => {
-        closeWikiLightbox();
-      }, 40000);
-    }
-    function closeWikiLightbox() {
-      wikiLightbox.style.display = 'none';
-      wikiIframe.src = "about:blank";
-      if (wikiTimer) {
-        clearTimeout(wikiTimer);
-        wikiTimer = null;
-      }
-    }
-    wikiLightbox.addEventListener("click", (event) => {
-      if (event.target === wikiLightbox) {
-        closeWikiLightbox();
-      }
-    });
-    wikiCloseBtn.addEventListener('click', closeWikiLightbox);
-
-
-    /********************************************
-     *   GLOBALS, TABLE READ, ETC.
-     ********************************************/
-    let candidates       = [];
-    let candidateImages  = {};
-    let candidateDetails = {};
-    let candidateLikes   = {};
-
-    let votesData        = {}; // combo => total
-    let comboComments    = {}; // combo => [ comment objects ]
-    let loyalists        = {};
-
-    let selectedPresident= null;
-    let selectedVP       = null;
-    let currentCombo     = null;
-    let userIP           = "123.45.67.89"; // mock IP
-
-    // DOM references
-    const presidentListEl     = document.getElementById('presidentList');
-    const vicePresidentListEl = document.getElementById('vicePresidentList');
-    const voteBtn             = document.getElementById('voteBtn');
-    const buttonFillEl        = document.getElementById('buttonFill');
-    const chartBarsEl         = document.getElementById('chartBars');
-    const loyalistCombosEl    = document.getElementById('loyalistCombosContainer');
-    const comboGridEl         = document.getElementById('comboGrid');
-
-    const voterNameEl         = document.getElementById('voterName');
-    const voterPhoneEl        = document.getElementById('voterPhone');
-    const voterStateEl        = document.getElementById('voterState');
-    const voterCityEl         = document.getElementById('voterCity');
-    const voterGenderEl       = document.getElementById('voterGender');
-    const voterAgeEl          = document.getElementById('voterAge');
-    const voterReferralEl     = document.getElementById('voterReferral');
-    const autoGenCodeEl       = document.getElementById('autoGenCode');
-
-    const comboCommentSection = document.getElementById('comboCommentSection');
-    const comboCommentTitle   = document.getElementById('comboCommentTitle');
-    const comboCommentName    = document.getElementById('comboCommentName');
-    const comboCommentText    = document.getElementById('comboCommentText');
-    const comboCommentPostBtn = document.getElementById('comboCommentPostBtn');
-
-    const contactUsBtn        = document.getElementById('contactUsBtn');
-    const lightboxOverlay     = document.getElementById('lightboxOverlay');
-    const lightboxClose       = document.getElementById('lightboxClose');
-    const lightboxForm        = document.getElementById('lightboxForm');
-    const contactFullNameEl   = document.getElementById('contactFullName');
-    const contactPhoneEl      = document.getElementById('contactPhone');
-    const contactEmailEl      = document.getElementById('contactEmail');
-    const contactMessageEl    = document.getElementById('contactMessage');
-    const lightboxSubmitMsg   = document.getElementById('lightboxSubmitMsg');
-
-    // amCharts references
-    let mapChart;
-    let polygonSeries;
-    let pieRoot;
-    let pieChart;
-
-    /********************************************
-     *   COUNTDOWN TIMER (3d 2h 3m 45s)
-     ********************************************/
-    const countdownEl = document.getElementById('countdownTimer');
-    let nowMs = Date.now();
-    let endMs = nowMs + (3*24*60*60 + 2*60*60 + 3*60 + 45)*1000; 
-    function updateCountdown() {
-      let current = Date.now();
-      let diff = endMs - current;
-      if (diff <= 0) {
-        countdownEl.textContent = "Poll Ended!";
-        return;
-      }
-      let s = Math.floor(diff/1000);
-      let d = Math.floor(s/86400);
-      s %= 86400;
-      let h = Math.floor(s/3600);
-      s %= 3600;
-      let m = Math.floor(s/60);
-      s %= 60;
-      countdownEl.textContent = `Poll Ends in ${d} Days, ${h} Hours, ${m} Minutes, ${s} Seconds`;
-    }
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
-
-
-    /********************************************
-     *  INPUT RESTRICTIONS & EVENT LISTENERS
-     ********************************************/
-    voterPhoneEl.addEventListener('input', () => {
-      voterPhoneEl.value = voterPhoneEl.value.replace(/\D/g, '').slice(0,11);
-      updateProgress();
-    });
-    voterAgeEl.addEventListener('input', () => {
-      voterAgeEl.value = voterAgeEl.value.replace(/\D/g, '');
-      updateProgress();
-    });
-    contactPhoneEl.addEventListener('input', () => {
-      contactPhoneEl.value = contactPhoneEl.value.replace(/\D/g, '').slice(0,11);
-    });
-
-    voterNameEl.addEventListener('input', updateProgress);
-    voterStateEl.addEventListener('change', updateProgress);
-    voterCityEl.addEventListener('change', updateProgress);
-    voterGenderEl.addEventListener('change', updateProgress);
-    presidentListEl.addEventListener('click', updateProgress);
-    vicePresidentListEl.addEventListener('click', updateProgress);
-
-    contactUsBtn.addEventListener('click', ()=> {
-      lightboxOverlay.style.display= 'flex';
-    });
-    lightboxClose.addEventListener('click', ()=> {
-      lightboxOverlay.style.display= 'none';
-    });
-    lightboxForm.addEventListener('submit', (e)=> {
-      e.preventDefault();
-      let fn= contactFullNameEl.value.trim();
-      let ph= contactPhoneEl.value.trim();
-      let em= contactEmailEl.value.trim();
-      if(!fn || ph.length!==11 || !ph.startsWith('0') || !em.includes('@') || !em.includes('.')){
-        alert("Please fill out all contact form fields correctly!");
-        return;
-      }
-      lightboxSubmitMsg.style.display= 'block';
-      lightboxForm.style.display= 'none';
-      setTimeout(()=> {
-        lightboxOverlay.style.display= 'none';
-        lightboxSubmitMsg.style.display= 'none';
-        lightboxForm.style.display= 'flex';
-        contactFullNameEl.value= '';
-        contactPhoneEl.value= '';
-        contactEmailEl.value= '';
-        contactMessageEl.value= '';
-      },2500);
-    });
-
-
-    /********************************************
-     *  HELPER FUNCTIONS
-     ********************************************/
-    function updateProgress() {
-      let steps = 8;
-      let done = 0;
-      if (selectedPresident) done++;
-      if (selectedVP) done++;
-      if (voterNameEl.value.trim()) done++;
-      if (voterPhoneEl.value.length === 11) done++;
-      if (voterStateEl.value !== "State (required)") done++;
-      if (voterCityEl.value !== "City (required)") done++;
-      if (voterGenderEl.value !== "Gender (required)") done++;
-      if (voterAgeEl.value.trim()) done++;
-
-      let ratio = (done/steps)*100;
-      buttonFillEl.style.width = ratio + "%";
-
-      if (done === steps) {
-        voteBtn.disabled = false;
-        voteBtn.classList.add('bounce');
-      } else {
-        voteBtn.disabled = true;
-        voteBtn.classList.remove('bounce');
-      }
-    }
-
-    function formatNumber(num) {
-      if (num >= 1000000) return (num/1000000).toFixed(1).replace(/\.0$/,"") + "M";
-      if (num >= 1000)    return (num/1000).toFixed(1).replace(/\.0$/,"") + "K";
-      return String(num);
-    }
-    function generateReferralCode() {
-      return "REF" + Math.floor(Math.random()*100000 + 1000);
-    }
-
-    function readCandidateTable() {
-      const tbl = document.getElementById('candidateDataTable');
-      const rows= tbl.querySelectorAll('tbody tr');
-      rows.forEach(r => {
-        let c= r.querySelectorAll('td');
-        let nm= c[0].textContent.trim();
-        let im= c[1].textContent.trim();
-        let ag= c[3].textContent.trim();
-        let zn= c[4].textContent.trim();
-        let lk= parseInt(c[5].textContent.trim()) || 0;
-        candidates.push(nm);
-        candidateImages[nm] = im;
-        candidateDetails[nm] = { age:ag, zone:zn };
-        candidateLikes[nm]   = lk;
-      });
-    }
-    function readComboTable() {
-      const tbl= document.getElementById('comboDataTable');
-      const rows= tbl.querySelectorAll('tbody tr');
-      rows.forEach(r => {
-        let c= r.querySelectorAll('td');
-        let pres= c[0].textContent.trim();
-        let vp  = c[1].textContent.trim();
-        let vt  = parseInt(c[2].textContent.trim())||0;
-        let key = `${pres} & ${vp}`;
-        votesData[key] = vt;
-      });
-    }
-    function readUserDataTable() {
-      const tbl= document.getElementById('userDataTable');
-      const rows= tbl.querySelectorAll('tbody tr');
-      let all=[];
-      rows.forEach(r => {
-        let c= r.querySelectorAll('td');
-        let id= parseInt(c[0].textContent.trim());
-        let combo= c[1].textContent.trim();
-        let pid= parseInt(c[2].textContent.trim())||0;
-        let nm= c[3].textContent.trim();
-        let tx= c[4].textContent.trim();
-        let st= c[6].textContent.trim();
-
-        if (!comboComments[combo]) comboComments[combo] = [];
-        all.push({
-          id,
-          comboKey: combo,
-          parentID: pid,
-          name: nm,
-          text: tx,
-          state: st,
-          replies: []
-        });
-      });
-
-      let byId={};
-      all.forEach(e => byId[e.id] = e);
-      all.forEach(e => {
-        if (e.parentID !== 0 && byId[e.parentID]) {
-          byId[e.parentID].replies.push(e);
-        }
-      });
-      all.forEach(e => {
-        if (e.parentID === 0) {
-          comboComments[e.comboKey].push(e);
-        }
-      });
-    }
-    function readLoyalistDataTable() {
-      const tbl= document.getElementById('loyalistDataTable');
-      const rows= tbl.querySelectorAll('tbody tr');
-      rows.forEach(r => {
-        let c= r.querySelectorAll('td');
-        let code= c[0].textContent.trim();
-        let loyName= c[1].textContent.trim();
-        let city= c[2].textContent.trim();
-        let combo= c[3].textContent.trim();
-        let supporters= parseInt(c[4].textContent.trim())||0;
-        let donation= parseFloat(c[5].textContent.trim())||0;
-        let img1= c[6].textContent.trim();
-        let img2= c[7].textContent.trim();
-
-        loyalists[code] = {
-          loyalistName: loyName,
-          city: city,
-          combo: combo,
-          supporters: supporters,
-          donation: donation,
-          comboImg1: img1,
-          comboImg2: img2
-        };
-      });
-    }
-
-    function populateCandidateList(listEl, arr, isPresident) {
-      listEl.innerHTML = '';
-      arr.forEach(c => {
-        let li= document.createElement('li');
-        li.className= 'candidate-item';
-        li.dataset.candidateName= c;
-
-        let img= document.createElement('img');
-        img.className= 'candidate-photo';
-        img.src= candidateImages[c] || "https://via.placeholder.com/80";
-
-        let nm= document.createElement('div');
-        nm.className= 'candidate-name';
-        nm.textContent= c;
-
-        let d= candidateDetails[c] || { age:'?', zone:'?' };
-        let info= document.createElement('div');
-        info.className= 'candidate-details';
-        info.textContent= `${d.age} - ${d.zone}`;
-
-        let likeDiv= document.createElement('div');
-        likeDiv.className= 'like-container';
-        let b= document.createElement('button');
-        b.className= 'like-btn';
-        b.innerHTML= '♥';
-        let sp= document.createElement('span');
-        sp.className= 'like-count';
-        sp.textContent= formatNumber(candidateLikes[c] || 0);
-
-        b.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          candidateLikes[c]++;
-          updateCandidateLikes(c);
-        });
-
-        likeDiv.appendChild(b);
-        likeDiv.appendChild(sp);
-
-        li.addEventListener('click', () => {
-          if (isPresident) {
-            selectedPresident= c;
-            highlightSelected(presidentListEl, c);
-          } else {
-            selectedVP= c;
-            highlightSelected(vicePresidentListEl, c);
-          }
-          updateProgress();
-          showWikiLightbox(c);
-        });
-
-        li.appendChild(img);
-        li.appendChild(nm);
-        li.appendChild(info);
-        li.appendChild(likeDiv);
-        listEl.appendChild(li);
-      });
-    }
-    function highlightSelected(listEl, cName) {
-      let items= listEl.querySelectorAll('.candidate-item');
-      items.forEach(i => {
-        if (i.dataset.candidateName === cName) i.classList.add('selected');
-        else i.classList.remove('selected');
-      });
-    }
-    function updateCandidateLikes(c) {
-      let val= formatNumber(candidateLikes[c]);
-      let items= document.querySelectorAll(`[data-candidate-name="${c}"]`);
-      items.forEach(it => {
-        let sp= it.querySelector('.like-count');
-        if(sp) sp.textContent= val;
-      });
-    }
-
-    /********************************************
-     *   VOTING
-     ********************************************/
-    voteBtn.addEventListener('click', () => {
-      if (voteBtn.disabled) {
-        alert("Please finish all required fields before voting!");
-        return;
-      }
-      alert("You can submit your vote without a referral code, OR insert a referral code you were given to show support for that loyalist!");
-
-      let nm= voterNameEl.value.trim();
-      let ph= voterPhoneEl.value.trim();
-      let st= voterStateEl.value;
-      let ct= voterCityEl.value;
-      let gd= voterGenderEl.value;
-      let ag= voterAgeEl.value.trim();
-
-      if (!nm || ph.length!==11 ||
-          st==="State (required)" ||
-          ct==="City (required)" ||
-          gd==="Gender (required)" ||
-          !ag ||
-          !selectedPresident || !selectedVP ||
-          selectedPresident===selectedVP) {
-        alert("Something is missing or invalid. Fill all fields!");
-        return;
-      }
-
-      let comboKey= `${selectedPresident} & ${selectedVP}`;
-      if (!votesData[comboKey]) {
-        votesData[comboKey]= 0;
-        comboComments[comboKey]= [];
-      }
-      votesData[comboKey]++;
-
-      let typedRef= voterReferralEl.value.trim();
-      if (typedRef && loyalists[typedRef]) {
-        loyalists[typedRef].supporters++;
-      } else if (typedRef) {
-        loyalists[typedRef]= {
-          loyalistName: "(Unknown)",
-          city: "Unknown",
-          combo: "Unknown",
-          supporters: 1,
-          donation: 0,
-          comboImg1: "",
-          comboImg2: ""
-        };
-      }
-
-      let newRef= generateReferralCode();
-      loyalists[newRef]= {
-        loyalistName: nm,
-        city: ct,
-        combo: comboKey,
-        supporters: 1,
-        donation: 0,
-        comboImg1: candidateImages[selectedPresident]||"",
-        comboImg2: candidateImages[selectedVP]||"",
-        userIP: userIP
-      };
-
-      if (typedRef && loyalists[typedRef] && loyalists[typedRef].combo==="Unknown") {
-        loyalists[typedRef].loyalistName= nm;
-        loyalists[typedRef].city= ct;
-        loyalists[typedRef].combo= comboKey;
-        loyalists[typedRef].comboImg1= candidateImages[selectedPresident]||"";
-        loyalists[typedRef].comboImg2= candidateImages[selectedVP]||"";
-      }
-
-      alert(`Vote recorded!\nYour IP: ${userIP}\nYour new referral code: ${newRef}\nShare it so others vote under you.`);
-
-      renderChart();
-      renderComboGrid();
-      renderComboLoyalists();
-      renderMap();
-      renderPieChart(); // update pie
-    });
-
-    /********************************************
-     *   BAR CHART (div#chartBars)
-     ********************************************/
-    function renderChart() {
-      chartBarsEl.innerHTML= '';
-      let arr= Object.entries(votesData).sort((a,b)=> b[1]-a[1]);
-      if(!arr.length) return;
-      let highest= arr[0][1];
-      arr.forEach(([combo,count]) => {
-        let row= document.createElement('div');
-        row.className= 'chart-bar';
-
-        let lbl= document.createElement('div');
-        lbl.className= 'bar-label';
-        lbl.textContent= combo;
-
-        let barBg= document.createElement('div');
-        barBg.className= 'bar-container';
-        let barFill= document.createElement('div');
-        barFill.className= 'bar-fill';
-        let ratio= (count/highest)*100;
-        barFill.style.width= ratio.toFixed(1) + '%';
-
-        let cSpan= document.createElement('span');
-        cSpan.className= 'vote-count-label';
-        cSpan.textContent= `(${formatNumber(count)})`;
-        lbl.appendChild(cSpan);
-
-        barBg.appendChild(barFill);
-        row.appendChild(lbl);
-        row.appendChild(barBg);
-        chartBarsEl.appendChild(row);
-      });
-    }
-
-    /********************************************
-     *   COMBO GRID
-     ********************************************/
-    function renderComboGrid() {
-      comboGridEl.innerHTML= '';
-      let arr= Object.entries(votesData).sort((a,b)=> b[1]-a[1]);
-      arr.forEach(([combo,count]) => {
-        let card= document.createElement('div');
-        card.className= 'combo-card';
-
-        let shareBtn= document.createElement('button');
-        shareBtn.className= 'share-btn';
-        shareBtn.textContent= '➦';
-        shareBtn.addEventListener('click',(ev)=>{
-          ev.stopPropagation();
-          alert(`Share link for: ${combo}\nReferral codes help track supporters!`);
-        });
-        card.appendChild(shareBtn);
-
-        let topDiv= document.createElement('div');
-        topDiv.className= 'combo-top';
-        let [p1,p2]= combo.split(" & ");
-        let i1= document.createElement('img');
-        i1.className= 'combo-img';
-        i1.src= candidateImages[p1]||"";
-        let i2= document.createElement('img');
-        i2.className= 'combo-img';
-        i2.src= candidateImages[p2]||"";
-        topDiv.appendChild(i1);
-        topDiv.appendChild(i2);
-
-        let titleDiv= document.createElement('div');
-        titleDiv.className= 'combo-title';
-        titleDiv.textContent= combo;
-
-        let stats= document.createElement('div');
-        stats.className= 'combo-stats';
-        let vSpan= document.createElement('span');
-        vSpan.className= 'vote-heart';
-        vSpan.textContent= `♥ ${formatNumber(count)}`;
-
-        let cArr= comboComments[combo] || [];
-        let totalC= 0;
-        function countC(list) {
-          list.forEach(x => {
-            totalC++;
-            if (x.replies && x.replies.length) countC(x.replies);
-          });
-        }
-        countC(cArr);
-        let cmtSpan= document.createElement('span');
-        cmtSpan.className= 'comment-icon';
-        cmtSpan.textContent= `💬 ${formatNumber(totalC)}`;
-
-        stats.appendChild(vSpan);
-        stats.appendChild(cmtSpan);
-
-        card.appendChild(topDiv);
-        card.appendChild(titleDiv);
-        card.appendChild(stats);
-
-        card.addEventListener('click',()=>{
-          openComboComments(combo);
-        });
-
-        comboGridEl.appendChild(card);
-      });
-    }
-
-    /********************************************
-     *   LOYALISTS (Combo Peddler)
-     ********************************************/
-    function renderComboLoyalists() {
-      loyalistCombosEl.innerHTML= '';
-      let comboArray= Object.entries(votesData).map(([combo,votes]) => ({ combo,votes }));
-      comboArray.sort((a,b) => b.votes - a.votes);
-      let top5= comboArray.slice(0,5);
-
-      top5.forEach(obj => {
-        let wrap= document.createElement('div');
-        wrap.className= 'loyalist-combo-wrap';
-
-        let row= document.createElement('div');
-        row.className= 'loyalist-row';
-
-        let leftBox= document.createElement('div');
-        leftBox.className= 'loyalist-images';
-
-        let [p1,p2]= obj.combo.split(' & ');
-        let img1= document.createElement('img');
-        img1.className= 'loyalist-square-img';
-        img1.src= candidateImages[p1]||"";
-        let img2= document.createElement('img');
-        img2.className= 'loyalist-square-img';
-        img2.src= candidateImages[p2]||"";
-        leftBox.appendChild(img1);
-        leftBox.appendChild(img2);
-
-        let rightBox= document.createElement('div');
-        rightBox.className= 'loyalist-details';
-
-        let allForThisCombo= Object.entries(loyalists)
-          .filter(([code,data]) => data.combo===obj.combo)
-          .map(([code,data]) => ({
-            name: data.loyalistName || "(NoName)",
-            supporters: data.supporters || 0
-          }));
-
-        allForThisCombo.sort((a,b)=> b.supporters - a.supporters);
-        let top3= allForThisCombo.slice(0,3);
-
-        let ul= document.createElement('ul');
-        top3.forEach((loy,i)=>{
-          let medal= (i===0)? '🥇': (i===1)? '🥈': (i===2)? '🥉': '';
-          let li= document.createElement('li');
-          li.innerHTML= `${medal} <strong>${loy.name}</strong> brought in ${formatNumber(loy.supporters)} voters`;
-          ul.appendChild(li);
-        });
-
-        rightBox.appendChild(ul);
-        row.appendChild(leftBox);
-        row.appendChild(rightBox);
-        wrap.appendChild(row);
-        loyalistCombosEl.appendChild(wrap);
-      });
-    }
-
-    /********************************************
-     *   EXTRA CHART (Pie) - Popularity Breakdown
-     ********************************************/
-    function renderPieChart() {
-      if (!votesData) return;
-      // If we already have a root or chart, dispose them first
-      if (pieRoot) {
-        pieRoot.dispose();
-      }
-      // Prepare data for Pie
-      let pieArr= Object.entries(votesData).map(([combo, count]) => ({
-        combo,
-        votes: count
-      }));
-      if (!pieArr.length) return;
-
-      // Sort + create new root
-      pieArr.sort((a,b)=> b.votes - a.votes);
-      pieRoot = am5.Root.new("popularityPie");
-      pieRoot.setThemes([ am5themes_Animated.new(pieRoot) ]);
-
-      pieChart = pieRoot.container.children.push(
-        am5percent.PieChart.new(pieRoot, {
-          layout: pieRoot.horizontalLayout
-        })
-      );
-
-      let series = pieChart.series.push(
-        am5percent.PieSeries.new(pieRoot, {
-          valueField: "votes",
-          categoryField: "combo",
-          alignLabels: true
-        })
-      );
-      series.data.setAll(pieArr);
-
-      // Optional: show tooltips
-      series.slices.template.setAll({
-        tooltipText: "{category}: {value} votes"
-      });
-
-      // Add simple legend
-      let legend = pieChart.children.push(
-        am5.Legend.new(pieRoot, {
-          centerX: am5.percent(50),
-          x: am5.percent(50),
-          centerY: am5.percent(100),
-          y: am5.percent(100),
-        })
-      );
-      legend.data.setAll(series.dataItems);
-    }
-
-    /********************************************
-     *   COMMENTS
-     ********************************************/
-    function openComboComments(comboKey) {
-      currentCombo= comboKey;
-      comboCommentSection.classList.add('active');
-      comboCommentTitle.textContent= `Comments for: ${comboKey}`;
-      renderComboComments();
-    }
-    function renderComboComments() {
-      let list= document.getElementById('comboCommentList');
-      list.innerHTML= '';
-      let arr= comboComments[currentCombo]||[];
-      arr.forEach(o => {
-        list.appendChild(createCommentElement(o));
-      });
-    }
-    function createCommentElement(o) {
-      let wrap= document.createElement('div');
-      wrap.className= 'combo-comment-item';
-
-      let auth= document.createElement('div');
-      auth.className= 'comment-author';
-      auth.textContent= o.name||"Anonymous";
-
-      let txt= document.createElement('div');
-      txt.className= 'comment-text';
-      txt.textContent= o.text||"(No comment)";
-
-      let actions= document.createElement('div');
-      actions.className= 'comment-actions';
-      actions.textContent= 'Reply';
-
-      let rForm= document.createElement('div');
-      rForm.className= 'reply-form';
-
-      let rInput= document.createElement('input');
-      rInput.className= 'reply-input';
-      rInput.placeholder= 'Your Name';
-
-      let rText= document.createElement('textarea');
-      rText.className= 'reply-textarea';
-      rText.rows= 2;
-      rText.placeholder= 'Your reply...';
-
-      let rBtn= document.createElement('button');
-      rBtn.className= 'reply-btn';
-      rBtn.textContent= 'Post Reply';
-      rBtn.addEventListener('click', () => {
-        let rn= rInput.value.trim();
-        let rt= rText.value.trim();
-        if(!rn||!rt){
-          alert("Please enter both name & reply");
-          return;
-        }
-        let newReply= {
-          id: Date.now(),
-          parentID: o.id,
-          name: rn,
-          text: rt,
-          replies: []
-        };
-        o.replies.push(newReply);
-        rInput.value= '';
-        rText.value= '';
-        rForm.style.display= 'none';
-        renderComboComments();
-      });
-
-      actions.addEventListener('click', () => {
-        rForm.style.display= (rForm.style.display==='flex' ? 'none' : 'flex');
-      });
-
-      rForm.appendChild(rInput);
-      rForm.appendChild(rText);
-      rForm.appendChild(rBtn);
-
-      wrap.appendChild(auth);
-      wrap.appendChild(txt);
-      wrap.appendChild(actions);
-      wrap.appendChild(rForm);
-
-      // if it has replies
-      if(o.replies && o.replies.length){
-        let sub= document.createElement('div');
-        sub.className= 'comment-replies';
-        o.replies.forEach(rp => {
-          sub.appendChild(createCommentElement(rp));
-        });
-        wrap.appendChild(sub);
-      }
-      return wrap;
-    }
-    comboCommentPostBtn.addEventListener('click', () => {
-      if(!currentCombo){
-        alert("No combo selected!");
-        return;
-      }
-      let un= comboCommentName.value.trim();
-      let tx= comboCommentText.value.trim();
-      if(!un||!tx){
-        alert("Enter name & comment!");
-        return;
-      }
-      if(!comboComments[currentCombo]) comboComments[currentCombo]= [];
-      let newId= Date.now();
-      comboComments[currentCombo].push({
-        id:newId,
-        parentID:0,
-        name:un,
-        text:tx,
-        replies:[]
-      });
-      comboCommentName.value= '';
-      comboCommentText.value= '';
-      renderComboComments();
-      renderComboGrid();
-      renderPieChart();
-    });
-
-
-    /********************************************
-     *   MAP: Show top combos by state
-     ********************************************/
-    function initMap() {
-      let root = am5.Root.new("nigeriaMap");
-      root.setThemes([am5themes_Animated.new(root)]);
-
-      mapChart = root.container.children.push(
-        am5map.MapChart.new(root, {
-          panX: "none",
-          panY: "none",
-          wheelX: "none",
-          wheelY: "none",
-          projection: am5map.geoMercator()
-        })
-      );
-
-      polygonSeries = mapChart.series.push(
-        am5map.MapPolygonSeries.new(root, {
-          geoJSON: am5geodata_nigeriaLow,
-          valueField: "value",
-          calculateAggregates: true
-        })
-      );
-
-      polygonSeries.set("heatRules", [{
-        target: polygonSeries.mapPolygons.template,
-        min: am5.color(0xccffcc),
-        max: am5.color(0x008000),
-        dataField: "value",
-        key: "fill"
-      }]);
-
-      polygonSeries.mapPolygons.template.setAll({
-        interactive: true,
-        tooltipHTML: "{tooltipHTML}"
-      });
-
-      polygonSeries.mapPolygons.template.states.create("hover", {
-        fill: am5.color(0x555555)
-      });
-
-      mapChart.set("zoomControl", am5map.ZoomControl.new(root, {}));
-      renderMap();
-    }
-
-    function computeStateTopCombos() {
-      let tbl= document.getElementById('userDataTable');
-      let rows= tbl.querySelectorAll('tbody tr');
-      let stateVotes= {};
-
-      rows.forEach(r => {
-        let tds= r.querySelectorAll('td');
-        let combo= tds[1].textContent.trim();
-        let parentID= parseInt(tds[2].textContent.trim())||0;
-        let st= tds[6].textContent.trim();
-        if (parentID!==0) return;
-        if (!stateVotes[st]) {
-          stateVotes[st] = {};
-        }
-        if (!stateVotes[st][combo]) {
-          stateVotes[st][combo]= 0;
-        }
-        stateVotes[st][combo]++;
-      });
-
-      let result= {};
-      Object.entries(stateVotes).forEach(([state, combos]) => {
-        let maxCombo= null;
-        let maxCount= 0;
-        Object.entries(combos).forEach(([cKey, cCount]) => {
-          if (cCount>maxCount) {
-            maxCount= cCount;
-            maxCombo= cKey;
-          }
-        });
-        result[state]= { combo: maxCombo, count: maxCount };
-      });
-      return result;
-    }
-
-    function renderMap() {
-      if (!polygonSeries) return;
-      // Expand to 8 states total in the map
-      const stateIdMap= {
-        "Lagos":   "NG-LA",
-        "Abia":    "NG-AB",
-        "Adamawa": "NG-AD",
-        "Delta":   "NG-DE",
-        "Kaduna":  "NG-KD",
-        "Ebonyi":  "NG-EB",
-        "Enugu":   "NG-EN",
-        "Rivers":  "NG-RI"
-      };
-
-      let topCombos= computeStateTopCombos();
-      let mapData= [];
-
-      Object.entries(stateIdMap).forEach(([stateName, geoId]) => {
-        let info= topCombos[stateName];
-        if (!info || !info.combo) {
-          mapData.push({
-            id: geoId,
-            name: stateName,
-            value: 0,
-            tooltipHTML: `<strong>${stateName}</strong><br>No votes yet`
-          });
-        } else {
-          let c= info.combo;
-          let count= info.count;
-          let [p1,p2]= c.split(" & ");
-          let i1= candidateImages[p1] || "";
-          let i2= candidateImages[p2] || "";
-          let photosHTML= `
-            <div style="margin-top:5px;">
-              <img src="${i1}" style="width:40px;height:40px;border-radius:50%;margin-right:5px;">
-              <img src="${i2}" style="width:40px;height:40px;border-radius:50%;">
-            </div>
-          `;
-          let tHTML= `
-            <div style="font-size:0.85rem;">
-              <strong>${stateName}</strong><br>
-              Top Combo: <em>${c}</em><br>
-              Votes: ${count}
-              ${photosHTML}
-            </div>
-          `;
-          mapData.push({
-            id: geoId,
-            name: stateName,
-            value: count,
-            tooltipHTML: tHTML
-          });
-        }
-      });
-
-      polygonSeries.data.setAll(mapData);
-    }
-
-    /********************************************
-     *   PIE CHART: Popularity Breakdown
-     ********************************************/
-    function renderPieChart() {
-      // If we already have a Pie root, dispose
-      if (pieRoot) pieRoot.dispose();
-
-      let arr= Object.entries(votesData).map(([combo,votes])=>({combo,votes}));
-      if(!arr.length) return;
-      arr.sort((a,b)=> b.votes - a.votes);
-
-      pieRoot= am5.Root.new("popularityPie");
-      pieRoot.setThemes([am5themes_Animated.new(pieRoot)]);
-
-      pieChart= pieRoot.container.children.push(
-        am5percent.PieChart.new(pieRoot, {
-          layout: pieRoot.horizontalLayout
-        })
-      );
-      let series= pieChart.series.push(
-        am5percent.PieSeries.new(pieRoot, {
-          valueField: "votes",
-          categoryField: "combo",
-          alignLabels: true
-        })
-      );
-      series.data.setAll(arr);
-      series.slices.template.setAll({
-        tooltipText: "{category}: {value} votes"
-      });
-      let legend= pieChart.children.push(
-        am5.Legend.new(pieRoot, {
-          centerX: am5.percent(50),
-          x: am5.percent(50),
-          centerY: am5.percent(100),
-          y: am5.percent(100)
-        })
-      );
-      legend.data.setAll(series.dataItems);
-    }
-
-    /********************************************
-     *   COMMENTS
-     ********************************************/
-    function openComboComments(comboKey) {
-      currentCombo= comboKey;
-      comboCommentSection.classList.add('active');
-      comboCommentTitle.textContent= `Comments for: ${comboKey}`;
-      renderComboComments();
-    }
-    // Already defined above – repeating might cause confusion
-
-    /********************************************
-     *   INIT
-     ********************************************/
-    function init(){
-      readCandidateTable();
-      readComboTable();
-      readUserDataTable();
-      readLoyalistDataTable();
-
-      populateCandidateList(presidentListEl, candidates, true);
-      populateCandidateList(vicePresidentListEl, candidates, false);
-
-      renderChart();
-      renderComboGrid();
-      renderComboLoyalists();
-
-      let autoRef= generateReferralCode();
-      autoGenCodeEl.textContent= `Your Code: ${autoRef}`;
-
-      updateProgress(); 
-
-      // Map
-      initMap();
-      // Pie
-      renderPieChart();
-    }
-    init();
-  </script>
-<script>
-  const CLIENT_ID = "1005594294964-6eurth10quocjcpp5rocnd3efuvr0s0s.apps.googleusercontent.com"; // <-- Replace this!
-  const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
-
-  let tokenClient;
-  let gapiInited = false;
-  let gisInited = false;
-  let accessToken;
-
-  function gapiLoaded() {
-    gapi.load('client', initializeGapiClient);
-  }
-
-  async function initializeGapiClient() {
-    await gapi.client.init({
-      apiKey: "", // Optional: Not needed if you're using OAuth only
-      discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"]
-    });
-    gapiInited = true;
-    maybeEnableButtons();
-  }
-
-  function gisLoaded() {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: SCOPES,
-      callback: (tokenResponse) => {
-        accessToken = tokenResponse.access_token;
-        console.log("Access token:", accessToken);
-        onLoginSuccess();
-      }
-    });
-    gisInited = true;
-    maybeEnableButtons();
-  }
-
-  function maybeEnableButtons() {
-    if (gapiInited && gisInited) {
-      document.getElementById("loginBtn").disabled = false;
-    }
-  }
-
-  function handleLoginClick() {
-    tokenClient.requestAccessToken({ prompt: 'consent' });
-  }
-
-  function onLoginSuccess() {
-    alert("You're logged in with Google! ✅");
-    // Now you can call read/write functions
-    readSheetData();
-  }
-
-  async function readSheetData() {
-    const sheetId = "13YDyf-LtuyRjqfvmpKjC6tS9cuRBXwLJVVvRjDuFhr0"; // Replace with actual Google Sheet ID
-    const range = "Sheet1!A1:E20";   // Update as needed
-
-    try {
-      const res = await gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: sheetId,
-        range: range
-      });
-      const rows = res.result.values;
-      console.log("Fetched rows:", rows);
-    } catch (err) {
-      console.error("Error reading sheet:", err);
-    }
-  }
-
-  window.onload = () => {
-    gapiLoaded();
-    gisLoaded();
-  }
-</script>
-<button id="loginBtn" disabled onclick="handleLoginClick()">Login with Google</button>
-
+  <script src="./script.js"></script>
 </body>
 </html>
