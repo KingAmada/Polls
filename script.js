@@ -66,6 +66,20 @@
       : null;
     let socialProofMessages = [];
     let dataBackend = "mock";
+    const DEBUG_MODE = true;
+    function debugLog(scope, message, details) {
+      if (!DEBUG_MODE) return;
+      const prefix = `[DEBUG:${scope}]`;
+      if (details === undefined) {
+        console.log(prefix, message);
+      } else {
+        console.log(prefix, message, details);
+      }
+    }
+    function debugError(scope, message, error) {
+      if (!DEBUG_MODE) return;
+      console.error(`[DEBUG:${scope}]`, message, error);
+    }
     const MOCK_DATA = {
       candidates: [
         { name: "Bola Tinubu", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg", age: 70, zone: "SW", likes: 500000 },
@@ -711,9 +725,11 @@
     }
     async function loadSupabaseData() {
       if (!supabaseClient) {
+        debugLog("loadSupabaseData", "Supabase client missing. Initializing empty store.");
         initializeEmptyDataStore();
         return;
       }
+      debugLog("loadSupabaseData", "Starting Supabase fetches.");
       const [
         candidatesRes,
         combosRes,
@@ -733,6 +749,16 @@
         supabaseClient.from("combo_shares").select("combo_key"),
         supabaseClient.from("social_proofs").select("*").order("display_order", { ascending: true })
       ]);
+      debugLog("loadSupabaseData", "Query results received.", {
+        candidateProfiles: { rows: candidatesRes.data?.length || 0, error: candidatesRes.error?.message || null },
+        comboStats: { rows: combosRes.data?.length || 0, error: combosRes.error?.message || null },
+        comments: { rows: commentsRes.data?.length || 0, error: commentsRes.error?.message || null },
+        loyalists: { rows: loyalistsRes.data?.length || 0, error: loyalistsRes.error?.message || null },
+        votes: { rows: votesRes.data?.length || 0, error: votesRes.error?.message || null },
+        candidateLikes: { rows: likesRes.data?.length || 0, error: likesRes.error?.message || null },
+        comboShares: { rows: sharesRes.data?.length || 0, error: sharesRes.error?.message || null },
+        socialProofs: { rows: proofsRes.data?.length || 0, error: proofsRes.error?.message || null }
+      });
       const errors = [
         candidatesRes.error,
         combosRes.error,
@@ -744,10 +770,11 @@
         proofsRes.error
       ].filter(Boolean);
       if (candidatesRes.error || combosRes.error) {
+        debugError("loadSupabaseData", "Critical load error.", [candidatesRes.error, combosRes.error].filter(Boolean));
         throw new Error([candidatesRes.error, combosRes.error].filter(Boolean).map((item) => item.message).join(" | "));
       }
       if (errors.length) {
-        console.error("Non-fatal Supabase data load issues:", errors.map((item) => item.message).join(" | "));
+        debugError("loadSupabaseData", "Non-fatal load issues.", errors.map((item) => item.message));
       }
 
       candidates = [];
@@ -804,28 +831,44 @@
       });
 
       dataBackend = "supabase";
+      debugLog("loadSupabaseData", "Hydrated client store.", {
+        candidates: candidates.length,
+        comboDefinitions: comboDefinitions.length,
+        voteCombos: Object.keys(votesData).length,
+        totalVotes: Object.values(votesData).reduce((sum, count) => sum + count, 0),
+        mapRows: mapStatesData.length,
+        loyalists: Object.keys(loyalists).length,
+        socialProofMessages: socialProofMessages.length
+      });
     }
     async function incrementCandidateLikeInStore(candidateName) {
       if (dataBackend !== "supabase" || !supabaseClient) return;
+      debugLog("like", "Persisting candidate like.", { candidateName });
       const { error } = await supabaseClient
         .from("candidate_likes")
         .insert({ candidate_name: candidateName });
       if (error) {
+        debugError("like", "Candidate like insert failed.", error);
         throw error;
       }
+      debugLog("like", "Candidate like insert succeeded.", { candidateName });
     }
     async function persistShareCount(comboKey) {
       if (dataBackend !== "supabase" || !supabaseClient) return;
+      debugLog("share", "Persisting combo share.", { comboKey });
       const { error } = await supabaseClient
         .from("combo_shares")
         .insert({ combo_key: comboKey });
       if (error) {
+        debugError("share", "Combo share insert failed.", error);
         throw error;
       }
+      debugLog("share", "Combo share insert succeeded.", { comboKey });
     }
     async function persistVoteRecord(votePayload) {
       if (dataBackend !== "supabase" || !supabaseClient) return;
       const comboKey = votePayload.combo;
+      debugLog("vote", "Persisting vote payload.", votePayload);
       const voteInsert = {
         voter_name: votePayload.name,
         phone: votePayload.phone,
@@ -857,13 +900,21 @@
         }
       }
       const results = await Promise.all(requests);
+      debugLog("vote", "Vote-related write responses received.", results.map((item, index) => ({
+        requestIndex: index,
+        error: item.error?.message || null,
+        rows: Array.isArray(item.data) ? item.data.length : (item.data ? 1 : 0)
+      })));
       const errors = results.map((item) => item.error).filter(Boolean);
       if (errors.length) {
+        debugError("vote", "Vote persistence failed.", errors);
         throw new Error(errors.map((item) => item.message).join(" | "));
       }
+      debugLog("vote", "Vote persistence succeeded.", { comboKey, referralCodeUsed: votePayload.referralCodeUsed || null });
     }
     async function persistComment(commentPayload) {
       if (dataBackend !== "supabase" || !supabaseClient) return null;
+      debugLog("comment", "Persisting comment.", commentPayload);
       const payload = {
         combo_key: commentPayload.comboKey,
         parent_id: commentPayload.parentID && commentPayload.parentID !== 0 ? commentPayload.parentID : null,
@@ -875,7 +926,11 @@
         .insert(payload)
         .select()
         .single();
-      if (error) throw error;
+      if (error) {
+        debugError("comment", "Comment insert failed.", error);
+        throw error;
+      }
+      debugLog("comment", "Comment insert succeeded.", data);
       return normalizeSupabaseComment(data);
     }
     async function persistContactRequest() {
@@ -898,6 +953,7 @@
     }
     async function refreshDataFromDatabase() {
       if (dataBackend !== "supabase" || !supabaseClient) return;
+      debugLog("refresh", "Refreshing all UI state from database.");
       await loadSupabaseData();
       populateCandidateList(presidentListEl, candidates, true);
       populateCandidateList(vicePresidentListEl, candidates, false);
@@ -912,6 +968,13 @@
         updateComboModalHeader(currentCombo);
         renderComboComments();
       }
+      debugLog("refresh", "Refresh complete.", {
+        totalVotes: Object.values(votesData).reduce((sum, count) => sum + count, 0),
+        totalLikes: Object.values(candidateLikes).reduce((sum, count) => sum + count, 0),
+        totalShares: Object.values(comboShares).reduce((sum, count) => sum + count, 0),
+        loyalists: Object.keys(loyalists).length,
+        mapRows: mapStatesData.length
+      });
     }
     function getVoteValidationMessage() {
       if (!selectedPresident) return "Kindly select President to vote";
@@ -1385,6 +1448,14 @@
           name: name, phone: phone, state: state, city: city, gender: gender,
           age: parseInt(age) || 0, combo: comboKey, referralCodeUsed: typedReferral
       };
+      debugLog("submitVote", "Submitting vote from UI.", {
+        comboKey,
+        selectedPresident,
+        selectedVP,
+        state,
+        city,
+        referralCodeUsed: typedReferral
+      });
       try {
         await persistVoteRecord(votePayload);
         await refreshDataFromDatabase();
@@ -1394,7 +1465,7 @@
           kicker: "Success"
         });
       } catch (error) {
-        console.error("Vote persistence error:", error);
+        debugError("submitVote", "Vote persistence error.", error);
         openNoticeModal({
           title: "Vote Failed",
           message: "Your vote could not be saved to the database. No local counts were changed.",
@@ -1437,6 +1508,11 @@
         const sortedVotes = Object.entries(votesData)
           .filter(([, count]) => count > 0)
           .sort(([,a],[,b]) => b - a);
+        debugLog("renderChart", "Rendering chart.", {
+          combosWithVotes: sortedVotes.length,
+          topCombo: sortedVotes[0]?.[0] || null,
+          topVotes: sortedVotes[0]?.[1] || 0
+        });
         if (!sortedVotes.length) {
             chartBarsEl.innerHTML = "<p>No votes recorded yet.</p>";
             return;
@@ -1474,6 +1550,7 @@
         const sortedVotes = Object.entries(votesData)
           .filter(([, count]) => count > 0)
           .sort(([,a],[,b]) => b - a);
+        debugLog("renderComboGrid", "Rendering combo grid.", { combosWithVotes: sortedVotes.length });
         if (!sortedVotes.length) {
             comboGridEl.innerHTML = "<p>No combinations voted for yet.</p>";
             return;
@@ -1545,6 +1622,10 @@ function renderComboLoyalists() {
   loyalistCombosEl.innerHTML = '';
   const activeLoyalistEntries = Object.entries(loyalists).filter(([, loyData]) => (loyData.supporters || 0) > 0);
   const totalInfluencers = activeLoyalistEntries.length;
+  debugLog("renderComboLoyalists", "Rendering loyalists.", {
+    storedLoyalists: Object.keys(loyalists).length,
+    activeInfluencers: totalInfluencers
+  });
   if (loyalistMetaEl) {
     loyalistMetaEl.textContent = `Total ${formatNumber(totalInfluencers)} Influencers`;
   }
@@ -2053,6 +2134,10 @@ function renderComboLoyalists() {
             "Rivers": "NG-RI", "Sokoto": "NG-SO", "Taraba": "NG-TA", "Yobe": "NG-YO", "Zamfara": "NG-ZA"
         };
         let topCombosByState = computeStateTopCombosFromCMS();
+        debugLog("renderMap", "Rendering map.", {
+          mapStatesDataRows: mapStatesData.length,
+          statesWithTopCombo: Object.keys(topCombosByState).length
+        });
         const stateCounts = Object.values(topCombosByState)
           .map(info => info?.count || 0)
           .filter(count => count > 0);
@@ -2099,7 +2184,10 @@ function renderComboLoyalists() {
             });
         });
         polygonSeries.data.setAll(mapDataForSeries);
-        // console.log("Map data updated with", mapDataForSeries.length, "state entries."); // Less verbose
+        debugLog("renderMap", "Map polygon data set.", {
+          polygonRows: mapDataForSeries.length,
+          activeStates: mapDataForSeries.filter((item) => item.value > 0).length
+        });
     }
      /********************************************
      * amCharts PIE CHART RENDER
@@ -2111,6 +2199,7 @@ function renderComboLoyalists() {
         let chartData = Object.entries(votesData)
                                 .map(([combo, votes]) => ({ combo, votes }))
                                 .filter(item => item.votes > 0);
+        debugLog("renderPieChart", "Rendering pie chart.", { slicesBeforeGrouping: chartData.length });
         if (!chartData.length) {
              pieDiv.innerHTML = "<p style='text-align: center; padding: 20px;'>No votes yet to display popularity.</p>";
              return;
@@ -2194,7 +2283,11 @@ function renderComboLoyalists() {
      * INITIALIZATION FUNCTION
      ********************************************/
     async function init(){
-      console.log("Initializing application with Supabase data...");
+      debugLog("init", "Initializing application.", {
+        protocol: window.location.protocol,
+        href: window.location.href,
+        hasSupabaseClient: !!supabaseClient
+      });
       if (window.location.protocol === 'file:') {
         openNoticeModal({
           title: "Run Through a Local Server",
@@ -2206,7 +2299,7 @@ function renderComboLoyalists() {
       try {
         await loadSupabaseData();
       } catch (error) {
-        console.error("Supabase load failed, using empty state:", error);
+        debugError("init", "Supabase load failed, using empty state.", error);
         initializeEmptyDataStore();
       }
       populateCandidateList(presidentListEl, candidates, true);
@@ -2218,7 +2311,11 @@ function renderComboLoyalists() {
       initMap();
       renderPieChart();
       startSocialProofFeed();
-      console.log("Initialization complete.");
+      debugLog("init", "Initialization complete.", {
+        candidates: candidates.length,
+        combosWithVotes: Object.entries(votesData).filter(([, count]) => count > 0).length,
+        mapRows: mapStatesData.length
+      });
     }
     // --- Run Initialization ---
     document.addEventListener('DOMContentLoaded', init);
