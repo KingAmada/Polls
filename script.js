@@ -57,6 +57,8 @@
     let socialProofTimer = null;
     let socialProofHideTimer = null;
     let voteTooltipTimer = null;
+    let influencerSignupState = null;
+    let influencerStatusPollTimer = null;
     let locationData = {};
     const NIGERIAN_STATES_URL = "https://gist.githubusercontent.com/chrisidakwo/4ba3a4f03afc442305021be4ca67738e/raw/a8276ee3a756ae47ee853c4be5a82a11d6c8a313/nigerian-states.json";
     const SUPABASE_URL = "https://eeynpndieynavvxdyqhp.supabase.co";
@@ -217,6 +219,7 @@
     const voteTooltipEl       = document.getElementById('voteTooltip');
     const socialProofToastEl  = document.getElementById('socialProofToast');
     const socialProofMessageEl = document.getElementById('socialProofMessage');
+    const pollBackendBaseMeta = document.querySelector('meta[name="poll-backend-base"]');
     const noticeModalEl       = document.getElementById('noticeModal');
     const noticeModalClose    = document.getElementById('noticeModalClose');
     const noticeModalKicker   = document.getElementById('noticeModalKicker');
@@ -260,7 +263,23 @@
     const referralRequestForm = document.getElementById('referralRequestForm'); // New form
     const referralNameEl      = document.getElementById('referralName'); // New input
     const referralContactEl   = document.getElementById('referralContact'); // New input
+    const referralCityEl      = document.getElementById('referralCity');
+    const referralRequestSubmitBtn = document.getElementById('referralRequestSubmitBtn');
     const referralSubmitMsg   = document.getElementById('referralSubmitMsg'); // New message div
+    const influencerSelectedComboEl = document.getElementById('influencerSelectedCombo');
+    const influencerStatusCardEl = document.getElementById('influencerStatusCard');
+    const influencerStatusComboEl = document.getElementById('influencerStatusCombo');
+    const influencerExpectedAmountEl = document.getElementById('influencerExpectedAmount');
+    const influencerAccountNameEl = document.getElementById('influencerAccountName');
+    const influencerAccountNumberEl = document.getElementById('influencerAccountNumber');
+    const influencerPaymentStatusEl = document.getElementById('influencerPaymentStatus');
+    const influencerRefreshBtn = document.getElementById('influencerRefreshBtn');
+    const influencerCopyAccountBtn = document.getElementById('influencerCopyAccountBtn');
+    const influencerActivationCardEl = document.getElementById('influencerActivationCard');
+    const influencerReferralCodeEl = document.getElementById('influencerReferralCode');
+    const influencerShareLinkEl = document.getElementById('influencerShareLink');
+    const influencerCopyCodeBtn = document.getElementById('influencerCopyCodeBtn');
+    const influencerShareBtn = document.getElementById('influencerShareBtn');
     // amCharts Globals
     let mapChart;
     let polygonSeries;
@@ -301,6 +320,11 @@
      contactPhoneEl.addEventListener('input', () => {
       contactPhoneEl.value = contactPhoneEl.value.replace(/\D/g, '').slice(0,11);
     });
+    if (referralContactEl) {
+      referralContactEl.addEventListener('input', () => {
+        referralContactEl.value = referralContactEl.value.replace(/\D/g, '').slice(0, 11);
+      });
+    }
     voterNameEl.addEventListener('input', updateProgress);
     voterStateEl.addEventListener('change', () => {
       populateCityOptions(voterStateEl.value);
@@ -393,79 +417,132 @@
     // --- Referral Request Lightbox Listeners ---
     if (getReferralCodeBtn && referralLightbox) {
         getReferralCodeBtn.addEventListener('click', () => {
-            referralLightbox.style.display = 'flex'; // Show referral lightbox
+            const selectedCombo = getSelectedComboKey();
+            if (!selectedCombo) {
+              openNoticeModal({
+                title: "Choose a Combo First",
+                message: "Select both a president and a vice president before requesting your influencer account.",
+                kicker: "Influencer"
+              });
+              return;
+            }
+            openReferralLightbox(selectedCombo);
         });
     }
     if (referralLightboxClose && referralLightbox) {
         referralLightboxClose.addEventListener('click', () => {
-            referralLightbox.style.display = 'none'; // Hide referral lightbox
-            // Reset form appearance if needed
-             if (referralSubmitMsg) referralSubmitMsg.style.display = 'none';
-             if (referralRequestForm) referralRequestForm.style.display = 'flex';
+            closeReferralLightbox();
         });
     }
      if (referralLightbox) {
         referralLightbox.addEventListener('click', (e) => {
             if (e.target === referralLightbox) { // Click on overlay background
-                referralLightbox.style.display = 'none';
-                 if (referralSubmitMsg) referralSubmitMsg.style.display = 'none';
-                 if (referralRequestForm) referralRequestForm.style.display = 'flex';
+                closeReferralLightbox();
             }
         });
     }
     if (referralRequestForm) {
         referralRequestForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = referralNameEl.value.trim();
-            const contact = referralContactEl.value.trim();
-            const submitButton = referralRequestForm.querySelector('button[type="submit"]');
+            const selectedCombo = getSelectedComboKey();
+            const name = referralNameEl?.value.trim();
+            const contact = referralContactEl?.value.trim();
+            const city = referralCityEl?.value.trim();
 
-            if (!name || !contact) {
+            if (!selectedCombo) {
                 openNoticeModal({
-                  title: "Referral Request Error",
-                  message: "Please enter your name and phone or email.",
+                  title: "Influencer Signup Error",
+                  message: "Select a president and vice president combo first.",
+                  kicker: "Validation"
+                });
+                return;
+            }
+            if (!name || !contact || !city) {
+                openNoticeModal({
+                  title: "Influencer Signup Error",
+                  message: "Please enter your full name, phone number, and city.",
+                  kicker: "Validation"
+                });
+                return;
+            }
+            if (contact.length !== 11 || !contact.startsWith('0')) {
+                openNoticeModal({
+                  title: "Influencer Signup Error",
+                  message: "Please enter a valid 11-digit Nigerian phone number.",
                   kicker: "Validation"
                 });
                 return;
             }
 
-            // Disable button, show loading
-            if(submitButton) {
-                submitButton.disabled = true;
-                submitButton.textContent = 'Submitting...';
-            }
             try {
-                await persistReferralRequest();
+                await submitInfluencerSignup({
+                  fullName: name,
+                  phone: contact,
+                  city,
+                  comboKey: selectedCombo
+                });
             } catch (error) {
-                console.error("Referral request error:", error);
-                if(submitButton) {
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Request Code';
-                }
+                console.error("Influencer signup error:", error);
                 openNoticeModal({
-                  title: "Referral Request Error",
-                  message: "Unable to submit your request right now. Please try again.",
+                  title: "Influencer Signup Error",
+                  message: error?.message || "Unable to create your influencer account right now. Please try again.",
                   kicker: "Network"
                 });
-                return;
             }
-            // Show confirmation message in lightbox, hide form
-            if (referralSubmitMsg) referralSubmitMsg.style.display = 'block';
-            referralRequestForm.style.display = 'none';
-
-            // Re-enable button and optionally close lightbox after delay
-            setTimeout(() => {
-                if(submitButton) {
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Request Code';
-                }
-                // Optionally close lightbox automatically
-                // if (referralLightbox) referralLightbox.style.display = 'none';
-                // if (referralRequestForm) referralRequestForm.style.display = 'flex'; // Reset form visibility for next time
-                // referralNameEl.value = ''; // Clear fields
-                // referralContactEl.value = '';
-            }, 3000); // Adjust delay as needed
         });
+    }
+    if (influencerRefreshBtn) {
+      influencerRefreshBtn.addEventListener('click', async () => {
+        try {
+          await refreshInfluencerStatus();
+        } catch (error) {
+          console.error('Influencer status refresh error:', error);
+          openNoticeModal({
+            title: "Status Check Failed",
+            message: error?.message || "Unable to confirm payment right now.",
+            kicker: "Network"
+          });
+        }
+      });
+    }
+    if (influencerCopyAccountBtn) {
+      influencerCopyAccountBtn.addEventListener('click', async () => {
+        if (!influencerSignupState?.virtualAccountNumber) return;
+        await copyTextToClipboard(influencerSignupState.virtualAccountNumber, {
+          title: "Account Number Copied",
+          message: "The virtual account number has been copied.",
+          kicker: "Influencer"
+        });
+      });
+    }
+    if (influencerCopyCodeBtn) {
+      influencerCopyCodeBtn.addEventListener('click', async () => {
+        if (!influencerSignupState?.referralCode) return;
+        await copyTextToClipboard(influencerSignupState.referralCode, {
+          title: "Referral Code Copied",
+          message: "Your influencer referral code has been copied.",
+          kicker: "Influencer"
+        });
+      });
+    }
+    if (influencerShareBtn) {
+      influencerShareBtn.addEventListener('click', async () => {
+        if (!influencerSignupState?.referralCode || !influencerSignupState?.comboKey) return;
+        try {
+          await shareVoteLink({
+            comboKey: influencerSignupState.comboKey,
+            referralCode: influencerSignupState.referralCode,
+            sharerName: influencerSignupState.fullName || ""
+          });
+        } catch (error) {
+          console.error('Influencer share error:', error);
+          openNoticeModal({
+            title: "Share Failed",
+            message: "Unable to share your influencer link right now.",
+            kicker: "Influencer"
+          });
+        }
+      });
     }
     /********************************************
      * HELPER FUNCTIONS
@@ -499,6 +576,216 @@
       referralPromptModal.classList.remove('active');
       if (!comboCommentSection?.classList.contains('active') && !loyalistModalEl?.classList.contains('active') && !noticeModalEl?.classList.contains('active')) {
         document.body.style.overflow = '';
+      }
+    }
+    function getSelectedComboKey() {
+      if (!selectedPresident || !selectedVP || selectedPresident === selectedVP) return "";
+      return `${selectedPresident} & ${selectedVP}`;
+    }
+    function getPollBackendBase() {
+      const configuredBase = pollBackendBaseMeta?.content?.trim();
+      const resolvedBase = configuredBase || window.location.origin;
+      return resolvedBase.replace(/\/+$/, "");
+    }
+    function getPollApiUrl(path) {
+      const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+      return `${getPollBackendBase()}${normalizedPath}`;
+    }
+    function formatNaira(amount) {
+      const numericAmount = Number(amount) || 0;
+      try {
+        return new Intl.NumberFormat('en-NG', {
+          style: 'currency',
+          currency: 'NGN',
+          maximumFractionDigits: 0
+        }).format(numericAmount);
+      } catch (error) {
+        return `NGN ${numericAmount.toLocaleString()}`;
+      }
+    }
+    function normalizePhoneValue(phone) {
+      return (phone || "").replace(/\D/g, '').slice(0, 11);
+    }
+    function stopInfluencerStatusPolling() {
+      if (influencerStatusPollTimer) {
+        clearTimeout(influencerStatusPollTimer);
+        influencerStatusPollTimer = null;
+      }
+    }
+    function setInfluencerSubmissionState(isSubmitting, message = "Processing your influencer signup...") {
+      if (referralRequestSubmitBtn) {
+        referralRequestSubmitBtn.disabled = isSubmitting;
+        referralRequestSubmitBtn.textContent = isSubmitting ? 'Processing...' : 'Get Virtual Account';
+      }
+      if (referralSubmitMsg) {
+        referralSubmitMsg.textContent = message;
+        referralSubmitMsg.style.display = isSubmitting ? 'block' : 'none';
+      }
+    }
+    function resetInfluencerModal({ clearFields = false } = {}) {
+      stopInfluencerStatusPolling();
+      influencerSignupState = null;
+      setInfluencerSubmissionState(false, "Processing your influencer signup...");
+      if (referralRequestForm) referralRequestForm.style.display = 'flex';
+      if (influencerStatusCardEl) influencerStatusCardEl.hidden = true;
+      if (influencerActivationCardEl) influencerActivationCardEl.hidden = true;
+      if (influencerStatusComboEl) influencerStatusComboEl.textContent = '-';
+      if (influencerExpectedAmountEl) influencerExpectedAmountEl.textContent = '-';
+      if (influencerAccountNameEl) influencerAccountNameEl.textContent = '-';
+      if (influencerAccountNumberEl) influencerAccountNumberEl.textContent = '-';
+      if (influencerPaymentStatusEl) influencerPaymentStatusEl.textContent = 'Waiting for payment confirmation...';
+      if (influencerReferralCodeEl) influencerReferralCodeEl.textContent = '-';
+      if (influencerShareLinkEl) influencerShareLinkEl.textContent = '-';
+      if (clearFields) {
+        if (referralNameEl) referralNameEl.value = '';
+        if (referralContactEl) referralContactEl.value = '';
+        if (referralCityEl) referralCityEl.value = '';
+      }
+    }
+    function closeReferralLightbox() {
+      if (!referralLightbox) return;
+      referralLightbox.style.display = 'none';
+      document.body.style.overflow = '';
+      resetInfluencerModal();
+    }
+    function renderInfluencerSelectedCombo(comboKey) {
+      if (influencerSelectedComboEl) {
+        influencerSelectedComboEl.textContent = `Selected combo: ${comboKey || 'None'}`;
+      }
+    }
+    function describeInfluencerStatus(signup) {
+      const paymentStatus = (signup?.paymentStatus || 'pending').toLowerCase();
+      const activationStatus = (signup?.activationStatus || 'pending').toLowerCase();
+      if (activationStatus === 'activated') {
+        return signup?.paidAt
+          ? `Payment confirmed. Your code went live on ${new Date(signup.paidAt).toLocaleString()}.`
+          : 'Payment confirmed. Your influencer account is active.';
+      }
+      if (paymentStatus === 'underpaid') {
+        return `Payment received but still below ${formatNaira(signup?.expectedAmount)}.`;
+      }
+      if (paymentStatus === 'paid') {
+        return 'Payment received. Activation is being finalized.';
+      }
+      return 'Waiting for payment confirmation...';
+    }
+    function renderInfluencerSignup(signup) {
+      if (!signup) return;
+      influencerSignupState = signup;
+      renderInfluencerSelectedCombo(signup.comboKey || getSelectedComboKey());
+      if (referralRequestForm) referralRequestForm.style.display = 'none';
+      if (referralSubmitMsg) referralSubmitMsg.style.display = 'none';
+      if (influencerStatusCardEl) influencerStatusCardEl.hidden = false;
+      if (influencerStatusComboEl) influencerStatusComboEl.textContent = signup.comboKey || '-';
+      if (influencerExpectedAmountEl) influencerExpectedAmountEl.textContent = formatNaira(signup.expectedAmount);
+      if (influencerAccountNameEl) influencerAccountNameEl.textContent = signup.accountName || '-';
+      if (influencerAccountNumberEl) influencerAccountNumberEl.textContent = signup.virtualAccountNumber || '-';
+      if (influencerPaymentStatusEl) influencerPaymentStatusEl.textContent = describeInfluencerStatus(signup);
+      const isActivated = (signup.activationStatus || '').toLowerCase() === 'activated';
+      if (influencerActivationCardEl) influencerActivationCardEl.hidden = !isActivated;
+      if (influencerReferralCodeEl) influencerReferralCodeEl.textContent = signup.referralCode || '-';
+      if (influencerShareLinkEl) influencerShareLinkEl.textContent = signup.shareLink || '-';
+      if (influencerRefreshBtn) {
+        influencerRefreshBtn.textContent = isActivated ? 'Refresh Status' : 'Check Payment';
+      }
+      if (!isActivated) {
+        scheduleInfluencerStatusPoll();
+      } else {
+        stopInfluencerStatusPolling();
+      }
+    }
+    function openReferralLightbox(comboKey) {
+      resetInfluencerModal();
+      renderInfluencerSelectedCombo(comboKey);
+      if (referralNameEl && voterNameEl?.value.trim()) referralNameEl.value = voterNameEl.value.trim();
+      if (referralContactEl && voterPhoneEl?.value.trim()) referralContactEl.value = normalizePhoneValue(voterPhoneEl.value);
+      if (referralCityEl && voterCityEl?.value) referralCityEl.value = voterCityEl.value;
+      referralLightbox.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    async function callPollApi(path, { method = 'GET', body = null, query = null } = {}) {
+      const url = new URL(getPollApiUrl(path));
+      if (query) {
+        Object.entries(query).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            url.searchParams.set(key, value);
+          }
+        });
+      }
+      const requestInit = {
+        method,
+        headers: {
+          'Accept': 'application/json'
+        }
+      };
+      if (body) {
+        requestInit.headers['Content-Type'] = 'application/json';
+        requestInit.body = JSON.stringify(body);
+      }
+      const response = await fetch(url.toString(), requestInit);
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload?.success === false) {
+        const baseMessage = payload?.message || `Request failed with status ${response.status}`;
+        if (!pollBackendBaseMeta?.content?.trim() && window.location.hostname.endsWith('github.io')) {
+          throw new Error(`${baseMessage} Configure meta[name="poll-backend-base"] with your Wix site URL.`);
+        }
+        throw new Error(baseMessage);
+      }
+      return payload;
+    }
+    async function submitInfluencerSignup({ fullName, phone, city, comboKey }) {
+      setInfluencerSubmissionState(true, "Creating your influencer virtual account...");
+      const response = await callPollApi('/_functions/apiPollInfluencerSignup', {
+        method: 'POST',
+        body: {
+          fullName,
+          phone: normalizePhoneValue(phone),
+          city,
+          comboKey
+        }
+      });
+      renderInfluencerSignup(response.signup);
+      setInfluencerSubmissionState(false, "Creating your influencer virtual account...");
+      return response.signup;
+    }
+    async function refreshInfluencerStatus() {
+      const signupId = influencerSignupState?.signupId;
+      const phone = influencerSignupState?.phone || normalizePhoneValue(referralContactEl?.value);
+      if (!signupId && !phone) {
+        throw new Error('No influencer signup found yet.');
+      }
+      if (influencerPaymentStatusEl) {
+        influencerPaymentStatusEl.textContent = 'Checking payment confirmation...';
+      }
+      const response = await callPollApi('/_functions/apiPollInfluencerStatus', {
+        query: signupId ? { signupId } : { phone }
+      });
+      renderInfluencerSignup(response.signup);
+      return response.signup;
+    }
+    function scheduleInfluencerStatusPoll() {
+      stopInfluencerStatusPolling();
+      influencerStatusPollTimer = setTimeout(async () => {
+        try {
+          await refreshInfluencerStatus();
+        } catch (error) {
+          debugError('influencer', 'Automatic influencer status poll failed.', error);
+          scheduleInfluencerStatusPoll();
+        }
+      }, 7000);
+    }
+    async function copyTextToClipboard(text, noticeOptions) {
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        if (noticeOptions) openNoticeModal(noticeOptions);
+      } catch (error) {
+        console.error('Clipboard copy failed:', error);
+        openNoticeModal({
+          title: "Copy Failed",
+          message: "Unable to copy to your clipboard on this device.",
+          kicker: "Clipboard"
+        });
       }
     }
     function showSocialProofMessage(message) {
@@ -1002,14 +1289,6 @@
         phone: contactPhoneEl.value.trim(),
         email: contactEmailEl.value.trim(),
         message: contactMessageEl.value.trim()
-      });
-      if (error) throw error;
-    }
-    async function persistReferralRequest() {
-      if (dataBackend !== "supabase" || !supabaseClient) return;
-      const { error } = await supabaseClient.from("referral_requests").insert({
-        full_name: referralNameEl.value.trim(),
-        contact: referralContactEl.value.trim()
       });
       if (error) throw error;
     }

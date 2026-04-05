@@ -11,6 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0d5c2f" />
   <link rel="canonical" href="https://kingamada.github.io/Polls/" />
+  <meta name="poll-backend-base" content="" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="KingAmada Polls" />
   <meta property="og:title" content="2027 Nigeria Election Permutation Poll" />
@@ -284,20 +285,62 @@
   <div class="lightbox-overlay" id="referralLightbox">
     <div class="lightbox-content">
       <span class="lightbox-close" id="referralLightboxClose">X</span>
-      <h2 style="text-align:center; font-size: 1.2rem;">Request Referral Code</h2>
+      <h2 style="text-align:center; font-size: 1.2rem;">Become a Top Combo Influencer</h2>
       <p style="font-size:0.85rem; color:#666; margin-top:0.3rem; text-align:center;">
-        Fill out the form to request your unique code. Share it to climb the leaderboard and position yourself as a top influencer with strong chances of future ministerial or political appointments.
-        <br><strong>The fee to get a code and be part of this leadership poll is non-refundable N1,000,000.</strong>
+        Reserve your influencer slot for the combo you want to promote. You will receive a dedicated Stanbic virtual account number, and your referral code will activate automatically once payment is confirmed.
       </p>
+      <div class="influencer-selected-combo" id="influencerSelectedCombo">Selected combo: None</div>
       <form class="lightbox-form" id="referralRequestForm">
-        <label for="referralName">Your Name (required)</label>
+        <label for="referralName">Your Name</label>
         <input type="text" id="referralName" placeholder="Your Full Name" required />
-        <label for="referralContact">Phone or Email (required)</label>
-        <input type="text" id="referralContact" placeholder="Phone or Email for code delivery" required />
-        <button type="submit">Request Code</button>
+        <label for="referralContact">Phone Number</label>
+        <input type="tel" id="referralContact" placeholder="08012345678" required />
+        <label for="referralCity">City</label>
+        <input type="text" id="referralCity" placeholder="Your City" required />
+        <button type="submit" id="referralRequestSubmitBtn">Get Virtual Account</button>
       </form>
       <div class="submit-message" id="referralSubmitMsg">
-        Thanks! Your request has been submitted. We'll process it shortly.
+        Processing your influencer signup...
+      </div>
+      <div class="influencer-status-card" id="influencerStatusCard" hidden>
+        <div class="influencer-status-kicker">Payment Instructions</div>
+        <div class="influencer-status-row">
+          <span>Combo</span>
+          <strong id="influencerStatusCombo">-</strong>
+        </div>
+        <div class="influencer-status-row">
+          <span>Expected Fee</span>
+          <strong id="influencerExpectedAmount">-</strong>
+        </div>
+        <div class="influencer-status-row">
+          <span>Bank</span>
+          <strong>Stanbic IBTC Bank</strong>
+        </div>
+        <div class="influencer-status-row">
+          <span>Account Name</span>
+          <strong id="influencerAccountName">-</strong>
+        </div>
+        <div class="influencer-status-row account-number">
+          <span>Virtual Account Number</span>
+          <strong id="influencerAccountNumber">-</strong>
+        </div>
+        <div class="influencer-status-pill" id="influencerPaymentStatus">Waiting for payment confirmation...</div>
+        <div class="influencer-status-actions">
+          <button type="button" class="notice-modal-btn secondary" id="influencerRefreshBtn">Check Payment</button>
+          <button type="button" class="notice-modal-btn" id="influencerCopyAccountBtn">Copy Account Number</button>
+        </div>
+      </div>
+      <div class="influencer-activation-card" id="influencerActivationCard" hidden>
+        <div class="influencer-status-kicker">Activation Complete</div>
+        <div class="influencer-status-row">
+          <span>Referral Code</span>
+          <strong id="influencerReferralCode">-</strong>
+        </div>
+        <div class="influencer-share-box" id="influencerShareLink">-</div>
+        <div class="influencer-status-actions">
+          <button type="button" class="notice-modal-btn secondary" id="influencerCopyCodeBtn">Copy Code</button>
+          <button type="button" class="notice-modal-btn" id="influencerShareBtn">Share Link</button>
+        </div>
       </div>
     </div>
   </div>
