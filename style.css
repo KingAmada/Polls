@@ -391,6 +391,9 @@ body::before {
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   padding: 1rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 .selection-box h2 {
   text-align: center;
@@ -405,9 +408,13 @@ body::before {
   grid-auto-rows: auto;
   gap: 0.75rem;
   justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
 }
 .candidate-item {
-  width: auto;
+  width: 100%;
   min-width: 100px;
   background: #fff;
   border-radius: 8px;
@@ -593,8 +600,9 @@ body::before {
   padding: 1.4rem 1.15rem 1.5rem;
   border-radius: 28px;
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   min-width: 0;
+  max-width: 100%;
 }
 .vote-subtitle {
   width: 100%;
@@ -2237,6 +2245,74 @@ body::before {
   line-height: 1.55;
   overflow-wrap: anywhere;
 }
+.influencer-receipt-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-bottom: 0.95rem;
+}
+.influencer-receipt-title {
+  font-size: 1rem;
+  color: #143825;
+  margin-bottom: 0.18rem;
+}
+.influencer-receipt-sub {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #5f7467;
+}
+.influencer-receipt-badge {
+  flex: 0 0 auto;
+  padding: 0.46rem 0.72rem;
+  border-radius: 999px;
+  background: rgba(229, 247, 235, 0.96);
+  border: 1px solid rgba(87, 174, 121, 0.18);
+  color: #1c5034;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.influencer-receipt-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+.influencer-receipt-item {
+  padding: 0.85rem 0.9rem;
+  border-radius: 18px;
+  background: rgba(249, 252, 250, 0.96);
+  border: 1px solid rgba(25, 53, 37, 0.08);
+  min-width: 0;
+}
+.influencer-receipt-item span {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #708378;
+  margin-bottom: 0.34rem;
+}
+.influencer-receipt-item strong {
+  display: block;
+  color: #173825;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.influencer-activation-note {
+  margin-top: 0.9rem;
+  color: #224836;
+  font-size: 0.86rem;
+  line-height: 1.58;
+  text-align: center;
+}
+.influencer-activation-note small {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.72rem;
+  color: #6f8277;
+}
 /* FOOTER */
 .site-footer {
   width: 100%;
@@ -2310,6 +2386,10 @@ body::before {
   body {
     padding: 0.45rem;
   }
+  html,
+  body {
+    overflow-x: hidden;
+  }
   .header,
   .container,
   .site-footer,
@@ -2342,9 +2422,13 @@ body::before {
   .container {
     padding: 0.6rem;
     border-radius: 16px;
+    width: 100%;
+    overflow-x: hidden;
   }
   .header {
     margin-bottom: 0.8rem;
+    width: 100%;
+    overflow-x: hidden;
   }
   .sub-heading {
     max-width: 100%;
@@ -2363,6 +2447,9 @@ body::before {
   .voted-combos,
   .extra-chart-container {
     padding: 0.7rem;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
   .selection-box h2 {
     font-size: 1rem;
@@ -2371,8 +2458,12 @@ body::before {
   .candidate-list {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.42rem;
+    align-items: stretch;
+    justify-content: stretch;
+    overflow-x: hidden;
   }
   .candidate-item {
+    width: 100%;
     min-width: 0;
     min-height: 126px;
     padding: 0.35rem 0.25rem 0.4rem;
@@ -2415,6 +2506,9 @@ body::before {
     padding: 0.85rem 0.7rem 0.95rem;
     border-radius: 18px;
     gap: 0.7rem;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
   }
   .vote-subtitle {
     font-size: 0.76rem;
@@ -2423,6 +2517,9 @@ body::before {
   .vote-form {
     padding: 0.7rem;
     gap: 0.55rem;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
   .vote-form select,
   .vote-form input,
@@ -2470,6 +2567,8 @@ body::before {
   .combo-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.65rem;
+    width: 100%;
+    max-width: 100%;
   }
   .combo-card {
     min-height: 148px;
@@ -2657,6 +2756,7 @@ body::before {
   #comboGrid {
     max-height: 38vh;
     overflow-y: auto;
+    overflow-x: hidden;
     padding-bottom: 0.5rem;
   }
   .candidate-list::-webkit-scrollbar,
@@ -2730,6 +2830,18 @@ body::before {
   .influencer-status-actions .notice-modal-btn {
     width: 100%;
     flex-basis: 100%;
+  }
+  .influencer-receipt-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+  .influencer-receipt-badge {
+    align-self: flex-start;
+  }
+  .influencer-receipt-grid {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
   }
   .loyalist-modal {
     width: 100%;
@@ -2977,6 +3089,16 @@ body::before {
 }
 
 @media (max-width: 600px) {
+  .selection-section,
+  .results-section,
+  .vote-section,
+  .chart,
+  .voted-combos,
+  .extra-chart-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
   .social-proof-toast {
     left: 10px;
     right: 10px;

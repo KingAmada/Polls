@@ -286,6 +286,10 @@
     const influencerRefreshBtn = document.getElementById('influencerRefreshBtn');
     const influencerCopyAccountBtn = document.getElementById('influencerCopyAccountBtn');
     const influencerActivationCardEl = document.getElementById('influencerActivationCard');
+    const influencerReceiptIdEl = document.getElementById('influencerReceiptId');
+    const influencerReceiptComboEl = document.getElementById('influencerReceiptCombo');
+    const influencerReceiptAmountEl = document.getElementById('influencerReceiptAmount');
+    const influencerReceiptPaidAtEl = document.getElementById('influencerReceiptPaidAt');
     const influencerReferralCodeEl = document.getElementById('influencerReferralCode');
     const influencerShareLinkEl = document.getElementById('influencerShareLink');
     const influencerCopyCodeBtn = document.getElementById('influencerCopyCodeBtn');
@@ -652,6 +656,10 @@
       if (influencerAccountNameEl) influencerAccountNameEl.textContent = '-';
       if (influencerAccountNumberEl) influencerAccountNumberEl.textContent = '-';
       if (influencerPaymentStatusEl) influencerPaymentStatusEl.textContent = 'Waiting for payment confirmation...';
+      if (influencerReceiptIdEl) influencerReceiptIdEl.textContent = '-';
+      if (influencerReceiptComboEl) influencerReceiptComboEl.textContent = '-';
+      if (influencerReceiptAmountEl) influencerReceiptAmountEl.textContent = '-';
+      if (influencerReceiptPaidAtEl) influencerReceiptPaidAtEl.textContent = '-';
       if (influencerReferralCodeEl) influencerReferralCodeEl.textContent = '-';
       if (influencerShareLinkEl) influencerShareLinkEl.textContent = '-';
       if (clearFields) {
@@ -671,6 +679,16 @@
       if (influencerSelectedComboEl) {
         influencerSelectedComboEl.textContent = `Selected combo: ${comboKey || 'None'}`;
       }
+    }
+    function buildInfluencerReceiptId(signup) {
+      const signupIdTail = String(signup?.signupId || '').slice(-6).toUpperCase();
+      const referralCode = String(signup?.referralCode || '').toUpperCase();
+      return referralCode ? `RCT-${referralCode.slice(-6)}` : `RCT-${signupIdTail || 'POLL50'}`;
+    }
+    function formatReceiptTimestamp(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? '-' : date.toLocaleString();
     }
     function describeInfluencerStatus(signup) {
       const paymentStatus = (signup?.paymentStatus || 'pending').toLowerCase();
@@ -702,6 +720,10 @@
       if (influencerPaymentStatusEl) influencerPaymentStatusEl.textContent = describeInfluencerStatus(signup);
       const isActivated = (signup.activationStatus || '').toLowerCase() === 'activated';
       if (influencerActivationCardEl) influencerActivationCardEl.hidden = !isActivated;
+      if (influencerReceiptIdEl) influencerReceiptIdEl.textContent = buildInfluencerReceiptId(signup);
+      if (influencerReceiptComboEl) influencerReceiptComboEl.textContent = signup.comboKey || '-';
+      if (influencerReceiptAmountEl) influencerReceiptAmountEl.textContent = formatNaira(signup.totalPaid || signup.expectedAmount || 0);
+      if (influencerReceiptPaidAtEl) influencerReceiptPaidAtEl.textContent = formatReceiptTimestamp(signup.paidAt || signup.activatedAt);
       if (influencerReferralCodeEl) influencerReferralCodeEl.textContent = signup.referralCode || '-';
       if (influencerShareLinkEl) influencerShareLinkEl.textContent = signup.shareLink || '-';
       if (influencerRefreshBtn) {
