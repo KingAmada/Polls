@@ -263,6 +263,7 @@
     const referralRequestForm = document.getElementById('referralRequestForm'); // New form
     const referralNameEl      = document.getElementById('referralName'); // New input
     const referralContactEl   = document.getElementById('referralContact'); // New input
+    const referralStateEl     = document.getElementById('referralState');
     const referralCityEl      = document.getElementById('referralCity');
     const referralRequestSubmitBtn = document.getElementById('referralRequestSubmitBtn');
     const referralSubmitMsg   = document.getElementById('referralSubmitMsg'); // New message div
@@ -331,6 +332,11 @@
       updateProgress();
     });
     voterCityEl.addEventListener('change', updateProgress);
+    if (referralStateEl) {
+      referralStateEl.addEventListener('change', () => {
+        populateInfluencerCityOptions(referralStateEl.value);
+      });
+    }
     voterGenderEl.addEventListener('change', updateProgress);
     if (presidentListEl) presidentListEl.addEventListener('click', updateProgress);
     if (vicePresidentListEl) vicePresidentListEl.addEventListener('click', updateProgress);
@@ -447,7 +453,8 @@
             const selectedCombo = getSelectedComboKey();
             const name = referralNameEl?.value.trim();
             const contact = referralContactEl?.value.trim();
-            const city = referralCityEl?.value.trim();
+            const state = referralStateEl?.value;
+            const city = referralCityEl?.value;
 
             if (!selectedCombo) {
                 openNoticeModal({
@@ -457,10 +464,10 @@
                 });
                 return;
             }
-            if (!name || !contact || !city) {
+            if (!name || !contact || !state || !city) {
                 openNoticeModal({
                   title: "Influencer Signup Error",
-                  message: "Please enter your full name, phone number, and city.",
+                  message: "Please enter your full name, phone number, state, and city.",
                   kicker: "Validation"
                 });
                 return;
@@ -478,6 +485,7 @@
                 await submitInfluencerSignup({
                   fullName: name,
                   phone: contact,
+                  state,
                   city,
                   comboKey: selectedCombo
                 });
@@ -615,7 +623,7 @@
     function setInfluencerSubmissionState(isSubmitting, message = "Processing your influencer signup...") {
       if (referralRequestSubmitBtn) {
         referralRequestSubmitBtn.disabled = isSubmitting;
-        referralRequestSubmitBtn.textContent = isSubmitting ? 'Processing...' : 'Get Virtual Account';
+        referralRequestSubmitBtn.textContent = isSubmitting ? 'Processing...' : 'Become an Influencer';
       }
       if (referralSubmitMsg) {
         referralSubmitMsg.textContent = message;
@@ -639,7 +647,8 @@
       if (clearFields) {
         if (referralNameEl) referralNameEl.value = '';
         if (referralContactEl) referralContactEl.value = '';
-        if (referralCityEl) referralCityEl.value = '';
+        if (referralStateEl) referralStateEl.selectedIndex = 0;
+        resetInfluencerCityOptions("Select state first");
       }
     }
     function closeReferralLightbox() {
@@ -699,7 +708,13 @@
       renderInfluencerSelectedCombo(comboKey);
       if (referralNameEl && voterNameEl?.value.trim()) referralNameEl.value = voterNameEl.value.trim();
       if (referralContactEl && voterPhoneEl?.value.trim()) referralContactEl.value = normalizePhoneValue(voterPhoneEl.value);
-      if (referralCityEl && voterCityEl?.value) referralCityEl.value = voterCityEl.value;
+      if (referralStateEl && voterStateEl?.value) {
+        referralStateEl.value = voterStateEl.value;
+        populateInfluencerCityOptions(voterStateEl.value, voterCityEl?.value || "");
+      } else {
+        if (referralStateEl) referralStateEl.selectedIndex = 0;
+        resetInfluencerCityOptions("Select state first");
+      }
       referralLightbox.style.display = 'flex';
       document.body.style.overflow = 'hidden';
     }
@@ -733,13 +748,14 @@
       }
       return payload;
     }
-    async function submitInfluencerSignup({ fullName, phone, city, comboKey }) {
+    async function submitInfluencerSignup({ fullName, phone, state, city, comboKey }) {
       setInfluencerSubmissionState(true, "Creating your influencer virtual account...");
       const response = await callPollApi('/_functions/apiPollInfluencerSignup', {
         method: 'POST',
         body: {
           fullName,
           phone: normalizePhoneValue(phone),
+          state,
           city,
           comboKey
         }
@@ -819,39 +835,49 @@
         showSocialProofMessage(messages[socialProofIndex]);
       }, 4200);
     }
-    function resetCityOptions(placeholder = "City *") {
-      if (!voterCityEl) return;
-      voterCityEl.innerHTML = "";
+    function resetSelectOptions(selectEl, placeholder) {
+      if (!selectEl) return;
+      selectEl.innerHTML = "";
       const option = document.createElement("option");
       option.value = "";
       option.disabled = true;
       option.selected = true;
       option.textContent = placeholder;
-      voterCityEl.appendChild(option);
+      selectEl.appendChild(option);
     }
-    function populateStateOptions(statesMap) {
-      if (!voterStateEl) return;
-      const selectedState = voterStateEl.value;
+    function resetCityOptions(placeholder = "City *") {
+      resetSelectOptions(voterCityEl, placeholder);
+    }
+    function resetInfluencerCityOptions(placeholder = "City *") {
+      resetSelectOptions(referralCityEl, placeholder);
+    }
+    function populateSelectWithStates(selectEl, statesMap, placeholderText = "State *") {
+      if (!selectEl) return;
+      const selectedState = selectEl.value;
       const stateNames = Object.keys(statesMap || {}).sort((a, b) => a.localeCompare(b));
-      voterStateEl.innerHTML = "";
+      selectEl.innerHTML = "";
       const placeholder = document.createElement("option");
       placeholder.value = "";
       placeholder.disabled = true;
       placeholder.selected = !selectedState;
-      placeholder.textContent = "State *";
-      voterStateEl.appendChild(placeholder);
+      placeholder.textContent = placeholderText;
+      selectEl.appendChild(placeholder);
       stateNames.forEach((stateName) => {
         const option = document.createElement("option");
         option.value = stateName;
         option.textContent = stateName;
         if (selectedState === stateName) option.selected = true;
-        voterStateEl.appendChild(option);
+        selectEl.appendChild(option);
       });
     }
-    function populateCityOptions(stateName, preferredCity = "") {
-      if (!voterCityEl) return;
+    function populateStateOptions(statesMap) {
+      populateSelectWithStates(voterStateEl, statesMap, "State *");
+      populateSelectWithStates(referralStateEl, statesMap, "State *");
+    }
+    function populateSelectWithCities(selectEl, stateName, preferredCity = "", emptyPlaceholder = "Select state first") {
+      if (!selectEl) return;
       const cities = Array.isArray(locationData[stateName]) ? locationData[stateName] : [];
-      resetCityOptions(cities.length ? "City *" : "Select state first");
+      resetSelectOptions(selectEl, cities.length ? "City *" : emptyPlaceholder);
       if (!cities.length) return;
       const sortedCities = [...cities].sort((a, b) => a.localeCompare(b));
       let matchedPreferred = false;
@@ -863,11 +889,17 @@
           option.selected = true;
           matchedPreferred = true;
         }
-        voterCityEl.appendChild(option);
+        selectEl.appendChild(option);
       });
       if (!matchedPreferred) {
-        voterCityEl.selectedIndex = 0;
+        selectEl.selectedIndex = 0;
       }
+    }
+    function populateCityOptions(stateName, preferredCity = "") {
+      populateSelectWithCities(voterCityEl, stateName, preferredCity, "Select state first");
+    }
+    function populateInfluencerCityOptions(stateName, preferredCity = "") {
+      populateSelectWithCities(referralCityEl, stateName, preferredCity, "Select state first");
     }
     async function loadLocationData() {
       try {
@@ -920,6 +952,7 @@
       }
       populateStateOptions(locationData);
       resetCityOptions("Select state first");
+      resetInfluencerCityOptions("Select state first");
     }
     function normalizeSupabaseComment(commentRow) {
       return {

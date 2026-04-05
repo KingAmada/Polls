@@ -295,9 +295,15 @@
         <input type="text" id="referralName" placeholder="Your Full Name" required />
         <label for="referralContact">Phone Number</label>
         <input type="tel" id="referralContact" placeholder="08012345678" required />
+        <label for="referralState">State</label>
+        <select id="referralState" required>
+          <option value="" disabled selected>State *</option>
+        </select>
         <label for="referralCity">City</label>
-        <input type="text" id="referralCity" placeholder="Your City" required />
-        <button type="submit" id="referralRequestSubmitBtn">Get Virtual Account</button>
+        <select id="referralCity" required>
+          <option value="" disabled selected>Select state first</option>
+        </select>
+        <button type="submit" id="referralRequestSubmitBtn">Become an Influencer</button>
       </form>
       <div class="submit-message" id="referralSubmitMsg">
         Processing your influencer signup...
