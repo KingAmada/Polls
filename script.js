@@ -305,12 +305,24 @@
      ********************************************/
     const countdownEl = document.getElementById('countdownTimer');
     const endMs = Date.now() + (3 * 24 * 60 * 60 + 2 * 60 * 60 + 3 * 60 + 45) * 1000;
+    let countdownPulseInterval = null;
+    let countdownHideTimer = null;
+    function showCountdownToast() {
+      if (!countdownEl) return;
+      countdownEl.classList.add('visible');
+      if (countdownHideTimer) clearTimeout(countdownHideTimer);
+      countdownHideTimer = setTimeout(() => {
+        countdownEl.classList.remove('visible');
+      }, 3600);
+    }
     function updateCountdown() {
       const current = Date.now();
       const diff = endMs - current;
       if (diff <= 0) {
         countdownEl.textContent = "Poll Ended!";
         clearInterval(countdownInterval);
+        if (countdownPulseInterval) clearInterval(countdownPulseInterval);
+        countdownEl.classList.add('visible');
         return;
       }
       let s = Math.floor(diff / 1000);
@@ -321,6 +333,8 @@
     }
     const countdownInterval = setInterval(updateCountdown, 1000);
     updateCountdown();
+    showCountdownToast();
+    countdownPulseInterval = setInterval(showCountdownToast, 9000);
     /********************************************
      * INPUT VALIDATION & EVENT LISTENERS
      ********************************************/
