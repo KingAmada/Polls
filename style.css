@@ -7,11 +7,16 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 body {
   font-family: "Manrope", sans-serif;
   background: #f0f1f2;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -19,11 +24,17 @@ body {
   color: #333;
   position: relative;
   overflow-x: hidden;
+  overflow-x: clip;
   font-size: 1rem;
 }
 img,
 iframe {
   max-width: 100%;
+}
+svg,
+canvas {
+  max-width: 100%;
+  display: block;
 }
 body::before {
   content: "";
@@ -83,6 +94,7 @@ body::before {
   padding: 1rem;
   animation: fadeIn 1.2s ease;
   margin-top: 50px;
+  overflow-x: clip;
 }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
@@ -582,6 +594,7 @@ body::before {
   border-radius: 28px;
   position: relative;
   overflow: visible;
+  min-width: 0;
 }
 .vote-subtitle {
   width: 100%;
@@ -635,6 +648,7 @@ body::before {
   max-width: 960px;
   position: relative;
   z-index: 1;
+  min-width: 0;
 }
 .vote-form label {
   font-size: 0.72rem;
@@ -1059,6 +1073,7 @@ body::before {
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 1rem;
   margin-bottom: 1rem;
+  min-width: 0;
 }
 .combo-card {
   background: #f9f9f9;
@@ -1170,6 +1185,7 @@ body::before {
 #loyalistCombosContainer {
   max-height: 400px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 .loyalist-combo-wrap {
   background: #fff;
@@ -1179,6 +1195,8 @@ body::before {
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-width: 0;
+  overflow: hidden;
 }
 .loyalist-combo-wrap:hover {
   transform: translateY(-2px);
@@ -1238,6 +1256,7 @@ body::before {
   font-size: 0.9rem;
   color: #333;
   line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 .loyalist-info strong {
   color: #111;
@@ -1629,6 +1648,7 @@ body::before {
   overflow: hidden;
   position: relative;
   box-shadow: 0 30px 90px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.76);
+  min-width: 0;
 }
 .combo-comment-close {
   position: absolute;
@@ -1728,6 +1748,7 @@ body::before {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  min-width: 0;
   overflow: hidden;
   background: #ffffff;
 }
@@ -2289,6 +2310,28 @@ body::before {
   body {
     padding: 0.45rem;
   }
+  .header,
+  .container,
+  .site-footer,
+  .selection-section,
+  .results-section,
+  .vote-section,
+  .vote-form,
+  .chart,
+  .voted-combos,
+  .extra-chart-container,
+  .combo-grid,
+  .candidate-list,
+  .loyalist-combo-wrap,
+  .loyalist-flex,
+  .loyalist-row,
+  .combo-comment-modal,
+  .combo-comment-panel,
+  .lightbox-content,
+  .wiki-lightbox-content {
+    min-width: 0;
+    max-width: 100%;
+  }
   #countdownTimer {
     top: 8px;
     right: 8px;
@@ -2462,6 +2505,7 @@ body::before {
     flex-shrink: 0;
   }
   .loyalist-influencers-col {
+    flex: 1 1 auto;
     min-width: 0;
     gap: 0.38rem;
   }
@@ -2476,13 +2520,16 @@ body::before {
     border-radius: 12px;
   }
   .loyalist-row {
+    width: 100%;
     padding: 0.52rem 0.6rem;
     border-radius: 14px;
     margin-bottom: 0;
+    overflow: hidden;
   }
   .loyalist-info {
     font-size: 0.74rem;
     line-height: 1.28;
+    overflow-wrap: anywhere;
   }
   .loyalist-total-link {
     font-size: 0.68rem;
@@ -2548,6 +2595,7 @@ body::before {
   }
   .combo-comment-topbar {
     padding: 0.85rem 0.9rem 0.75rem;
+    min-width: 0;
   }
   .combo-comment-brand-icon {
     width: 38px;
@@ -2576,6 +2624,7 @@ body::before {
   }
   .combo-comment-list {
     padding: 0.15rem 0.9rem 0.85rem;
+    overflow-x: hidden;
   }
   .combo-comment-item {
     gap: 0.62rem;
@@ -2643,6 +2692,16 @@ body::before {
   }
   .lightbox-content {
     padding: 1rem 0.9rem 0.95rem;
+  }
+  .lightbox-form {
+    min-width: 0;
+  }
+  .lightbox-form label,
+  .lightbox-form input,
+  .lightbox-form textarea,
+  .lightbox-form select {
+    min-width: 0;
+    max-width: 100%;
   }
   .lightbox-overlay,
   .wiki-lightbox-overlay {
@@ -2720,6 +2779,7 @@ body::before {
   }
   .loyalist-modal-list {
     padding: 0.65rem 0.85rem 0.95rem;
+    overflow-x: hidden;
   }
   .loyalist-modal-row {
     padding: 0.72rem 0.78rem;
