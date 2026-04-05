@@ -1420,14 +1420,13 @@
       return String(num);
     }
     function buildShareUrl(comboKey, referralCode = "") {
-      const shareUrl = new URL(window.location.href);
+      const shareUrl = new URL('/_functions/pollShare', `${getPollBackendBase()}/`);
       shareUrl.searchParams.set('combo', comboKey);
       if (referralCode) {
         shareUrl.searchParams.set('ref', referralCode.toUpperCase());
       } else {
         shareUrl.searchParams.delete('ref');
       }
-      shareUrl.hash = 'voteSection';
       return shareUrl.toString();
     }
     async function shareVoteLink({ comboKey, referralCode = "", sharerName = "" }) {
