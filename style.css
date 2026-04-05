@@ -2190,14 +2190,19 @@ body::before {
   z-index: 1;
 }
 .receipt-lightbox-content {
-  max-width: 640px;
+  max-width: 840px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.86), rgba(235, 248, 239, 0.8));
 }
 .influencer-activation-card {
+  padding: 1.25rem 1.2rem 1.15rem;
   background:
-    radial-gradient(circle at top right, rgba(214, 179, 75, 0.16), transparent 28%),
-    linear-gradient(150deg, rgba(255,255,255,0.96), rgba(243, 249, 245, 0.88));
-  border: 1px solid rgba(188, 157, 65, 0.2);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 28px 54px rgba(18, 58, 39, 0.12);
+    radial-gradient(circle at top left, rgba(255,255,255,0.78), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(228, 200, 110, 0.14), transparent 22%),
+    linear-gradient(180deg, rgba(255,255,255,0.98), rgba(240, 247, 242, 0.96));
+  border: 1px solid rgba(206, 216, 208, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    0 28px 54px rgba(18, 58, 39, 0.12);
 }
 .influencer-status-card[hidden],
 .influencer-activation-card[hidden] {
@@ -2270,22 +2275,20 @@ body::before {
 }
 .influencer-receipt-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid rgba(25, 53, 37, 0.1);
+  gap: 1.15rem;
+  padding-bottom: 0.95rem;
 }
 .influencer-receipt-brand {
   display: flex;
   align-items: center;
-  gap: 0.95rem;
+  gap: 1rem;
   min-width: 0;
 }
 .influencer-receipt-logo {
-  width: 62px;
-  height: 62px;
+  width: 78px;
+  height: 78px;
   object-fit: contain;
   flex: 0 0 auto;
   filter: drop-shadow(0 8px 18px rgba(20, 49, 34, 0.14));
@@ -2301,151 +2304,243 @@ body::before {
   font-weight: 800;
   margin-bottom: 0.25rem;
 }
+.influencer-receipt-status-badge {
+  flex: 0 0 auto;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: linear-gradient(180deg, #1d8a4a, #0e6a33);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 10px 22px rgba(15, 91, 43, 0.22);
+}
+.influencer-receipt-wave {
+  height: 18px;
+  margin: 0.2rem -1.2rem 1rem;
+  background:
+    radial-gradient(circle at 50% -12px, rgba(192, 158, 73, 0.75) 0 22px, transparent 23px),
+    linear-gradient(180deg, rgba(209, 180, 105, 0.95), rgba(188, 157, 65, 0.55));
+  opacity: 0.9;
+  clip-path: polygon(0 42%, 14% 58%, 29% 45%, 46% 61%, 64% 42%, 80% 55%, 100% 40%, 100% 100%, 0 100%);
+}
+.influencer-receipt-body {
+  padding: 0.2rem 0;
+}
 .influencer-receipt-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.1rem;
+  gap: 1.25rem;
+  margin-bottom: 1rem;
 }
 .influencer-receipt-title {
   font-family: "Playfair Display", serif;
-  font-size: 1.28rem;
-  color: #143825;
-  margin-bottom: 0.22rem;
+  font-size: 2rem;
+  line-height: 1.05;
+  color: #25414b;
+  margin-bottom: 0.28rem;
   letter-spacing: 0.01em;
 }
 .influencer-receipt-sub {
-  font-size: 0.82rem;
-  line-height: 1.55;
-  color: #5f7467;
+  font-size: 0.96rem;
+  line-height: 1.45;
+  color: #61737a;
 }
 .influencer-receipt-highlight {
   flex: 1 1 auto;
   min-width: 0;
-  padding: 1rem 1.05rem;
-  border-radius: 20px;
-  background: linear-gradient(145deg, rgba(22, 56, 37, 0.96), rgba(35, 84, 55, 0.92));
-  color: #f8fbf8;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 20px 36px rgba(18, 58, 39, 0.16);
+  padding: 0.7rem 0.2rem 0.2rem 0;
+  color: #27434b;
 }
 .influencer-receipt-highlight span {
   display: block;
-  font-size: 0.7rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(238, 245, 239, 0.72);
-  margin-bottom: 0.32rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #43606a;
+  margin-bottom: 0.55rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(82, 108, 117, 0.16);
 }
 .influencer-receipt-highlight strong {
   display: block;
-  font-size: 1rem;
-  margin-bottom: 0.35rem;
+  font-size: 1.92rem;
+  font-family: "Playfair Display", serif;
+  color: #284953;
+  margin-bottom: 0.45rem;
 }
 .influencer-receipt-highlight p {
-  font-size: 0.8rem;
-  line-height: 1.55;
-  color: rgba(244, 249, 245, 0.82);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #526871;
+  max-width: 430px;
+}
+.influencer-receipt-highlight p + p {
+  margin-top: 0.18rem;
+}
+.influencer-receipt-qr-side {
+  flex: 0 0 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
 }
 .influencer-receipt-qr-wrap {
-  flex: 0 0 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.85rem;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(25, 53, 37, 0.1);
+  padding: 1rem;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(245, 248, 246, 0.96));
+  border: 1px solid rgba(206, 216, 208, 0.9);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 14px 28px rgba(52, 85, 64, 0.08);
 }
 .influencer-receipt-qr {
-  width: 92px;
-  height: 92px;
-  border-radius: 12px;
+  width: 168px;
+  height: 168px;
+  border-radius: 16px;
   background: #fff;
+  padding: 8px;
+  box-shadow: 0 10px 18px rgba(28, 47, 36, 0.08);
 }
 .influencer-receipt-qr-wrap small {
-  font-size: 0.68rem;
+  font-size: 0.82rem;
   line-height: 1.35;
   text-align: center;
   color: #5d7266;
 }
 .influencer-receipt-badge {
-  flex: 0 0 auto;
-  padding: 0.52rem 0.8rem;
-  border-radius: 999px;
-  background: linear-gradient(145deg, rgba(252, 245, 217, 0.96), rgba(242, 225, 166, 0.9));
-  border: 1px solid rgba(188, 157, 65, 0.22);
-  color: #6b5211;
-  font-size: 0.72rem;
+  align-self: flex-end;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(245, 248, 246, 0.96));
+  border: 1px dashed rgba(193, 202, 196, 0.95);
+  color: #5b6871;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 18px rgba(56, 82, 66, 0.05);
+}
+.influencer-receipt-amount-card {
+  margin-bottom: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(245, 248, 246, 0.96));
+  border: 1px solid rgba(206, 216, 208, 0.95);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 10px 24px rgba(57, 85, 67, 0.06);
+}
+.influencer-receipt-amount-card span {
+  display: block;
+  font-size: 1rem;
+  color: #51686f;
+  margin-bottom: 0.35rem;
+}
+.influencer-receipt-amount-card strong {
+  display: block;
+  font-size: 3rem;
+  line-height: 1;
+  color: #21424c;
   font-weight: 800;
-  letter-spacing: 0.08em;
-  box-shadow: 0 12px 24px rgba(137, 109, 32, 0.12);
 }
 .influencer-receipt-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.8rem;
 }
 .influencer-receipt-item {
-  padding: 0.85rem 0.9rem;
-  border-radius: 18px;
-  background: rgba(249, 252, 250, 0.96);
-  border: 1px solid rgba(25, 53, 37, 0.08);
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(245, 248, 246, 0.96));
+  border: 1px solid rgba(206, 216, 208, 0.95);
+  box-shadow: 0 8px 18px rgba(56, 82, 66, 0.04);
   min-width: 0;
 }
 .influencer-receipt-item span {
   display: block;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #708378;
-  margin-bottom: 0.34rem;
+  font-size: 0.92rem;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #5b7078;
+  margin-bottom: 0.4rem;
 }
 .influencer-receipt-item strong {
   display: block;
-  color: #173825;
-  font-size: 0.9rem;
+  color: #264550;
+  font-size: 1.18rem;
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
+.influencer-share-box {
+  margin-top: 1rem;
+  padding: 1rem 1.05rem;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(245, 248, 246, 0.96));
+  border: 1px solid rgba(206, 216, 208, 0.95);
+  box-shadow: 0 10px 20px rgba(56, 82, 66, 0.04);
+}
+.influencer-share-box-label {
+  display: block;
+  font-size: 1rem;
+  color: #536a72;
+  margin-bottom: 0.6rem;
+}
+.influencer-share-box #influencerShareLink {
+  display: block;
+  width: 100%;
+  padding: 0.95rem 1.1rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid rgba(217, 223, 219, 0.98);
+  box-shadow: inset 0 2px 6px rgba(34, 59, 47, 0.05);
+  font-size: 1rem;
+  color: #4f636b;
+  overflow-wrap: anywhere;
+}
 .influencer-receipt-footer {
-  margin-top: 0.9rem;
+  margin-top: 1rem;
+  padding: 1rem 0 0.25rem;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.8rem;
+  border-top: 1px solid rgba(205, 214, 208, 0.92);
 }
 .influencer-receipt-signoff {
-  padding: 0.8rem 0.9rem;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.78);
-  border: 1px solid rgba(25, 53, 37, 0.08);
+  padding: 0.2rem 0.55rem;
+  text-align: center;
+  border-right: 1px solid rgba(205, 214, 208, 0.92);
+}
+.influencer-receipt-signoff:last-child {
+  border-right: none;
 }
 .influencer-receipt-signoff span {
   display: block;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #718278;
-  margin-bottom: 0.28rem;
+  font-size: 0.86rem;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  color: #708188;
+  margin-bottom: 0.34rem;
 }
 .influencer-receipt-signoff strong {
   display: block;
-  font-size: 0.92rem;
-  color: #173825;
+  font-size: 1rem;
+  color: #264550;
 }
 .influencer-activation-note {
-  margin-top: 0.9rem;
-  color: #224836;
-  font-size: 0.86rem;
-  line-height: 1.58;
+  margin-top: 0.95rem;
+  color: #5d7079;
+  font-size: 0.95rem;
+  line-height: 1.6;
   text-align: center;
 }
 .influencer-activation-note small {
   display: block;
-  margin-top: 0.3rem;
-  font-size: 0.72rem;
-  color: #6f8277;
+  margin-top: 0.28rem;
+  font-size: 0.92rem;
+  color: #49616c;
+  font-style: italic;
 }
 .receipt-modal-actions .notice-modal-btn {
   flex: 1 1 190px;
@@ -2985,15 +3080,49 @@ body::before {
     width: 52px;
     height: 52px;
   }
-  .influencer-receipt-title {
-    font-size: 1.1rem;
+  .influencer-receipt-status-badge {
+    align-self: flex-start;
+    font-size: 0.74rem;
+    padding: 0.58rem 0.8rem;
   }
-  .influencer-receipt-qr-wrap {
+  .influencer-receipt-wave {
+    margin-left: -0.9rem;
+    margin-right: -0.9rem;
+  }
+  .influencer-receipt-title {
+    font-size: 1.34rem;
+  }
+  .influencer-receipt-sub {
+    font-size: 0.82rem;
+  }
+  .influencer-receipt-highlight span {
+    font-size: 0.92rem;
+  }
+  .influencer-receipt-highlight strong {
+    font-size: 1.36rem;
+  }
+  .influencer-receipt-highlight p {
+    font-size: 0.86rem;
+  }
+  .influencer-receipt-qr-side {
     flex-basis: auto;
     width: 100%;
   }
+  .influencer-receipt-qr-wrap {
+    width: 100%;
+  }
+  .influencer-receipt-qr {
+    width: 132px;
+    height: 132px;
+  }
   .influencer-receipt-badge {
     align-self: flex-start;
+    width: 100%;
+    text-align: left;
+    font-size: 0.8rem;
+  }
+  .influencer-receipt-amount-card strong {
+    font-size: 2.2rem;
   }
   .influencer-receipt-grid {
     grid-template-columns: 1fr;
@@ -3001,6 +3130,24 @@ body::before {
   }
   .influencer-receipt-footer {
     grid-template-columns: 1fr;
+    gap: 0.45rem;
+  }
+  .influencer-receipt-signoff {
+    border-right: none;
+    border-bottom: 1px solid rgba(205, 214, 208, 0.92);
+    padding-bottom: 0.7rem;
+  }
+  .influencer-receipt-signoff:last-child {
+    border-bottom: none;
+    padding-bottom: 0.15rem;
+  }
+  .influencer-share-box #influencerShareLink {
+    font-size: 0.84rem;
+    padding: 0.82rem 0.95rem;
+  }
+  .influencer-activation-note,
+  .influencer-activation-note small {
+    font-size: 0.82rem;
   }
   .loyalist-modal {
     width: 100%;

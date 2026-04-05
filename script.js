@@ -298,7 +298,7 @@
     const influencerCopyCodeBtn = document.getElementById('influencerCopyCodeBtn');
     const influencerShareBtn = document.getElementById('influencerShareBtn');
     const influencerDownloadReceiptBtn = document.getElementById('influencerDownloadReceiptBtn');
-    const MOBILIZER_BUTTON_TEXT = "claim your mobilizer slot - prove your political impact";
+    const MOBILIZER_BUTTON_TEXT = "Proceed to get your Code/Link";
     // amCharts Globals
     let mapChart;
     let polygonSeries;
