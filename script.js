@@ -1546,12 +1546,20 @@
         row.className = 'loyalist-modal-row';
         row.innerHTML = `
           <div class="loyalist-modal-rank">${index + 1}</div>
-          <div class="loyalist-modal-body">
-            <div class="loyalist-modal-name">${loy.name}</div>
-            <div class="loyalist-modal-city">${loy.city || 'Unknown location'}</div>
+          <div class="loyalist-modal-main">
+            <div class="loyalist-modal-body">
+              <div class="loyalist-modal-name">${loy.name}</div>
+              <div class="loyalist-modal-meta">
+                <span class="loyalist-modal-city">${loy.city || 'Unknown location'}</span>
+                <span class="loyalist-modal-time">Active mobilizer</span>
+              </div>
+              <div class="loyalist-modal-note">Influenced <strong>${formatNumber(loy.supporters)}</strong> verified voters for this combo.</div>
+            </div>
+            <div class="loyalist-modal-actions">
+              <div class="loyalist-modal-supporters">${formatNumber(loy.supporters)} voters</div>
+              <button class="loyalist-modal-share" type="button">Share link</button>
+            </div>
           </div>
-          <div class="loyalist-modal-supporters">${formatNumber(loy.supporters)} voters</div>
-          <button class="loyalist-modal-share" type="button">⤴ Share</button>
         `;
         const shareBtn = row.querySelector('.loyalist-modal-share');
         if (shareBtn) {
@@ -2505,7 +2513,7 @@ function renderComboLoyalists() {
             );
             polygonSeries.mapPolygons.template.setAll({
               interactive: true,
-              tooltipHTML: `<div style="min-width:150px; font-family: 'Montserrat', sans-serif;">{tooltipHTML}</div>`,
+              tooltipHTML: `<div style="min-width:150px; font-family: 'Manrope', sans-serif;">{tooltipHTML}</div>`,
               templateField: "polygonSettings",
               stroke: am5.color(0xffffff),
               strokeWidth: 1.2
