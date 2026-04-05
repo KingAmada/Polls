@@ -519,7 +519,7 @@
         if (!influencerSignupState?.virtualAccountNumber) return;
         await copyTextToClipboard(influencerSignupState.virtualAccountNumber, {
           title: "Account Number Copied",
-          message: "The virtual account number has been copied.",
+          message: "The account number has been copied.",
           kicker: "Influencer"
         });
       });
@@ -750,7 +750,7 @@
       return payload;
     }
     async function submitInfluencerSignup({ fullName, phone, state, city, comboKey }) {
-      setInfluencerSubmissionState(true, "Creating your influencer virtual account...");
+      setInfluencerSubmissionState(true, "Creating your influencer account number...");
       const response = await callPollApi('/_functions/apiPollInfluencerSignup', {
         method: 'POST',
         body: {
@@ -762,7 +762,7 @@
         }
       });
       renderInfluencerSignup(response.signup);
-      setInfluencerSubmissionState(false, "Creating your influencer virtual account...");
+      setInfluencerSubmissionState(false, "Creating your influencer account number...");
       return response.signup;
     }
     async function refreshInfluencerStatus() {
