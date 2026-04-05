@@ -281,6 +281,7 @@
     const influencerShareLinkEl = document.getElementById('influencerShareLink');
     const influencerCopyCodeBtn = document.getElementById('influencerCopyCodeBtn');
     const influencerShareBtn = document.getElementById('influencerShareBtn');
+    const MOBILIZER_BUTTON_TEXT = "🔥 CLAIM YOUR MOBILIZER SLOT — Prove Your Political Impact";
     // amCharts Globals
     let mapChart;
     let polygonSeries;
@@ -623,7 +624,7 @@
     function setInfluencerSubmissionState(isSubmitting, message = "Processing your influencer signup...") {
       if (referralRequestSubmitBtn) {
         referralRequestSubmitBtn.disabled = isSubmitting;
-        referralRequestSubmitBtn.textContent = isSubmitting ? 'Processing...' : 'Become an Influencer';
+        referralRequestSubmitBtn.textContent = isSubmitting ? 'Processing...' : MOBILIZER_BUTTON_TEXT;
       }
       if (referralSubmitMsg) {
         referralSubmitMsg.textContent = message;
