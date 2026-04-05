@@ -276,6 +276,8 @@
     const referralCityEl      = document.getElementById('referralCity');
     const referralRequestSubmitBtn = document.getElementById('referralRequestSubmitBtn');
     const referralSubmitMsg   = document.getElementById('referralSubmitMsg'); // New message div
+    const receiptLightbox = document.getElementById('receiptLightbox');
+    const receiptLightboxClose = document.getElementById('receiptLightboxClose');
     const influencerSelectedComboEl = document.getElementById('influencerSelectedCombo');
     const influencerStatusCardEl = document.getElementById('influencerStatusCard');
     const influencerStatusComboEl = document.getElementById('influencerStatusCombo');
@@ -292,9 +294,11 @@
     const influencerReceiptPaidAtEl = document.getElementById('influencerReceiptPaidAt');
     const influencerReferralCodeEl = document.getElementById('influencerReferralCode');
     const influencerShareLinkEl = document.getElementById('influencerShareLink');
+    const influencerReceiptQrEl = document.getElementById('influencerReceiptQr');
     const influencerCopyCodeBtn = document.getElementById('influencerCopyCodeBtn');
     const influencerShareBtn = document.getElementById('influencerShareBtn');
-    const MOBILIZER_BUTTON_TEXT = "🔥 CLAIM YOUR MOBILIZER SLOT — Prove Your Political Impact";
+    const influencerDownloadReceiptBtn = document.getElementById('influencerDownloadReceiptBtn');
+    const MOBILIZER_BUTTON_TEXT = "claim your mobilizer slot - prove your political impact";
     // amCharts Globals
     let mapChart;
     let polygonSeries;
@@ -468,10 +472,22 @@
             closeReferralLightbox();
         });
     }
+    if (receiptLightboxClose && receiptLightbox) {
+        receiptLightboxClose.addEventListener('click', () => {
+            closeReceiptLightbox();
+        });
+    }
      if (referralLightbox) {
         referralLightbox.addEventListener('click', (e) => {
             if (e.target === referralLightbox) { // Click on overlay background
                 closeReferralLightbox();
+            }
+        });
+    }
+    if (receiptLightbox) {
+        receiptLightbox.addEventListener('click', (e) => {
+            if (e.target === receiptLightbox) {
+                closeReceiptLightbox();
             }
         });
     }
@@ -580,6 +596,11 @@
         }
       });
     }
+    if (influencerDownloadReceiptBtn) {
+      influencerDownloadReceiptBtn.addEventListener('click', async () => {
+        await downloadInfluencerReceiptPng();
+      });
+    }
     /********************************************
      * HELPER FUNCTIONS
      ********************************************/
@@ -661,6 +682,7 @@
     function resetInfluencerModal({ clearFields = false } = {}) {
       stopInfluencerStatusPolling();
       influencerSignupState = null;
+      if (receiptLightbox) receiptLightbox.style.display = 'none';
       setInfluencerSubmissionState(false, "Processing your influencer signup...");
       if (referralRequestForm) referralRequestForm.style.display = 'flex';
       if (influencerStatusCardEl) influencerStatusCardEl.hidden = true;
@@ -686,8 +708,22 @@
     function closeReferralLightbox() {
       if (!referralLightbox) return;
       referralLightbox.style.display = 'none';
-      document.body.style.overflow = '';
+      if (receiptLightbox?.style.display !== 'flex') {
+        document.body.style.overflow = '';
+      }
       resetInfluencerModal();
+    }
+    function openReceiptLightbox() {
+      if (!receiptLightbox) return;
+      receiptLightbox.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeReceiptLightbox() {
+      if (!receiptLightbox) return;
+      receiptLightbox.style.display = 'none';
+      if (referralLightbox?.style.display !== 'flex') {
+        document.body.style.overflow = '';
+      }
     }
     function renderInfluencerSelectedCombo(comboKey) {
       if (influencerSelectedComboEl) {
@@ -704,13 +740,25 @@
       const date = new Date(value);
       return Number.isNaN(date.getTime()) ? '-' : date.toLocaleString();
     }
+    function renderInfluencerReceiptQr(signup) {
+      if (!influencerReceiptQrEl || !window.QRious) return;
+      const qrValue = signup?.shareLink || signup?.referralCode || signup?.comboKey || '2027 Nigeria Election Permutation Poll';
+      const qr = new window.QRious({
+        element: influencerReceiptQrEl,
+        value: qrValue,
+        size: 184,
+        level: 'H',
+        foreground: '#143825',
+        background: '#ffffff'
+      });
+      influencerReceiptQrEl.width = qr.size;
+      influencerReceiptQrEl.height = qr.size;
+    }
     function describeInfluencerStatus(signup) {
       const paymentStatus = (signup?.paymentStatus || 'pending').toLowerCase();
       const activationStatus = (signup?.activationStatus || 'pending').toLowerCase();
       if (activationStatus === 'activated') {
-        return signup?.paidAt
-          ? `Payment confirmed. Your code went live on ${new Date(signup.paidAt).toLocaleString()}.`
-          : 'Payment confirmed. Your influencer account is active.';
+        return 'Payment has been received';
       }
       if (paymentStatus === 'underpaid') {
         return `Payment received but still below ${formatNaira(signup?.expectedAmount)}.`;
@@ -722,6 +770,7 @@
     }
     function renderInfluencerSignup(signup) {
       if (!signup) return;
+      const wasActivated = (influencerSignupState?.activationStatus || '').toLowerCase() === 'activated';
       influencerSignupState = signup;
       renderInfluencerSelectedCombo(signup.comboKey || getSelectedComboKey());
       if (referralRequestForm) referralRequestForm.style.display = 'none';
@@ -740,6 +789,7 @@
       if (influencerReceiptPaidAtEl) influencerReceiptPaidAtEl.textContent = formatReceiptTimestamp(signup.paidAt || signup.activatedAt);
       if (influencerReferralCodeEl) influencerReferralCodeEl.textContent = signup.referralCode || '-';
       if (influencerShareLinkEl) influencerShareLinkEl.textContent = signup.shareLink || '-';
+      renderInfluencerReceiptQr(signup);
       if (influencerRefreshBtn) {
         influencerRefreshBtn.textContent = isActivated ? 'Refresh Status' : 'Check Payment';
       }
@@ -747,6 +797,39 @@
         scheduleInfluencerStatusPoll();
       } else {
         stopInfluencerStatusPolling();
+        if (!wasActivated) {
+          if (referralLightbox) referralLightbox.style.display = 'none';
+          openReceiptLightbox();
+        }
+      }
+    }
+    async function downloadInfluencerReceiptPng() {
+      if (!influencerActivationCardEl) return;
+      const fileSuffix = String(influencerSignupState?.referralCode || influencerSignupState?.signupId || 'receipt')
+        .replace(/[^a-z0-9_-]/gi, '')
+        .slice(-12) || 'receipt';
+      try {
+        if (window.html2canvas) {
+          const canvas = await window.html2canvas(influencerActivationCardEl, {
+            backgroundColor: '#f8fbf8',
+            scale: Math.min(3, Math.max(2, window.devicePixelRatio || 2)),
+            useCORS: true,
+            logging: false
+          });
+          const link = document.createElement('a');
+          link.href = canvas.toDataURL('image/png');
+          link.download = `mobilizer-receipt-${fileSuffix}.png`;
+          link.click();
+          return;
+        }
+        throw new Error('Receipt renderer unavailable');
+      } catch (error) {
+        console.error('Receipt download failed:', error);
+        openNoticeModal({
+          title: 'Download Failed',
+          message: 'Unable to download the receipt as PNG right now.',
+          kicker: 'Receipt'
+        });
       }
     }
     function openReferralLightbox(comboKey) {

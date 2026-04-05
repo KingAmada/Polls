@@ -37,7 +37,7 @@
   <meta name="twitter:image" content="https://kingamada.github.io/Polls/Poll-og.png?v=20260405-2" />
   <meta name="twitter:image:alt" content="2027 Nigeria Election Permutation Poll preview" />
   <link
-    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Playfair+Display:wght@600;700;800&display=swap"
     rel="stylesheet"
   />
   <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
@@ -155,7 +155,7 @@
         <div id="chartBars"></div>
         <div class="referral-info">
           Want to be a <strong>Minister</strong> or get <strong>political appointment</strong>? Become official mobilizer for your chosen combo and show your candidates your political might. Political influencers often get political appointments: Minister, MD, Director etc. Get your referral code/link.
-          <br><button id="getReferralCodeBtn">🔥 CLAIM YOUR MOBILIZER SLOT — Prove Your Political Impact</button>
+          <br><button id="getReferralCodeBtn">Get Referal code to prove your political impact</button>
         </div>
         <h3 class="loyalist-heading">Top Combo Influencers</h3>
         <p class="loyalist-meta" id="loyalistMeta"></p>
@@ -292,7 +292,7 @@
   <div class="lightbox-overlay" id="referralLightbox">
     <div class="lightbox-content">
       <span class="lightbox-close" id="referralLightboxClose">X</span>
-      <h2 style="text-align:center; font-size: 1.2rem;">Prove Your Political Might — Become an Official Mobilizer for Your Combo</h2>
+      <h2 style="text-align:center; font-size: 1.2rem;">Prove Your Political Might: Become an Official Mobilizer for Your Combo</h2>
       <p style="font-size:0.96rem; color:#1f3329; margin-top:0.45rem; text-align:center; font-weight:700; line-height:1.65;">
         Demonstrate real voter mobilization power.
         Every vote using your code proves your influence.
@@ -312,7 +312,7 @@
         <select id="referralCity" required>
           <option value="" disabled selected>Select state first</option>
         </select>
-        <button type="submit" id="referralRequestSubmitBtn">🔥 CLAIM YOUR MOBILIZER SLOT — Prove Your Political Impact</button>
+        <button type="submit" id="referralRequestSubmitBtn">claim your mobilizer slot - prove your political impact</button>
       </form>
       <div class="submit-message" id="referralSubmitMsg">
         Processing your influencer signup...
@@ -345,14 +345,41 @@
           <button type="button" class="notice-modal-btn" id="influencerCopyAccountBtn">Copy Account Number</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="lightbox-overlay" id="receiptLightbox">
+    <div class="lightbox-content receipt-lightbox-content">
+      <span class="lightbox-close" id="receiptLightboxClose">X</span>
       <div class="influencer-activation-card" id="influencerActivationCard" hidden>
         <div class="influencer-status-kicker">Activation Complete</div>
-        <div class="influencer-receipt-head">
-          <div>
-            <h3 class="influencer-receipt-title">Official Mobilizer Receipt</h3>
-            <p class="influencer-receipt-sub">Your slot is active and your referral link is ready.</p>
+        <div class="influencer-receipt-header">
+          <div class="influencer-receipt-brand">
+            <img
+              class="influencer-receipt-logo"
+              id="influencerReceiptLogo"
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Coat_of_arms_of_Nigeria.svg/512px-Coat_of_arms_of_Nigeria.svg.png"
+              alt="Nigeria Coat of Arms"
+              crossorigin="anonymous"
+            />
+            <div class="influencer-receipt-brand-copy">
+              <div class="influencer-receipt-overline">Federal Mobilization Record</div>
+              <h3 class="influencer-receipt-title">Official Mobilizer Receipt</h3>
+              <p class="influencer-receipt-sub">Issued for verified political mobilization support in the 2027 election poll.</p>
+            </div>
           </div>
           <div class="influencer-receipt-badge" id="influencerReceiptId">-</div>
+        </div>
+        <div class="influencer-receipt-head">
+          <div class="influencer-receipt-highlight">
+            <span>Status</span>
+            <strong>Payment has been received</strong>
+            <p>Your slot is active and your referral link is ready for circulation.</p>
+          </div>
+          <div class="influencer-receipt-qr-wrap">
+            <canvas id="influencerReceiptQr" class="influencer-receipt-qr" aria-label="Receipt QR code"></canvas>
+            <small>Scan to open your mobilizer link</small>
+          </div>
         </div>
         <div class="influencer-receipt-grid">
           <div class="influencer-receipt-item">
@@ -373,11 +400,22 @@
           </div>
         </div>
         <div class="influencer-share-box" id="influencerShareLink">-</div>
+        <div class="influencer-receipt-footer">
+          <div class="influencer-receipt-signoff">
+            <span>Authorized Status</span>
+            <strong>Verified Mobilizer</strong>
+          </div>
+          <div class="influencer-receipt-signoff">
+            <span>Channel</span>
+            <strong>KingAmada Polls 2027</strong>
+          </div>
+        </div>
         <p class="influencer-activation-note">
           Wishing you success in your mobilization journey. Go and prove your political weight.
           <small>And when the appointment comes, don't forget us.</small>
         </p>
-        <div class="influencer-status-actions">
+        <div class="influencer-status-actions receipt-modal-actions">
+          <button type="button" class="notice-modal-btn secondary" id="influencerDownloadReceiptBtn">Download Receipt PNG</button>
           <button type="button" class="notice-modal-btn secondary" id="influencerCopyCodeBtn">Copy Code</button>
           <button type="button" class="notice-modal-btn" id="influencerShareBtn">Share Link</button>
         </div>
@@ -413,6 +451,8 @@
     </div>
   </footer>
 
-  <script src="./script.js?v=20260405-2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="./script.js?v=20260405-3"></script>
 </body>
 </html>
