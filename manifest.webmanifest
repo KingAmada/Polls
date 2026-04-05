@@ -1,0 +1,25 @@
+{
+  "name": "2027 Nigeria Election Permutation Poll",
+  "short_name": "2027 Poll",
+  "description": "Vote live, compare combos, track state momentum, and share mobilizer links in the 2027 Nigeria Election Permutation Poll.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f0f1f2",
+  "theme_color": "#0d5c2f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./Poll-og.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./Poll-og.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

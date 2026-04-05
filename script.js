@@ -82,6 +82,15 @@
       if (!DEBUG_MODE) return;
       console.error(`[DEBUG:${scope}]`, message, error);
     }
+    async function registerServiceWorker() {
+      if (!('serviceWorker' in navigator)) return;
+      try {
+        await navigator.serviceWorker.register('./sw.js?v=20260405-1', { scope: './' });
+        debugLog("pwa", "Service worker registered.");
+      } catch (error) {
+        debugError("pwa", "Service worker registration failed.", error);
+      }
+    }
     async function fetchAllSupabaseRows(tableName, selectClause, options = {}) {
       if (!supabaseClient) return { data: [], error: new Error("Supabase client missing") };
       const pageSize = options.pageSize || 1000;
@@ -2795,4 +2804,7 @@ function renderComboLoyalists() {
       });
     }
     // --- Run Initialization ---
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', () => {
+      registerServiceWorker();
+      init();
+    });
