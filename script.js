@@ -752,7 +752,7 @@
       const referralCode = String(signup?.referralCode || '').toUpperCase();
       return referralCode ? `RCT-${referralCode.slice(-6)}` : `RCT-${signupIdTail || 'POLL50'}`;
     }
-    function getReferralPrefixFromLocation(stateOrCity) {
+    function getReferralPrefixFromState(state) {
       const lookup = {
         ABIA: 'ABI', ADAMAWA: 'ADA', AKWAIBOM: 'AKW', ANAMBRA: 'ANA', BAUCHI: 'BAU',
         BAYELSA: 'BAY', BENUE: 'BEN', BORNO: 'BOR', CROSSRIVER: 'CRS', DELTA: 'DEL',
@@ -763,11 +763,11 @@
         RIVERS: 'RIV', SOKOTO: 'SOK', TARABA: 'TAR', YOBE: 'YOB', ZAMFARA: 'ZAM',
         FCT: 'ABJ', ABUJA: 'ABJ'
       };
-      const normalized = String(stateOrCity || '').replace(/[^A-Za-z]/g, '').toUpperCase();
+      const normalized = String(state || '').replace(/[^A-Za-z]/g, '').toUpperCase();
       return lookup[normalized] || (normalized || 'POL').slice(0, 3).padEnd(3, 'X');
     }
     function buildSimulatedReferralCode(signup) {
-      const prefix = getReferralPrefixFromLocation(signup?.state || signup?.city);
+      const prefix = getReferralPrefixFromState(signup?.state);
       const suffix = String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
       return `${prefix}${suffix}`;
     }
