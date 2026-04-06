@@ -341,6 +341,7 @@
         </div>
         <div class="influencer-status-pill" id="influencerPaymentStatus">Waiting for payment confirmation...</div>
         <div class="influencer-status-actions">
+          <button type="button" class="notice-modal-btn secondary" id="influencerSimulatePaymentBtn">Simulate Payment Received</button>
           <button type="button" class="notice-modal-btn secondary" id="influencerRefreshBtn">Check Payment</button>
           <button type="button" class="notice-modal-btn" id="influencerCopyAccountBtn">Copy Account Number</button>
         </div>
@@ -352,7 +353,7 @@
     <div class="lightbox-content receipt-lightbox-content">
       <span class="lightbox-close" id="receiptLightboxClose">X</span>
       <div class="influencer-activation-card" id="influencerActivationCard" hidden>
-        <div class="receipt-poster">
+        <div class="receipt-poster" id="receiptPoster">
           <div class="receipt-top">
             <img
               class="receipt-crest"

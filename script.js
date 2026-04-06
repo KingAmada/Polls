@@ -286,6 +286,7 @@
     const influencerAccountNumberEl = document.getElementById('influencerAccountNumber');
     const influencerPaymentStatusEl = document.getElementById('influencerPaymentStatus');
     const influencerRefreshBtn = document.getElementById('influencerRefreshBtn');
+    const influencerSimulatePaymentBtn = document.getElementById('influencerSimulatePaymentBtn');
     const influencerCopyAccountBtn = document.getElementById('influencerCopyAccountBtn');
     const influencerActivationCardEl = document.getElementById('influencerActivationCard');
     const influencerReceiptIdEl = document.getElementById('influencerReceiptId');
@@ -294,6 +295,7 @@
     const influencerReceiptPaidAtEl = document.getElementById('influencerReceiptPaidAt');
     const influencerReferralCodeEl = document.getElementById('influencerReferralCode');
     const influencerReceiptMobilizerNameEl = document.getElementById('influencerReceiptMobilizerName');
+    const receiptPosterEl = document.getElementById('receiptPoster');
     const influencerShareLinkEl = document.getElementById('influencerShareLink');
     const influencerReceiptQrEl = document.getElementById('influencerReceiptQr');
     const influencerCopyCodeBtn = document.getElementById('influencerCopyCodeBtn');
@@ -558,6 +560,11 @@
         }
       });
     }
+    if (influencerSimulatePaymentBtn) {
+      influencerSimulatePaymentBtn.addEventListener('click', () => {
+        simulateInfluencerPayment();
+      });
+    }
     if (influencerCopyAccountBtn) {
       influencerCopyAccountBtn.addEventListener('click', async () => {
         if (!influencerSignupState?.virtualAccountNumber) return;
@@ -736,6 +743,26 @@
       const referralCode = String(signup?.referralCode || '').toUpperCase();
       return referralCode ? `RCT-${referralCode.slice(-6)}` : `RCT-${signupIdTail || 'POLL50'}`;
     }
+    function getReferralPrefixFromLocation(stateOrCity) {
+      const lookup = {
+        ABIA: 'ABI', ADAMAWA: 'ADA', AKWAIBOM: 'AKW', ANAMBRA: 'ANA', BAUCHI: 'BAU',
+        BAYELSA: 'BAY', BENUE: 'BEN', BORNO: 'BOR', CROSSRIVER: 'CRS', DELTA: 'DEL',
+        EBONYI: 'EBO', EDO: 'EDO', EKITI: 'EKT', ENUGU: 'ENU', GOMBE: 'GOM', IMO: 'IMO',
+        JIGAWA: 'JIG', KADUNA: 'KAD', KANO: 'KAN', KATSINA: 'KAT', KEBBI: 'KEB',
+        KOGI: 'KOG', KWARA: 'KWA', LAGOS: 'LAG', NASARAWA: 'NAS', NIGER: 'NIG',
+        OGUN: 'OGN', ONDO: 'OND', OSUN: 'OSU', OYO: 'OYO', PLATEAU: 'PLA',
+        RIVERS: 'RIV', SOKOTO: 'SOK', TARABA: 'TAR', YOBE: 'YOB', ZAMFARA: 'ZAM',
+        FCT: 'ABJ', ABUJA: 'ABJ'
+      };
+      const normalized = String(stateOrCity || '').replace(/[^A-Za-z]/g, '').toUpperCase();
+      return lookup[normalized] || (normalized || 'POL').slice(0, 3).padEnd(3, 'X');
+    }
+    function buildSimulatedReferralCode(signup) {
+      const prefix = getReferralPrefixFromLocation(signup?.state || signup?.city);
+      const numericSeed = String(signup?.signupId || signup?.phone || Date.now()).replace(/\D/g, '');
+      const suffix = String(Number(numericSeed.slice(-6) || '1') % 1000000).padStart(6, '0');
+      return `${prefix}${suffix}`;
+    }
     function formatReceiptTimestamp(value) {
       if (!value) return '-';
       const date = new Date(value);
@@ -805,14 +832,37 @@
         }
       }
     }
+    function simulateInfluencerPayment() {
+      if (!influencerSignupState) {
+        openNoticeModal({
+          title: 'No Signup Found',
+          message: 'Create an influencer signup first before simulating payment.',
+          kicker: 'Testing'
+        });
+        return;
+      }
+      const simulatedPaidAt = new Date().toISOString();
+      const referralCode = influencerSignupState.referralCode || buildSimulatedReferralCode(influencerSignupState);
+      const simulatedSignup = {
+        ...influencerSignupState,
+        totalPaid: Math.max(Number(influencerSignupState.totalPaid || 0), Number(influencerSignupState.expectedAmount || 0)),
+        paymentStatus: 'paid',
+        activationStatus: 'activated',
+        paidAt: influencerSignupState.paidAt || simulatedPaidAt,
+        activatedAt: influencerSignupState.activatedAt || simulatedPaidAt,
+        referralCode,
+        shareLink: influencerSignupState.shareLink || buildShareUrl(influencerSignupState.comboKey, referralCode)
+      };
+      renderInfluencerSignup(simulatedSignup);
+    }
     async function downloadInfluencerReceiptPng() {
-      if (!influencerActivationCardEl) return;
+      if (!receiptPosterEl) return;
       const fileSuffix = String(influencerSignupState?.referralCode || influencerSignupState?.signupId || 'receipt')
         .replace(/[^a-z0-9_-]/gi, '')
         .slice(-12) || 'receipt';
       try {
         if (window.html2canvas) {
-          const canvas = await window.html2canvas(influencerActivationCardEl, {
+          const canvas = await window.html2canvas(receiptPosterEl, {
             backgroundColor: '#f8fbf8',
             scale: Math.min(3, Math.max(2, window.devicePixelRatio || 2)),
             useCORS: true,
