@@ -768,8 +768,7 @@
     }
     function buildSimulatedReferralCode(signup) {
       const prefix = getReferralPrefixFromLocation(signup?.state || signup?.city);
-      const numericSeed = String(signup?.signupId || signup?.phone || Date.now()).replace(/\D/g, '');
-      const suffix = String(Number(numericSeed.slice(-6) || '1') % 1000000).padStart(6, '0');
+      const suffix = String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
       return `${prefix}${suffix}`;
     }
     function formatReceiptTimestamp(value) {
@@ -780,7 +779,9 @@
     function renderInfluencerReceiptQr(signup) {
       if (!influencerReceiptQrEl || !window.QRious) return;
       const qrValue = signup?.shareLink || signup?.referralCode || signup?.comboKey || '2027 Nigeria Election Permutation Poll';
-      const qr = new window.QRious({
+      influencerReceiptQrEl.width = 184;
+      influencerReceiptQrEl.height = 184;
+      new window.QRious({
         element: influencerReceiptQrEl,
         value: qrValue,
         size: 184,
@@ -788,8 +789,6 @@
         foreground: '#143825',
         background: '#ffffff'
       });
-      influencerReceiptQrEl.width = qr.size;
-      influencerReceiptQrEl.height = qr.size;
     }
     function describeInfluencerStatus(signup) {
       const paymentStatus = (signup?.paymentStatus || 'pending').toLowerCase();
