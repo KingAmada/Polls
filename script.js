@@ -293,6 +293,7 @@
     const influencerReceiptAmountEl = document.getElementById('influencerReceiptAmount');
     const influencerReceiptPaidAtEl = document.getElementById('influencerReceiptPaidAt');
     const influencerReferralCodeEl = document.getElementById('influencerReferralCode');
+    const influencerReceiptMobilizerNameEl = document.getElementById('influencerReceiptMobilizerName');
     const influencerShareLinkEl = document.getElementById('influencerShareLink');
     const influencerReceiptQrEl = document.getElementById('influencerReceiptQr');
     const influencerCopyCodeBtn = document.getElementById('influencerCopyCodeBtn');
@@ -784,6 +785,7 @@
       const isActivated = (signup.activationStatus || '').toLowerCase() === 'activated';
       if (influencerActivationCardEl) influencerActivationCardEl.hidden = !isActivated;
       if (influencerReceiptIdEl) influencerReceiptIdEl.textContent = buildInfluencerReceiptId(signup);
+      if (influencerReceiptMobilizerNameEl) influencerReceiptMobilizerNameEl.textContent = signup.fullName || 'Mobilizer Name';
       if (influencerReceiptComboEl) influencerReceiptComboEl.textContent = signup.comboKey || '-';
       if (influencerReceiptAmountEl) influencerReceiptAmountEl.textContent = formatNaira(signup.totalPaid || signup.expectedAmount || 0);
       if (influencerReceiptPaidAtEl) influencerReceiptPaidAtEl.textContent = formatReceiptTimestamp(signup.paidAt || signup.activatedAt);

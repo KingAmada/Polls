@@ -352,84 +352,76 @@
     <div class="lightbox-content receipt-lightbox-content">
       <span class="lightbox-close" id="receiptLightboxClose">X</span>
       <div class="influencer-activation-card" id="influencerActivationCard" hidden>
-        <div class="influencer-status-kicker">Activation Complete</div>
-        <div class="influencer-receipt-header">
-          <div class="influencer-receipt-brand">
+        <div class="receipt-poster">
+          <div class="receipt-top">
             <img
-              class="influencer-receipt-logo"
+              class="receipt-crest"
               id="influencerReceiptLogo"
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Coat_of_arms_of_Nigeria.svg/512px-Coat_of_arms_of_Nigeria.svg.png"
-              alt="Nigeria Coat of Arms"
+              src="https://raw.githubusercontent.com/KingAmada/Polls/04bac4b679232544a66ee83bf5d2e25f5909a971/Coat_of_arms_of_Nigeria.png"
+              alt="Coat of Arms of Nigeria"
               crossorigin="anonymous"
             />
-            <div class="influencer-receipt-brand-copy">
-              <div class="influencer-receipt-overline">Federal Mobilization Record</div>
-              <h3 class="influencer-receipt-title">Verified Payment Receipt<br>Mobilizer Activation</h3>
-              <p class="influencer-receipt-sub">Official confirmation for political mobilizer onboarding.</p>
-            </div>
+            <h2 class="receipt-hero-title">Activation<br>Complete</h2>
+            <div class="receipt-hero-sub">Mobilization Record</div>
+            <div class="receipt-hero-mini">Verified Payment Receipt</div>
           </div>
-          <div class="influencer-receipt-status-badge">Paid &amp; Active</div>
-        </div>
-        <div class="influencer-receipt-wave" aria-hidden="true"></div>
-        <div class="influencer-receipt-body">
-          <div class="influencer-receipt-main">
-            <div class="influencer-receipt-head">
-              <div class="influencer-receipt-highlight">
-                <span>Activation Status</span>
-                <strong>Payment confirmed successfully</strong>
-                <p>Your mobilizer slot has been activated.</p>
-                <p>Your referral code and share link are now live and ready for circulation.</p>
+
+          <div class="receipt-wrap">
+            <div class="zig"></div>
+            <div class="receipt-paper">
+              <div class="certificate-head">
+                <h3 class="card-title">Mobilizer Certificate</h3>
+                <div class="card-subtitle">Official confirmation of a Political Gladiator</div>
               </div>
-              <div class="influencer-receipt-qr-side">
-                <div class="influencer-receipt-badge" id="influencerReceiptId">-</div>
-                <div class="influencer-receipt-qr-wrap">
-                  <canvas id="influencerReceiptQr" class="influencer-receipt-qr" aria-label="Receipt QR code"></canvas>
-                  <small>Scan to open your mobilizer link</small>
+
+              <div class="paid-pill" id="influencerReceiptMobilizerName">Mobilizer Name</div>
+
+              <div class="top-meta">
+                <div class="amount-box">
+                  <div class="amount-value" id="influencerReceiptAmount">-</div>
+                </div>
+              </div>
+
+              <div class="mid-pills">
+                <div class="info-box">
+                  <div class="info-label">Political Gladiator of</div>
+                  <div class="info-value one-line" id="influencerReceiptCombo">-</div>
+                </div>
+              </div>
+
+              <div class="bottom-grid">
+                <div class="stack">
+                  <span class="small-label">Confirmed On</span>
+                  <div class="small-value" id="influencerReceiptPaidAt">-</div>
+                  <div class="divider-line"></div>
+                  <span class="small-label">Referral Code</span>
+                  <div class="small-value ref-bold" id="influencerReferralCode">-</div>
+                </div>
+
+                <div class="qr-col">
+                  <div class="qr-caption">Scan to open your<br>mobilizer link</div>
+                  <div class="influencer-receipt-badge receipt-id-badge" id="influencerReceiptId">-</div>
+                  <div class="qr-box">
+                    <canvas id="influencerReceiptQr" class="influencer-receipt-qr" aria-label="Receipt QR code"></canvas>
+                  </div>
+                </div>
+
+                <div class="authorized">
+                  <div class="auth-label">Authorized Status</div>
+                  <div class="check">✓</div>
+                  <div class="auth-value">Verified<br>Mobilizer</div>
                 </div>
               </div>
             </div>
-            <div class="influencer-receipt-amount-card">
-              <span>Amount Paid</span>
-              <strong id="influencerReceiptAmount">-</strong>
-            </div>
-            <div class="influencer-receipt-grid">
-              <div class="influencer-receipt-item">
-                <span>Selected Combo</span>
-                <strong id="influencerReceiptCombo">-</strong>
-              </div>
-              <div class="influencer-receipt-item">
-                <span>Confirmed On</span>
-                <strong id="influencerReceiptPaidAt">-</strong>
-              </div>
-              <div class="influencer-receipt-item">
-                <span>Referral Code</span>
-                <strong id="influencerReferralCode">-</strong>
-              </div>
-            </div>
+            <div class="zig-bottom"></div>
           </div>
-          <div class="influencer-share-box">
-            <span class="influencer-share-box-label">Share Link</span>
-            <div id="influencerShareLink">-</div>
+
+          <div class="footer-bar">
+            <div class="footer-key">Verified Mobilizer Record</div>
+            <div class="footer-val">Mobilization Record • Official Digital Certificate</div>
+            <div id="influencerShareLink" hidden>-</div>
           </div>
         </div>
-        <div class="influencer-receipt-footer">
-          <div class="influencer-receipt-signoff">
-            <span>Authorized Status</span>
-            <strong>Verified Mobilizer</strong>
-          </div>
-          <div class="influencer-receipt-signoff">
-            <span>Platform</span>
-            <strong>KingAmada Polls 2027</strong>
-          </div>
-          <div class="influencer-receipt-signoff">
-            <span>Channel</span>
-            <strong>Digital Activation Desk</strong>
-          </div>
-        </div>
-        <p class="influencer-activation-note">
-          Use your referral code and share link to begin mobilization immediately.
-          <small>Stronger influence. Stronger visibility. Stronger political proof.</small>
-        </p>
         <div class="influencer-status-actions receipt-modal-actions">
           <button type="button" class="notice-modal-btn secondary" id="influencerDownloadReceiptBtn">Download Receipt PNG</button>
           <button type="button" class="notice-modal-btn secondary" id="influencerCopyCodeBtn">Copy Code</button>
