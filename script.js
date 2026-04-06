@@ -59,6 +59,7 @@
     let voteTooltipTimer = null;
     let influencerSignupState = null;
     let influencerStatusPollTimer = null;
+    let influencerSimulationMode = false;
     let locationData = {};
     const NIGERIAN_STATES_URL = "https://gist.githubusercontent.com/chrisidakwo/4ba3a4f03afc442305021be4ca67738e/raw/a8276ee3a756ae47ee853c4be5a82a11d6c8a313/nigerian-states.json";
     const SUPABASE_URL = "https://eeynpndieynavvxdyqhp.supabase.co";
@@ -687,25 +688,31 @@
         referralSubmitMsg.style.display = isSubmitting ? 'block' : 'none';
       }
     }
-    function resetInfluencerModal({ clearFields = false } = {}) {
+    function resetInfluencerModal({ clearFields = false, preserveReceipt = false } = {}) {
       stopInfluencerStatusPolling();
-      influencerSignupState = null;
-      if (receiptLightbox) receiptLightbox.style.display = 'none';
+      influencerSimulationMode = false;
+      if (!preserveReceipt) {
+        influencerSignupState = null;
+      }
+      if (receiptLightbox && !preserveReceipt) receiptLightbox.style.display = 'none';
       setInfluencerSubmissionState(false, "Processing your influencer signup...");
       if (referralRequestForm) referralRequestForm.style.display = 'flex';
       if (influencerStatusCardEl) influencerStatusCardEl.hidden = true;
-      if (influencerActivationCardEl) influencerActivationCardEl.hidden = true;
+      if (influencerActivationCardEl && !preserveReceipt) influencerActivationCardEl.hidden = true;
       if (influencerStatusComboEl) influencerStatusComboEl.textContent = '-';
       if (influencerExpectedAmountEl) influencerExpectedAmountEl.textContent = '-';
       if (influencerAccountNameEl) influencerAccountNameEl.textContent = '-';
       if (influencerAccountNumberEl) influencerAccountNumberEl.textContent = '-';
       if (influencerPaymentStatusEl) influencerPaymentStatusEl.textContent = 'Waiting for payment confirmation...';
-      if (influencerReceiptIdEl) influencerReceiptIdEl.textContent = '-';
-      if (influencerReceiptComboEl) influencerReceiptComboEl.textContent = '-';
-      if (influencerReceiptAmountEl) influencerReceiptAmountEl.textContent = '-';
-      if (influencerReceiptPaidAtEl) influencerReceiptPaidAtEl.textContent = '-';
-      if (influencerReferralCodeEl) influencerReferralCodeEl.textContent = '-';
-      if (influencerShareLinkEl) influencerShareLinkEl.textContent = '-';
+      if (!preserveReceipt) {
+        if (influencerReceiptIdEl) influencerReceiptIdEl.textContent = '-';
+        if (influencerReceiptMobilizerNameEl) influencerReceiptMobilizerNameEl.textContent = 'Mobilizer Name';
+        if (influencerReceiptComboEl) influencerReceiptComboEl.textContent = '-';
+        if (influencerReceiptAmountEl) influencerReceiptAmountEl.textContent = '-';
+        if (influencerReceiptPaidAtEl) influencerReceiptPaidAtEl.textContent = '-';
+        if (influencerReferralCodeEl) influencerReferralCodeEl.textContent = '-';
+        if (influencerShareLinkEl) influencerShareLinkEl.textContent = '-';
+      }
       if (clearFields) {
         if (referralNameEl) referralNameEl.value = '';
         if (referralContactEl) referralContactEl.value = '';
@@ -716,13 +723,15 @@
     function closeReferralLightbox() {
       if (!referralLightbox) return;
       referralLightbox.style.display = 'none';
-      if (receiptLightbox?.style.display !== 'flex') {
+      const receiptOpen = receiptLightbox?.style.display === 'flex';
+      if (!receiptOpen) {
         document.body.style.overflow = '';
       }
-      resetInfluencerModal();
+      resetInfluencerModal({ preserveReceipt: receiptOpen });
     }
     function openReceiptLightbox() {
       if (!receiptLightbox) return;
+      if (influencerActivationCardEl) influencerActivationCardEl.hidden = false;
       receiptLightbox.style.display = 'flex';
       document.body.style.overflow = 'hidden';
     }
@@ -799,6 +808,11 @@
     function renderInfluencerSignup(signup) {
       if (!signup) return;
       const wasActivated = (influencerSignupState?.activationStatus || '').toLowerCase() === 'activated';
+      if ((signup.activationStatus || '').toLowerCase() === 'activated') {
+        influencerSimulationMode = Boolean(signup.isSimulatedActivation);
+      } else if (!signup.isSimulatedActivation) {
+        influencerSimulationMode = false;
+      }
       influencerSignupState = signup;
       renderInfluencerSelectedCombo(signup.comboKey || getSelectedComboKey());
       if (referralRequestForm) referralRequestForm.style.display = 'none';
@@ -841,6 +855,8 @@
         });
         return;
       }
+      stopInfluencerStatusPolling();
+      influencerSimulationMode = true;
       const simulatedPaidAt = new Date().toISOString();
       const referralCode = influencerSignupState.referralCode || buildSimulatedReferralCode(influencerSignupState);
       const simulatedSignup = {
@@ -850,6 +866,7 @@
         activationStatus: 'activated',
         paidAt: influencerSignupState.paidAt || simulatedPaidAt,
         activatedAt: influencerSignupState.activatedAt || simulatedPaidAt,
+        isSimulatedActivation: true,
         referralCode,
         shareLink: influencerSignupState.shareLink || buildShareUrl(influencerSignupState.comboKey, referralCode)
       };
@@ -957,6 +974,13 @@
       const response = await callPollApi('/_functions/apiPollInfluencerStatus', {
         query: signupId ? { signupId } : { phone }
       });
+      if (
+        influencerSimulationMode &&
+        (influencerSignupState?.activationStatus || '').toLowerCase() === 'activated' &&
+        (response?.signup?.activationStatus || '').toLowerCase() !== 'activated'
+      ) {
+        return influencerSignupState;
+      }
       renderInfluencerSignup(response.signup);
       return response.signup;
     }
