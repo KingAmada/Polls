@@ -750,7 +750,7 @@
     function buildInfluencerReceiptId(signup) {
       const referralCode = String(signup?.referralCode || '').toUpperCase();
       const signupIdTail = String(signup?.signupId || '').slice(-6).toUpperCase();
-      return referralCode ? `RCT-${referralCode}` : `RCT-${signupIdTail || 'POLL50'}`;
+      return referralCode || signupIdTail || 'POLL50';
     }
     function getReferralPrefixFromState(state) {
       const lookup = {
@@ -879,7 +879,7 @@
       try {
         if (window.html2canvas) {
           const canvas = await window.html2canvas(receiptPosterEl, {
-            backgroundColor: '#f8fbf8',
+            backgroundColor: '#06251c',
             scale: Math.min(3, Math.max(2, window.devicePixelRatio || 2)),
             useCORS: true,
             logging: false
