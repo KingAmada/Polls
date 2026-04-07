@@ -1204,9 +1204,11 @@ body::before {
 /* LOYALIST SECTION */
 .loyalist-heading {}
 #loyalistCombosContainer {
-  max-height: 400px;
+  max-height: 760px;
   overflow-y: auto;
   overflow-x: hidden;
+  padding-right: 0.45rem;
+  scrollbar-gutter: stable;
 }
 .loyalist-combo-wrap {
   background: #fff;
@@ -1342,6 +1344,7 @@ body::before {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  min-width: 0;
 }
 .loyalist-row {
   border-radius: 16px;
@@ -1360,6 +1363,12 @@ body::before {
   font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
+}
+.loyalist-more-note {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6f7f75;
+  text-align: right;
 }
 .loyalist-total-link:hover {
   color: #234c34;
@@ -3458,8 +3467,9 @@ body::before {
     overflow-y: visible !important;
   }
   #loyalistCombosContainer {
-    max-height: none !important;
-    overflow-y: visible !important;
+    max-height: 760px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
   }
 }
 

@@ -2327,9 +2327,21 @@ function renderComboLoyalists() {
     const medalIcons = ["🥇", "🥈", "🥉"]; // for top 3 places
   let foundAny = false;
 
-  // 2) Render each combo that has loyalists
-  Object.keys(comboMap).forEach((comboName) => {
-    const arr = comboMap[comboName];
+  const rankedCombos = Object.entries(comboMap)
+    .map(([comboName, arr]) => ({
+      comboName,
+      arr,
+      influencerCount: arr.length,
+      supporterTotal: arr.reduce((sum, loy) => sum + (Number(loy.supporters) || 0), 0)
+    }))
+    .sort((a, b) => {
+      if (b.influencerCount !== a.influencerCount) return b.influencerCount - a.influencerCount;
+      return b.supporterTotal - a.supporterTotal;
+    })
+    .slice(0, 5);
+
+  // 2) Render only the top 5 combos that have loyalists
+  rankedCombos.forEach(({ comboName, arr }) => {
     if (!arr || arr.length === 0) return;
 
     foundAny = true;
@@ -2376,7 +2388,8 @@ function renderComboLoyalists() {
     const influencersCol = document.createElement('div');
     influencersCol.className = 'loyalist-influencers-col';
 
-    arr.forEach((loy, index) => {
+    const previewLoyalists = arr.slice(0, 4);
+    previewLoyalists.forEach((loy, index) => {
       // Decide medal or star
       let icon = medalIcons[index] || '⭐';
 
@@ -2395,10 +2408,17 @@ function renderComboLoyalists() {
       influencersCol.appendChild(row);
     });
 
+    if (arr.length > previewLoyalists.length) {
+      const moreLine = document.createElement('div');
+      moreLine.className = 'loyalist-more-note';
+      moreLine.textContent = `+${formatNumber(arr.length - previewLoyalists.length)} more influencers`;
+      influencersCol.appendChild(moreLine);
+    }
+
     const totalInfluencersLine = document.createElement('button');
     totalInfluencersLine.className = 'loyalist-total-link';
     totalInfluencersLine.type = 'button';
-    totalInfluencersLine.textContent = `${formatNumber(arr.length)} Influencers (Click to view all)`;
+    totalInfluencersLine.textContent = `View all ${formatNumber(arr.length)} influencers`;
     totalInfluencersLine.addEventListener('click', (event) => {
       event.stopPropagation();
       openLoyalistModal(comboName, arr);
