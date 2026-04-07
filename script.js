@@ -753,18 +753,8 @@
       return referralCode || signupIdTail || 'POLL50';
     }
     function getReferralPrefixFromState(state) {
-      const lookup = {
-        ABIA: 'ABI', ADAMAWA: 'ADA', AKWAIBOM: 'AKW', ANAMBRA: 'ANA', BAUCHI: 'BAU',
-        BAYELSA: 'BAY', BENUE: 'BEN', BORNO: 'BOR', CROSSRIVER: 'CRS', DELTA: 'DEL',
-        EBONYI: 'EBO', EDO: 'EDO', EKITI: 'EKT', ENUGU: 'ENU', GOMBE: 'GOM', IMO: 'IMO',
-        JIGAWA: 'JIG', KADUNA: 'KAD', KANO: 'KAN', KATSINA: 'KAT', KEBBI: 'KEB',
-        KOGI: 'KOG', KWARA: 'KWA', LAGOS: 'LAG', NASARAWA: 'NAS', NIGER: 'NIG',
-        OGUN: 'OGN', ONDO: 'OND', OSUN: 'OSU', OYO: 'OYO', PLATEAU: 'PLA',
-        RIVERS: 'RIV', SOKOTO: 'SOK', TARABA: 'TAR', YOBE: 'YOB', ZAMFARA: 'ZAM',
-        FCT: 'ABJ', ABUJA: 'ABJ'
-      };
       const normalized = String(state || '').replace(/[^A-Za-z]/g, '').toUpperCase();
-      return lookup[normalized] || (normalized || 'POL').slice(0, 3).padEnd(3, 'X');
+      return (normalized || 'POL').slice(0, 3).padEnd(3, 'X');
     }
     function buildSimulatedReferralCode(signup) {
       const prefix = getReferralPrefixFromState(signup?.state || referralStateEl?.value);
