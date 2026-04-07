@@ -748,9 +748,9 @@
       }
     }
     function buildInfluencerReceiptId(signup) {
-      const signupIdTail = String(signup?.signupId || '').slice(-6).toUpperCase();
       const referralCode = String(signup?.referralCode || '').toUpperCase();
-      return referralCode ? `RCT-${referralCode.slice(-6)}` : `RCT-${signupIdTail || 'POLL50'}`;
+      const signupIdTail = String(signup?.signupId || '').slice(-6).toUpperCase();
+      return referralCode ? `RCT-${referralCode}` : `RCT-${signupIdTail || 'POLL50'}`;
     }
     function getReferralPrefixFromState(state) {
       const lookup = {
@@ -767,7 +767,7 @@
       return lookup[normalized] || (normalized || 'POL').slice(0, 3).padEnd(3, 'X');
     }
     function buildSimulatedReferralCode(signup) {
-      const prefix = getReferralPrefixFromState(signup?.state);
+      const prefix = getReferralPrefixFromState(signup?.state || referralStateEl?.value);
       const suffix = String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
       return `${prefix}${suffix}`;
     }
