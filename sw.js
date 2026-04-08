@@ -1,16 +1,16 @@
-const CACHE_NAME = 'polls-pwa-v20260405-1';
+const CACHE_NAME = 'polls-pwa-v20260408-1';
 const APP_SHELL = [
   './',
   './index.html',
-  './style.css?v=20260405-3',
-  './script.js?v=20260405-2',
-  './manifest.webmanifest?v=20260405-1',
+  './style.css?v=20260408-1',
+  './script.js?v=20260408-1',
+  './manifest.webmanifest?v=20260408-1',
   './Poll-og.png'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
 });
 
@@ -24,6 +24,12 @@ self.addEventListener('activate', (event) => {
       )
     ).then(() => self.clients.claim())
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', (event) => {

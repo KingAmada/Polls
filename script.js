@@ -60,6 +60,11 @@
     let influencerSignupState = null;
     let influencerStatusPollTimer = null;
     let influencerSimulationMode = false;
+    let voteRealtimeChannel = null;
+    let commentRealtimeChannel = null;
+    let pwaWaitingWorker = null;
+    const seenVoteIds = new Set();
+    const seenCommentIds = new Set();
     let locationData = {};
     const NIGERIAN_STATES_URL = "https://gist.githubusercontent.com/chrisidakwo/4ba3a4f03afc442305021be4ca67738e/raw/a8276ee3a756ae47ee853c4be5a82a11d6c8a313/nigerian-states.json";
     const SUPABASE_URL = "https://eeynpndieynavvxdyqhp.supabase.co";
@@ -67,8 +72,9 @@
     const supabaseClient = window.supabase?.createClient
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null;
+    const CLIENT_DEVICE_TOKEN_KEY = "polls-client-device-token";
     let socialProofMessages = [];
-    let dataBackend = "mock";
+    let dataBackend = "supabase";
     const DEBUG_MODE = new URLSearchParams(window.location.search).get('debug') === '1';
     function debugLog(scope, message, details) {
       if (!DEBUG_MODE) return;
@@ -83,11 +89,49 @@
       if (!DEBUG_MODE) return;
       console.error(`[DEBUG:${scope}]`, message, error);
     }
+    function showPwaUpdateToast(worker) {
+      const toast = document.getElementById('pwaUpdateToast');
+      const updateBtn = document.getElementById('pwaUpdateBtn');
+      if (!toast || !updateBtn || !worker) return;
+      pwaWaitingWorker = worker;
+      toast.hidden = false;
+      updateBtn.onclick = () => {
+        updateBtn.disabled = true;
+        updateBtn.textContent = 'Updating...';
+        worker.postMessage({ type: 'SKIP_WAITING' });
+      };
+    }
+    function hidePwaUpdateToast() {
+      const toast = document.getElementById('pwaUpdateToast');
+      const updateBtn = document.getElementById('pwaUpdateBtn');
+      if (toast) toast.hidden = true;
+      if (updateBtn) {
+        updateBtn.disabled = false;
+        updateBtn.textContent = 'Update Now';
+      }
+      pwaWaitingWorker = null;
+    }
     async function registerServiceWorker() {
       if (!('serviceWorker' in navigator)) return;
       try {
-        await navigator.serviceWorker.register('./sw.js?v=20260405-1', { scope: './' });
+        const registration = await navigator.serviceWorker.register('./sw.js?v=20260408-1', { scope: './' });
         debugLog("pwa", "Service worker registered.");
+        if (registration.waiting) {
+          showPwaUpdateToast(registration.waiting);
+        }
+        registration.addEventListener('updatefound', () => {
+          const installingWorker = registration.installing;
+          if (!installingWorker) return;
+          installingWorker.addEventListener('statechange', () => {
+            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              showPwaUpdateToast(installingWorker);
+            }
+          });
+        });
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          hidePwaUpdateToast();
+          window.location.reload();
+        });
       } catch (error) {
         debugError("pwa", "Service worker registration failed.", error);
       }
@@ -122,86 +166,6 @@
       }
       return { data: allRows, error: null };
     }
-    const MOCK_DATA = {
-      candidates: [
-        { name: "Bola Tinubu", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg", age: 70, zone: "SW", likes: 500000 },
-        { name: "Kashim Shettima", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYTAojx7fgjFx49kdn8eEN4GfOrJtc8_ocuRxI0uTTCZ11Ug4W1NG67JsEs2acSXr77BucEZFTu5eS50YqGpYXA8TogvE-ft48gb8mOA&s=10", age: 65, zone: "NE", likes: 350000 },
-        { name: "Nasir El-Rufai", imageUrl: "https://d1jcea4y7xhp7l.cloudfront.net/2018/10/Kaduna_state_Governor.jpg", age: 63, zone: "NW", likes: 290000 },
-        { name: "Peter Obi", imageUrl: "https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png", age: 60, zone: "SE", likes: 600000 },
-        { name: "Rabiu Kwankwaso", imageUrl: "https://thetop10magazine.com.ng/wp-content/uploads/2022/09/Rabiu-Musa-Kwankwaso-NNPP.jpg", age: 66, zone: "NW", likes: 310000 },
-        { name: "Atiku Abubakar", imageUrl: "https://miro.medium.com/v2/resize:fit:2400/0*AZFse8ApInmJg7xf.jpg", age: 76, zone: "NE", likes: 450000 },
-        { name: "Yakubu Dogara", imageUrl: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjuBvZJoVkod1KbQdOKCSxKVqt9dk7zP6M26tKuy320OLGSuke9AuduxgF8j1G6f7OthrtlQr3MYW12RX8869PyIQQm8c_9EolExIJTu4y2q5JduhahRcnBA_6fCF0F5wDTlARpFAZuVz-L2_RBD-mVTnBcj01I-faMqKBx33v-H4cez3fPk0IdBrvF3uo/s600/Dogara.jpg", age: 55, zone: "NE", likes: 92000 },
-        { name: "Yemi Osinbajo", imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRg8Lf5k-amv-09x0qKf60WXtzfSxibqI7JD9zw4bwxMkCKdMQZga3SwYfkb1KeFF3DqWZ2ugTc7pDI9Jyv3NBkMaTZUrgjgFPqU7aDJCk&s=10", age: 64, zone: "SW", likes: 250000 },
-        { name: "Nyesom Wike", imageUrl: "https://dailypost.ng/wp-content/uploads/2024/01/wike.jpg", age: 54, zone: "SS", likes: 140000 },
-        { name: "Godswill Akpabio", imageUrl: "https://www.citypost.ng/wp-content/uploads/2024/08/IMG-20240827-WA0043.jpg", age: 60, zone: "SS", likes: 115000 },
-        { name: "Bukola Saraki", imageUrl: "https://leadership.ng/wp-content/uploads/2023/12/Bukola-Saraki-jpg.webp", age: 60, zone: "NC", likes: 290000 },
-        { name: "Rotimi Amaechi", imageUrl: "https://cdn.vanguardngr.com/wp-content/uploads/2022/04/Rt-Hon.-Chibuike-Rotimi-Amaechi-Image-2022-04-28-at-7.05.36-PM.jpeg", age: 57, zone: "SS", likes: 110000 },
-        { name: "Aminu Tambuwal", imageUrl: "https://csn-prod-profile-images.s3.amazonaws.com/kHNmjl177dtFve7iYeHvx", age: 56, zone: "NW", likes: 73000 },
-        { name: "Goodluck Jonathan", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/4/42/Goodluck_Jonathan_World_Economic_Forum_2013.jpg", age: 65, zone: "SS", likes: 380000 },
-        { name: "Sanusi Lamido", imageUrl: "https://www.itvradiong.com/wp-content/uploads/2024/05/image-208.webp", age: 47, zone: "NC", likes: 87000 }
-      ],
-      combos: [
-        { president: "Bola Tinubu", vicePresident: "Kashim Shettima", totalVotes: 179000, commentCount: 3, shareCount: 4200 },
-        { president: "Atiku Abubakar", vicePresident: "Rotimi Amaechi", totalVotes: 127600, commentCount: 2, shareCount: 2800 },
-        { president: "Peter Obi", vicePresident: "Sanusi Lamido", totalVotes: 97400, commentCount: 2, shareCount: 2400 },
-        { president: "Goodluck Jonathan", vicePresident: "Rabiu Kwankwaso", totalVotes: 87000, commentCount: 2, shareCount: 2100 },
-        { president: "Peter Obi", vicePresident: "Rabiu Kwankwaso", totalVotes: 82800, commentCount: 2, shareCount: 2000 },
-        { president: "Peter Obi", vicePresident: "Aminu Tambuwal", totalVotes: 74200, commentCount: 2, shareCount: 1800 },
-        { president: "Rabiu Kwankwaso", vicePresident: "Peter Obi", totalVotes: 64900, commentCount: 2, shareCount: 1650 },
-        { president: "Atiku Abubakar", vicePresident: "Goodluck Jonathan", totalVotes: 63300, commentCount: 1, shareCount: 1500 },
-        { president: "Nyesom Wike", vicePresident: "Sanusi Lamido", totalVotes: 62800, commentCount: 1, shareCount: 1450 },
-        { president: "Goodluck Jonathan", vicePresident: "Aminu Tambuwal", totalVotes: 61100, commentCount: 1, shareCount: 1370 },
-        { president: "Rotimi Amaechi", vicePresident: "Bukola Saraki", totalVotes: 60900, commentCount: 1, shareCount: 1320 },
-        { president: "Aminu Tambuwal", vicePresident: "Peter Obi", totalVotes: 59600, commentCount: 2, shareCount: 1260 },
-        { president: "Aminu Tambuwal", vicePresident: "Nyesom Wike", totalVotes: 58100, commentCount: 1, shareCount: 1210 },
-        { president: "Atiku Abubakar", vicePresident: "Peter Obi", totalVotes: 57800, commentCount: 1, shareCount: 1180 },
-        { president: "Peter Obi", vicePresident: "Nasir El-Rufai", totalVotes: 57200, commentCount: 2, shareCount: 1160 },
-        { president: "Yemi Osinbajo", vicePresident: "Sanusi Lamido", totalVotes: 56900, commentCount: 7, shareCount: 1110 },
-        { president: "Peter Obi", vicePresident: "Bukola Saraki", totalVotes: 55200, commentCount: 1, shareCount: 980 },
-        { president: "Sanusi Lamido", vicePresident: "Peter Obi", totalVotes: 53300, commentCount: 1, shareCount: 930 },
-        { president: "Nyesom Wike", vicePresident: "Aminu Tambuwal", totalVotes: 53300, commentCount: 1, shareCount: 910 },
-        { president: "Yemi Osinbajo", vicePresident: "Bukola Saraki", totalVotes: 49000, commentCount: 1, shareCount: 860 },
-        { president: "Nasir El-Rufai", vicePresident: "Peter Obi", totalVotes: 48600, commentCount: 2, shareCount: 810 },
-        { president: "Sanusi Lamido", vicePresident: "Yemi Osinbajo", totalVotes: 46900, commentCount: 1, shareCount: 760 },
-        { president: "Peter Obi", vicePresident: "Kashim Shettima", totalVotes: 2, commentCount: 2, shareCount: 7 },
-        { president: "Nasir El-Rufai", vicePresident: "Nyesom Wike", totalVotes: 1, commentCount: 1, shareCount: 4 },
-        { president: "Peter Obi", vicePresident: "Bola Tinubu", totalVotes: 1, commentCount: 1, shareCount: 3 },
-        { president: "Bukola Saraki", vicePresident: "Nyesom Wike", totalVotes: 1, commentCount: 0, shareCount: 2 }
-      ],
-      users: [],
-      mapStates: [
-        { state: "Lagos", tinubuKashim: 1200, peterObiYemiOsinbajo: 2600, atikuWike: 900 },
-        { state: "Abia", peterObiYemiOsinbajo: 1800, atikuWike: 320, goodluckElRufai: 200 },
-        { state: "Adamawa", atikuWike: 1400, rabiuAmaechi: 800, tinubuKashim: 500 },
-        { state: "Kaduna", goodluckElRufai: 1500, tinubuKashim: 900, sanusiYemi: 400 },
-        { state: "Rivers", atikuWike: 1700, peterObiYemiOsinbajo: 1200, rabiuAmaechi: 600 },
-        { state: "Enugu", peterObiYemiOsinbajo: 1900, sanusiYemi: 450, goodluckElRufai: 220 },
-        { state: "Ebonyi", peterObiYemiOsinbajo: 1300, atikuWike: 750, goodluckElRufai: 180 },
-        { state: "Delta", tinubuKashim: 880, rabiuAmaechi: 540, atikuWike: 710 }
-      ],
-      loyalists: [
-        { referralCode: "REF98123", loyalistName: "Segun", city: "Ikeja", combo: "Peter Obi & Yemi Osinbajo", supporters: 9300, totalInfluencers: 346, donation: 1500, comboImg1: "https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png", comboImg2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRg8Lf5k-amv-09x0qKf60WXtzfSxibqI7JD9zw4bwxMkCKdMQZga3SwYfkb1KeFF3DqWZ2ugTc7pDI9Jyv3NBkMaTZUrgjgFPqU7aDJCk&s=10" },
-        { referralCode: "REF98124", loyalistName: "Felicia", city: "Lekki", combo: "Peter Obi & Yemi Osinbajo", supporters: 15000, totalInfluencers: 346, donation: 2200, comboImg1: "https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png", comboImg2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRg8Lf5k-amv-09x0qKf60WXtzfSxibqI7JD9zw4bwxMkCKdMQZga3SwYfkb1KeFF3DqWZ2ugTc7pDI9Jyv3NBkMaTZUrgjgFPqU7aDJCk&s=10" },
-        { referralCode: "REF98125", loyalistName: "Nkem", city: "Enugu", combo: "Peter Obi & Yemi Osinbajo", supporters: 10800, totalInfluencers: 346, donation: 1750, comboImg1: "https://todayafrica.co/wp-content/uploads/2024/04/Blue-Simple-Dad-Appreciation-Facebook-Post-1200-%C3%97-720-px-10-2.png", comboImg2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRg8Lf5k-amv-09x0qKf60WXtzfSxibqI7JD9zw4bwxMkCKdMQZga3SwYfkb1KeFF3DqWZ2ugTc7pDI9Jyv3NBkMaTZUrgjgFPqU7aDJCk&s=10" },
-        { referralCode: "REF82776", loyalistName: "Musa", city: "Kaduna", combo: "Bola Tinubu & Kashim Shettima", supporters: 22000, totalInfluencers: 291, donation: 2500.5, comboImg1: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg", comboImg2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYTAojx7fgjFx49kdn8eEN4GfOrJtc8_ocuRxI0uTTCZ11Ug4W1NG67JsEs2acSXr77BucEZFTu5eS50YqGpYXA8TogvE-ft48gb8mOA&s=10" },
-        { referralCode: "REF82777", loyalistName: "Tolu", city: "Abuja", combo: "Bola Tinubu & Kashim Shettima", supporters: 12400, totalInfluencers: 291, donation: 1800, comboImg1: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg", comboImg2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYTAojx7fgjFx49kdn8eEN4GfOrJtc8_ocuRxI0uTTCZ11Ug4W1NG67JsEs2acSXr77BucEZFTu5eS50YqGpYXA8TogvE-ft48gb8mOA&s=10" },
-        { referralCode: "REF82778", loyalistName: "Zainab", city: "Kano", combo: "Bola Tinubu & Kashim Shettima", supporters: 9400, totalInfluencers: 291, donation: 1350, comboImg1: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Bola_Tinubu_portrait.jpg/1200px-Bola_Tinubu_portrait.jpg", comboImg2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYTAojx7fgjFx49kdn8eEN4GfOrJtc8_ocuRxI0uTTCZ11Ug4W1NG67JsEs2acSXr77BucEZFTu5eS50YqGpYXA8TogvE-ft48gb8mOA&s=10" },
-        { referralCode: "REF34921", loyalistName: "Salihu", city: "Kano", combo: "Rabiu Kwankwaso & Rotimi Amaechi", supporters: 15000, totalInfluencers: 184, donation: 2000, comboImg1: "https://thetop10magazine.com.ng/wp-content/uploads/2022/09/Rabiu-Musa-Kwankwaso-NNPP.jpg", comboImg2: "https://cdn.vanguardngr.com/wp-content/uploads/2022/04/Rt-Hon.-Chibuike-Rotimi-Amaechi-Image-2022-04-28-at-7.05.36-PM.jpeg" },
-        { referralCode: "REF76218", loyalistName: "Princess", city: "Port Harcourt", combo: "Goodluck Jonathan & Nasir El-Rufai", supporters: 8100, totalInfluencers: 128, donation: 500, comboImg1: "https://upload.wikimedia.org/wikipedia/commons/4/42/Goodluck_Jonathan_World_Economic_Forum_2013.jpg", comboImg2: "https://d1jcea4y7xhp7l.cloudfront.net/2018/10/Kaduna_state_Governor.jpg" }
-      ],
-      socialProofs: [
-        "Musa voted for Nyesom Wike & Aminu Tambuwal.",
-        "Felicia just became an influencer for Peter Obi & Yemi Osinbajo.",
-        "Nkem from Enugu just voted.",
-        "Musa just influenced 2K people.",
-        "Zainab may become a minister after influencing 10K voters.",
-        "Segun from Ikeja just shared his referral code.",
-        "Princess from Port Harcourt just climbed the influencer leaderboard.",
-        "Salihu just brought in another block of voters.",
-        "Felicia shared a direct combo link for Peter Obi & Yemi Osinbajo.",
-        "Nkem from Enugu is gaining momentum as an influencer."
-      ]
-    };
     // DOM References
     const presidentListEl     = document.getElementById('presidentList');
     const vicePresidentListEl = document.getElementById('vicePresidentList');
@@ -225,6 +189,7 @@
     const voterGenderEl       = document.getElementById('voterGender');
     const voterAgeEl          = document.getElementById('voterAge');
     const voterReferralEl     = document.getElementById('voterReferral');
+    const voterConsentEl      = document.getElementById('voterConsent');
     const voteActionEl        = document.getElementById('voteAction');
     const voteTooltipEl       = document.getElementById('voteTooltip');
     const socialProofToastEl  = document.getElementById('socialProofToast');
@@ -275,6 +240,7 @@
     const referralContactEl   = document.getElementById('referralContact'); // New input
     const referralStateEl     = document.getElementById('referralState');
     const referralCityEl      = document.getElementById('referralCity');
+    const referralConsentEl   = document.getElementById('referralConsent');
     const referralRequestSubmitBtn = document.getElementById('referralRequestSubmitBtn');
     const referralSubmitMsg   = document.getElementById('referralSubmitMsg'); // New message div
     const receiptLightbox = document.getElementById('receiptLightbox');
@@ -302,6 +268,10 @@
     const influencerCopyCodeBtn = document.getElementById('influencerCopyCodeBtn');
     const influencerShareBtn = document.getElementById('influencerShareBtn');
     const influencerDownloadReceiptBtn = document.getElementById('influencerDownloadReceiptBtn');
+    const voteTermsBtn = document.getElementById('voteTermsBtn');
+    const votePrivacyBtn = document.getElementById('votePrivacyBtn');
+    const influencerTermsBtn = document.getElementById('influencerTermsBtn');
+    const influencerPrivacyBtn = document.getElementById('influencerPrivacyBtn');
     const MOBILIZER_BUTTON_TEXT = "Proceed to get your Code/Link";
     // amCharts Globals
     let mapChart;
@@ -362,6 +332,24 @@
         referralContactEl.value = referralContactEl.value.replace(/\D/g, '').slice(0, 11);
       });
     }
+    [voteTermsBtn, influencerTermsBtn].forEach((btn) => {
+      btn?.addEventListener('click', () => {
+        openNoticeModal({
+          title: "Terms & Conditions",
+          message: "You agree to submit truthful details, avoid spam or automated voting, and use referral or mobilizer features only for legitimate participation in the poll.",
+          kicker: "Legal"
+        });
+      });
+    });
+    [votePrivacyBtn, influencerPrivacyBtn].forEach((btn) => {
+      btn?.addEventListener('click', () => {
+        openNoticeModal({
+          title: "Data Privacy Notice",
+          message: "Your submitted name, phone, location, and referral activity may be stored for vote integrity, anti-spam protection, leaderboard updates, and payment verification where applicable.",
+          kicker: "Privacy"
+        });
+      });
+    });
     voterNameEl.addEventListener('input', updateProgress);
     voterStateEl.addEventListener('change', () => {
       populateCityOptions(voterStateEl.value);
@@ -374,6 +362,7 @@
       });
     }
     voterGenderEl.addEventListener('change', updateProgress);
+    voterConsentEl?.addEventListener('change', updateProgress);
     if (presidentListEl) presidentListEl.addEventListener('click', updateProgress);
     if (vicePresidentListEl) vicePresidentListEl.addEventListener('click', updateProgress);
     if (contactUsBtn) {
@@ -396,10 +385,16 @@
     if (lightboxForm) {
         lightboxForm.addEventListener('submit', async (e) => {
           e.preventDefault();
-          let fn = contactFullNameEl.value.trim();
-          let ph = contactPhoneEl.value.trim();
-          let em = contactEmailEl.value.trim();
-          if (!fn || ph.length !== 11 || !ph.startsWith('0') || !em.includes('@') || !em.includes('.')) {
+          const submitBtn = lightboxForm.querySelector('button[type="submit"]');
+          let fn = sanitizePlainText(contactFullNameEl.value, 80);
+          let ph = normalizePhoneValue(contactPhoneEl.value);
+          let em = sanitizeEmailValue(contactEmailEl.value);
+          let msg = sanitizeCommentText(contactMessageEl.value, 600);
+          contactFullNameEl.value = fn;
+          contactPhoneEl.value = ph;
+          contactEmailEl.value = em;
+          contactMessageEl.value = msg;
+          if (!fn || ph.length !== 11 || !ph.startsWith('0') || !isValidEmail(em)) {
             openNoticeModal({
               title: "Contact Form Error",
               message: "Please fill out all contact form fields correctly.",
@@ -407,10 +402,12 @@
             });
             return;
           }
+          const resetButton = setAsyncButtonState(submitBtn, true, 'Submitting...');
           try {
             await persistContactRequest();
           } catch (error) {
             console.error("Contact request error:", error);
+            resetButton();
             openNoticeModal({
               title: "Contact Form Error",
               message: "Unable to submit your request right now. Please try again.",
@@ -418,6 +415,7 @@
             });
             return;
           }
+          resetButton();
           if (lightboxSubmitMsg) lightboxSubmitMsg.style.display = 'block';
           lightboxForm.style.display = 'none';
           // Simulate submission
@@ -499,10 +497,12 @@
         referralRequestForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const selectedCombo = getSelectedComboKey();
-            const name = referralNameEl?.value.trim();
-            const contact = referralContactEl?.value.trim();
-            const state = referralStateEl?.value;
-            const city = referralCityEl?.value;
+            const name = sanitizePlainText(referralNameEl?.value, 80);
+            const contact = normalizePhoneValue(referralContactEl?.value);
+            const state = sanitizePlainText(referralStateEl?.value, 60);
+            const city = sanitizePlainText(referralCityEl?.value, 60);
+            if (referralNameEl) referralNameEl.value = name;
+            if (referralContactEl) referralContactEl.value = contact;
 
             if (!selectedCombo) {
                 openNoticeModal({
@@ -528,6 +528,14 @@
                 });
                 return;
             }
+            if (!referralConsentEl?.checked) {
+                openNoticeModal({
+                  title: "Consent Required",
+                  message: "You must accept the Terms & Conditions and Data Privacy Notice before continuing.",
+                  kicker: "Validation"
+                });
+                return;
+            }
 
             try {
                 await submitInfluencerSignup({
@@ -535,7 +543,9 @@
                   phone: contact,
                   state,
                   city,
-                  comboKey: selectedCombo
+                  comboKey: selectedCombo,
+                  acceptedTerms: true,
+                  acceptedPrivacy: true
                 });
             } catch (error) {
                 console.error("Influencer signup error:", error);
@@ -549,6 +559,7 @@
     }
     if (influencerRefreshBtn) {
       influencerRefreshBtn.addEventListener('click', async () => {
+        const resetButton = setAsyncButtonState(influencerRefreshBtn, true, 'Checking...');
         try {
           await refreshInfluencerStatus();
         } catch (error) {
@@ -558,6 +569,8 @@
             message: error?.message || "Unable to confirm payment right now.",
             kicker: "Network"
           });
+        } finally {
+          resetButton();
         }
       });
     }
@@ -589,6 +602,7 @@
     if (influencerShareBtn) {
       influencerShareBtn.addEventListener('click', async () => {
         if (!influencerSignupState?.referralCode || !influencerSignupState?.comboKey) return;
+        const resetButton = setAsyncButtonState(influencerShareBtn, true, 'Sharing...');
         try {
           await shareVoteLink({
             comboKey: influencerSignupState.comboKey,
@@ -602,12 +616,19 @@
             message: "Unable to share your influencer link right now.",
             kicker: "Influencer"
           });
+        } finally {
+          resetButton();
         }
       });
     }
     if (influencerDownloadReceiptBtn) {
       influencerDownloadReceiptBtn.addEventListener('click', async () => {
-        await downloadInfluencerReceiptPng();
+        const resetButton = setAsyncButtonState(influencerDownloadReceiptBtn, true, 'Rendering...');
+        try {
+          await downloadInfluencerReceiptPng();
+        } finally {
+          resetButton();
+        }
       });
     }
     /********************************************
@@ -669,6 +690,65 @@
         return `NGN ${numericAmount.toLocaleString()}`;
       }
     }
+    function getClientDeviceToken() {
+      try {
+        let token = window.localStorage.getItem(CLIENT_DEVICE_TOKEN_KEY);
+        if (!token) {
+          token = `polls-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+          window.localStorage.setItem(CLIENT_DEVICE_TOKEN_KEY, token);
+        }
+        return token;
+      } catch (_) {
+        return `polls-${Math.random().toString(36).slice(2, 12)}`;
+      }
+    }
+    function stripTags(value) {
+      return String(value || '').replace(/<[^>]*>/g, ' ');
+    }
+    function sanitizePlainText(value, maxLength = 80) {
+      return stripTags(value)
+        .replace(/[\u0000-\u001F\u007F]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, maxLength);
+    }
+    function sanitizeCommentText(value, maxLength = 280) {
+      return stripTags(value)
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, ' ')
+        .replace(/\r/g, '')
+        .replace(/[ \t]+\n/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim()
+        .slice(0, maxLength);
+    }
+    function sanitizeReferralCode(value) {
+      return String(value || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 24);
+    }
+    function sanitizeEmailValue(value) {
+      return String(value || '').trim().toLowerCase().slice(0, 120);
+    }
+    function isValidEmail(value) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+    }
+    function setAsyncButtonState(button, isBusy, busyLabel) {
+      if (!button) return () => {};
+      const originalLabel = button.dataset.originalLabel || button.textContent;
+      button.dataset.originalLabel = originalLabel;
+      button.disabled = !!isBusy;
+      if (isBusy && busyLabel) {
+        button.textContent = busyLabel;
+      } else {
+        button.textContent = originalLabel;
+      }
+      return () => setAsyncButtonState(button, false);
+    }
+    function toggleFieldInvalid(field, isInvalid) {
+      if (!field) return;
+      field.classList.toggle('field-invalid', !!isInvalid);
+    }
+    function clearFormValidationStyles(fields) {
+      (fields || []).forEach((field) => toggleFieldInvalid(field, false));
+    }
     function normalizePhoneValue(phone) {
       return (phone || "").replace(/\D/g, '').slice(0, 11);
     }
@@ -719,6 +799,7 @@
         if (referralStateEl) referralStateEl.selectedIndex = 0;
         resetInfluencerCityOptions("Select state first");
       }
+      if (referralConsentEl) referralConsentEl.checked = false;
     }
     function closeReferralLightbox() {
       if (!referralLightbox) return;
@@ -902,6 +983,7 @@
         if (referralStateEl) referralStateEl.selectedIndex = 0;
         resetInfluencerCityOptions("Select state first");
       }
+      if (referralConsentEl) referralConsentEl.checked = false;
       referralLightbox.style.display = 'flex';
       document.body.style.overflow = 'hidden';
     }
@@ -935,16 +1017,18 @@
       }
       return payload;
     }
-    async function submitInfluencerSignup({ fullName, phone, state, city, comboKey }) {
+    async function submitInfluencerSignup({ fullName, phone, state, city, comboKey, acceptedTerms = false, acceptedPrivacy = false }) {
       setInfluencerSubmissionState(true, "Creating your influencer account number...");
       const response = await callPollApi('/_functions/apiPollInfluencerSignup', {
         method: 'POST',
         body: {
-          fullName,
+          fullName: sanitizePlainText(fullName, 80),
           phone: normalizePhoneValue(phone),
-          state,
-          city,
-          comboKey
+          state: sanitizePlainText(state, 60),
+          city: sanitizePlainText(city, 60),
+          comboKey: sanitizePlainText(comboKey, 120),
+          acceptedTerms: !!acceptedTerms,
+          acceptedPrivacy: !!acceptedPrivacy
         }
       });
       renderInfluencerSignup(response.signup);
@@ -1161,10 +1245,12 @@
     }
     function hydrateComments(commentRows) {
       comboComments = {};
+      seenCommentIds.clear();
       const commentsById = {};
       const allComments = commentRows.map(normalizeSupabaseComment);
       allComments.forEach((comment) => {
         commentsById[comment.id] = comment;
+        if (comment.id) seenCommentIds.add(comment.id);
       });
       allComments.forEach((comment) => {
         if (comment.parentID && commentsById[comment.parentID]) {
@@ -1191,6 +1277,8 @@
       mapStatesData = [];
       comboDefinitions = [];
       socialProofMessages = [];
+      seenVoteIds.clear();
+      seenCommentIds.clear();
       dataBackend = "supabase";
     }
     function groupCounts(rows, keyGetter) {
@@ -1325,6 +1413,7 @@
       comboDefinitions = [];
       comboComments = {};
       socialProofMessages = ((proofsRes.error ? [] : proofsRes.data) || []).map((row) => row.message).filter(Boolean);
+      seenVoteIds.clear();
 
       const stateVoteRows = stateVotesRes.error ? [] : (stateVotesRes.data || []);
       const voteCounts = Object.fromEntries(((combosRes.error ? [] : combosRes.data) || []).map((row) => [row.combo_key, row.total_votes || 0]));
@@ -1454,68 +1543,55 @@
       debugLog("vote", "Persisting vote payload.", votePayload);
       const [presidentName, vicePresidentName] = comboKey.split(" & ");
       const { data, error } = await supabaseClient.rpc("submit_vote", {
-        p_voter_name: votePayload.name,
-        p_phone: votePayload.phone,
+        p_voter_name: sanitizePlainText(votePayload.name, 80),
+        p_phone: normalizePhoneValue(votePayload.phone),
         p_state: normalizeStateName(votePayload.state),
-        p_city: votePayload.city,
-        p_gender: votePayload.gender,
+        p_city: sanitizePlainText(votePayload.city, 60),
+        p_gender: sanitizePlainText(votePayload.gender, 20),
         p_age: votePayload.age,
-        p_president: presidentName,
-        p_vice_president: vicePresidentName,
-        p_referral_code_used: votePayload.referralCodeUsed || null
+        p_president: sanitizePlainText(presidentName, 80),
+        p_vice_president: sanitizePlainText(vicePresidentName, 80),
+        p_referral_code_used: sanitizeReferralCode(votePayload.referralCodeUsed) || null,
+        p_client_token: getClientDeviceToken()
       });
       if (error) {
         debugError("vote", "Vote persistence failed.", error);
         throw error;
       }
       const insertedVote = data || null;
+      if (insertedVote?.id) seenVoteIds.add(insertedVote.id);
       debugLog("vote", "Vote persistence succeeded.", {
         comboKey,
         referralCodeUsed: votePayload.referralCodeUsed || null,
         insertedVote
       });
-      const { data: verificationRows, error: verificationError } = await supabaseClient
-        .from("votes")
-        .select("id, combo_key, state, city, created_at")
-        .eq("phone", votePayload.phone)
-        .eq("combo_key", comboKey)
-        .order("id", { ascending: false })
-        .limit(3);
-      if (verificationError) {
-        debugError("vote", "Post-insert verification query failed.", verificationError);
-      } else {
-        debugLog("vote", "Post-insert verification rows.", verificationRows);
-      }
       return insertedVote;
     }
     async function persistComment(commentPayload) {
       if (dataBackend !== "supabase" || !supabaseClient) return null;
       debugLog("comment", "Persisting comment.", commentPayload);
-      const payload = {
-        combo_key: commentPayload.comboKey,
-        parent_id: commentPayload.parentID && commentPayload.parentID !== 0 ? commentPayload.parentID : null,
-        author_name: commentPayload.name,
-        body: commentPayload.text
-      };
-      const { data, error } = await supabaseClient
-        .from("comments")
-        .insert(payload)
-        .select()
-        .single();
+      const { data, error } = await supabaseClient.rpc("submit_comment", {
+        p_combo_key: sanitizePlainText(commentPayload.comboKey, 120),
+        p_parent_id: commentPayload.parentID && commentPayload.parentID !== 0 ? commentPayload.parentID : null,
+        p_author_name: sanitizePlainText(commentPayload.name, 80),
+        p_body: sanitizeCommentText(commentPayload.text, 280),
+        p_client_token: getClientDeviceToken()
+      });
       if (error) {
         debugError("comment", "Comment insert failed.", error);
         throw error;
       }
       debugLog("comment", "Comment insert succeeded.", data);
+      if (data?.id) seenCommentIds.add(data.id);
       return normalizeSupabaseComment(data);
     }
     async function persistContactRequest() {
       if (dataBackend !== "supabase" || !supabaseClient) return;
       const { error } = await supabaseClient.from("contact_requests").insert({
-        full_name: contactFullNameEl.value.trim(),
-        phone: contactPhoneEl.value.trim(),
-        email: contactEmailEl.value.trim(),
-        message: contactMessageEl.value.trim()
+        full_name: sanitizePlainText(contactFullNameEl.value, 80),
+        phone: normalizePhoneValue(contactPhoneEl.value),
+        email: sanitizeEmailValue(contactEmailEl.value),
+        message: sanitizeCommentText(contactMessageEl.value, 600)
       });
       if (error) throw error;
     }
@@ -1548,14 +1624,15 @@
       if (!selectedPresident) return "Kindly select President to vote";
       if (!selectedVP) return "Kindly select Vice President to vote";
       if (selectedPresident === selectedVP) return "President and Vice President cannot be the same";
-      if (!voterNameEl?.value.trim()) return "Kindly input your name to vote";
-      if (!voterPhoneEl?.value.trim()) return "Kindly input your phone number to vote";
-      if (voterPhoneEl.value.length !== 11 || !voterPhoneEl.value.startsWith('0')) return "Kindly input a valid phone number to vote";
+      if (!sanitizePlainText(voterNameEl?.value, 80)) return "Kindly input your name to vote";
+      if (!normalizePhoneValue(voterPhoneEl?.value)) return "Kindly input your phone number to vote";
+      if (normalizePhoneValue(voterPhoneEl.value).length !== 11 || !normalizePhoneValue(voterPhoneEl.value).startsWith('0')) return "Kindly input a valid phone number to vote";
       if (!voterStateEl?.value) return "Kindly select your state to vote";
       if (!voterCityEl?.value) return "Kindly select your city to vote";
       if (!voterGenderEl?.value) return "Kindly select your gender to vote";
       if (!voterAgeEl?.value.trim()) return "Kindly input your age to vote";
       if ((parseInt(voterAgeEl.value, 10) || 0) < 18) return "Kindly note that minimum voting age is 18";
+      if (!voterConsentEl?.checked) return "Accept the Terms & Conditions and Data Privacy Notice to continue";
       return "";
     }
     function showVoteTooltip(force = false) {
@@ -1584,16 +1661,17 @@
       voteTooltipEl.classList.remove('visible');
     }
     function updateProgress() {
-      let steps = 8;
+      let steps = 9;
       let done = 0;
       if (selectedPresident) done++;
       if (selectedVP) done++;
-      if (voterNameEl?.value.trim()) done++;
-      if (voterPhoneEl?.value.length === 11 && voterPhoneEl.value.startsWith('0')) done++;
+      if (sanitizePlainText(voterNameEl?.value, 80)) done++;
+      if (normalizePhoneValue(voterPhoneEl?.value).length === 11 && normalizePhoneValue(voterPhoneEl.value).startsWith('0')) done++;
       if (voterStateEl?.value) done++;
       if (voterCityEl?.value) done++;
       if (voterGenderEl?.value) done++;
       if (voterAgeEl?.value.trim()) done++;
+      if (voterConsentEl?.checked) done++;
       let ratio = (steps > 0) ? (done / steps) * 100 : 0;
       if (buttonFillEl) buttonFillEl.style.width = ratio + "%";
       if (voteBtn) {
@@ -1823,92 +1901,6 @@
             setTimeout(() => { heart.remove(); }, duration);
         }
     }
-    function loadMockData() {
-      candidates = [];
-      candidateImages = {};
-      candidateDetails = {};
-      candidateLikes = {};
-      votesData = {};
-      comboShares = {};
-      comboComments = {};
-      loyalists = {};
-      mapStatesData = Array.isArray(MOCK_DATA.mapStates) ? [...MOCK_DATA.mapStates] : [];
-      socialProofMessages = Array.isArray(MOCK_DATA.socialProofs) ? [...MOCK_DATA.socialProofs] : [];
-
-      MOCK_DATA.candidates.forEach(c => {
-        candidates.push(c.name);
-        candidateImages[c.name] = c.imageUrl || 'https://placehold.co/80x80/cccccc/ffffff?text=N/A';
-        candidateDetails[c.name] = { age: c.age ?? '?', zone: c.zone ?? '?' };
-        candidateLikes[c.name] = c.likes ?? 0;
-      });
-
-      MOCK_DATA.combos.forEach(c => {
-        const comboKey = `${c.president} & ${c.vicePresident}`;
-        votesData[comboKey] = c.totalVotes ?? 0;
-        comboShares[comboKey] = c.shareCount ?? 0;
-      });
-      buildCandidateRoleVotes(
-        MOCK_DATA.combos.map((combo) => ({
-          combo_key: `${combo.president} & ${combo.vicePresident}`,
-          president: combo.president,
-          vice_president: combo.vicePresident
-        })),
-        votesData
-      );
-
-      const allComments = [];
-      let nextCommentId = 1;
-      MOCK_DATA.combos.forEach(combo => {
-        const comboKey = `${combo.president} & ${combo.vicePresident}`;
-        const totalComments = combo.commentCount ?? 0;
-        for (let index = 0; index < totalComments; index++) {
-          allComments.push({
-            id: `seed-comment-${nextCommentId++}`,
-            comboKey,
-            parentID: 0,
-            name: `Voter ${index + 1}`,
-            text: `Support for ${comboKey}.`,
-            replies: []
-          });
-        }
-      });
-      MOCK_DATA.users.forEach(user => {
-        allComments.push({
-          id: user._id,
-          comboKey: user.combo,
-          parentID: user.parentId || 0,
-          name: user.name || "Anonymous",
-          text: user.comment || "",
-          replies: []
-        });
-      });
-      const commentsById = {};
-      allComments.forEach(comment => commentsById[comment.id] = comment);
-      allComments.forEach(comment => {
-        if (comment.parentID !== 0 && commentsById[comment.parentID]) {
-          commentsById[comment.parentID].replies.push(comment);
-        }
-      });
-      allComments.forEach(comment => {
-        if (comment.parentID === 0) {
-          if (!comboComments[comment.comboKey]) comboComments[comment.comboKey] = [];
-          comboComments[comment.comboKey].push(comment);
-        }
-      });
-
-      MOCK_DATA.loyalists.forEach(l => {
-        loyalists[l.referralCode.toUpperCase()] = {
-          loyalistName: l.loyalistName || "Anonymous",
-          city: l.city || "",
-          combo: l.combo || "",
-          supporters: l.supporters ?? 0,
-          totalInfluencers: l.totalInfluencers ?? 0,
-          donation: l.donation ?? 0,
-          comboImg1: l.comboImg1 || 'https://placehold.co/50x50/cccccc/ffffff?text=N/A',
-          comboImg2: l.comboImg2 || 'https://placehold.co/50x50/cccccc/ffffff?text=N/A'
-        };
-      });
-    }
     /********************************************
      * UI RENDERING FUNCTIONS
      ********************************************/
@@ -2017,12 +2009,14 @@
     }
     function appendCommentToLocalState(comment) {
       if (!comment?.comboKey || !comment.id) return;
+      seenCommentIds.add(comment.id);
       if (!comboComments[comment.comboKey]) comboComments[comment.comboKey] = [];
       if (comment.parentID && comment.parentID !== 0) {
         const attachReply = (items) => {
           for (const item of items) {
             if (item.id === comment.parentID) {
               item.replies = item.replies || [];
+              if (item.replies.some((reply) => reply.id === comment.id)) return true;
               item.replies.push(comment);
               return true;
             }
@@ -2031,10 +2025,12 @@
           return false;
         };
         if (!attachReply(comboComments[comment.comboKey])) {
+          if (comboComments[comment.comboKey].some((item) => item.id === comment.id)) return;
           comboComments[comment.comboKey].push(comment);
         }
         return;
       }
+      if (comboComments[comment.comboKey].some((item) => item.id === comment.id)) return;
       comboComments[comment.comboKey].push(comment);
     }
     function upsertLoyalistFromVote(votePayload) {
@@ -2080,23 +2076,82 @@
       renderPieChart();
       if (currentCombo === comboKey) updateComboModalHeader(comboKey);
     }
+    function normalizeRealtimeVoteRow(row) {
+      if (!row?.combo_key) return null;
+      return {
+        id: row.vote_id || row.id,
+        name: "",
+        phone: "",
+        state: row.state || "",
+        city: row.city || "",
+        gender: row.gender || "",
+        age: row.age || 0,
+        combo: row.combo_key,
+        referralCodeUsed: row.referral_code_used || null
+      };
+    }
+    function applyRealtimeVoteRow(row) {
+      const votePayload = normalizeRealtimeVoteRow(row);
+      if (!votePayload?.combo || !row?.id || seenVoteIds.has(row.id)) return;
+      seenVoteIds.add(row.id);
+      applyVoteToLocalState(votePayload);
+    }
+    function applyRealtimeCommentRow(row) {
+      const comment = normalizeSupabaseComment(row);
+      if (!comment?.id || seenCommentIds.has(comment.id)) return;
+      appendCommentToLocalState(comment);
+      if (currentCombo === comment.comboKey) {
+        updateComboModalHeader(currentCombo);
+        renderComboComments();
+      }
+      renderComboGrid();
+    }
+    function teardownRealtimeSubscriptions() {
+      if (voteRealtimeChannel) {
+        supabaseClient?.removeChannel(voteRealtimeChannel);
+        voteRealtimeChannel = null;
+      }
+      if (commentRealtimeChannel) {
+        supabaseClient?.removeChannel(commentRealtimeChannel);
+        commentRealtimeChannel = null;
+      }
+    }
+    function setupRealtimeSubscriptions() {
+      if (!supabaseClient) return;
+      teardownRealtimeSubscriptions();
+      voteRealtimeChannel = supabaseClient
+        .channel('public:votes-live')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'public_vote_events' }, ({ new: row }) => {
+          applyRealtimeVoteRow(row);
+        })
+        .subscribe();
+      commentRealtimeChannel = supabaseClient
+        .channel('public:comments-live')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'comments' }, ({ new: row }) => {
+          applyRealtimeCommentRow(row);
+        })
+        .subscribe();
+    }
     /********************************************
      * VOTING LOGIC
      ********************************************/
     async function submitVote({ skipReferralPrompt = false } = {}) {
       if (voteBtn?.disabled) { return; }
-      const name = voterNameEl?.value.trim();
-      const phone = voterPhoneEl?.value.trim();
-      const state = voterStateEl?.value;
-      const city = voterCityEl?.value;
-      const gender = voterGenderEl?.value;
+      const name = sanitizePlainText(voterNameEl?.value, 80);
+      const phone = normalizePhoneValue(voterPhoneEl?.value);
+      const state = sanitizePlainText(voterStateEl?.value, 60);
+      const city = sanitizePlainText(voterCityEl?.value, 60);
+      const gender = sanitizePlainText(voterGenderEl?.value, 20);
       const age = voterAgeEl?.value.trim();
+      if (voterNameEl) voterNameEl.value = name;
+      if (voterPhoneEl) voterPhoneEl.value = phone;
       const voteValidationMessage = getVoteValidationMessage();
       if (voteValidationMessage) {
         openNoticeModal({ title: "Unable to Vote", message: voteValidationMessage, kicker: "Validation" });
         return;
       }
-      const typedReferral = voterReferralEl?.value.trim().toUpperCase() || null;
+      const typedReferral = sanitizeReferralCode(voterReferralEl?.value) || null;
+      if (voterReferralEl) voterReferralEl.value = typedReferral || '';
       if (!typedReferral && !skipReferralPrompt) {
         openReferralPromptModal();
         return;
@@ -2518,8 +2573,10 @@ function renderComboLoyalists() {
         });
         // Local reply interaction
         replyBtn.addEventListener('click', async () => {
-            const replyName = replyNameInput.value.trim();
-            const replyText = replyTextInput.value.trim();
+            const replyName = sanitizePlainText(replyNameInput.value, 80);
+            const replyText = sanitizeCommentText(replyTextInput.value, 280);
+            replyNameInput.value = replyName;
+            replyTextInput.value = replyText;
             if (!replyName || !replyText) {
               openNoticeModal({ title: "Reply Error", message: "Please enter name and reply.", kicker: "Validation" });
               return;
@@ -2582,8 +2639,10 @@ function renderComboLoyalists() {
             openNoticeModal({ title: "Comment Error", message: "No combo selected.", kicker: "Validation" });
             return;
           }
-          const name = comboCommentName?.value.trim();
-          const text = comboCommentText?.value.trim();
+          const name = sanitizePlainText(comboCommentName?.value, 80);
+          const text = sanitizeCommentText(comboCommentText?.value, 280);
+          if (comboCommentName) comboCommentName.value = name;
+          if (comboCommentText) comboCommentText.value = text;
           if (!name || !text) {
             openNoticeModal({ title: "Comment Error", message: "Please enter name and comment.", kicker: "Validation" });
             return;
@@ -2992,6 +3051,7 @@ function renderComboLoyalists() {
         debugError("init", "Supabase load failed, using empty state.", error);
         initializeEmptyDataStore();
       }
+      setupRealtimeSubscriptions();
       populateCandidateList(presidentListEl, candidates, true);
       populateCandidateList(vicePresidentListEl, candidates, false);
       applySharedSelectionFromUrl();

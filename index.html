@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="2027 Poll" />
   <link rel="canonical" href="https://kingamada.github.io/Polls/" />
-  <link rel="manifest" href="./manifest.webmanifest?v=20260405-1" />
+  <link rel="manifest" href="./manifest.webmanifest?v=20260408-1" />
   <meta name="poll-backend-base" content="https://peygo.net" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="KingAmada Polls" />
@@ -47,7 +47,7 @@
   <script src="https://cdn.amcharts.com/lib/5/geodata/nigeriaLow.js"></script>
   <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="./style.css?v=20260405-3" />
+  <link rel="stylesheet" href="./style.css?v=20260408-1" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -134,6 +134,10 @@
         <div class="referral-inline">
           <input type="text" id="voterReferral" placeholder="Referral Code" />
         </div>
+        <label class="consent-check" for="voterConsent">
+          <input type="checkbox" id="voterConsent" />
+          <span>I agree to the <button type="button" class="inline-link-btn" id="voteTermsBtn">Terms & Conditions</button> and <button type="button" class="inline-link-btn" id="votePrivacyBtn">Data Privacy Notice</button>.</span>
+        </label>
       </div>
       <div class="vote-action" id="voteAction">
         <button class="vote-button" id="voteBtn" disabled>
@@ -312,6 +316,10 @@
         <select id="referralCity" required>
           <option value="" disabled selected>Select state first</option>
         </select>
+        <label class="consent-check" for="referralConsent">
+          <input type="checkbox" id="referralConsent" required />
+          <span>I agree to the <button type="button" class="inline-link-btn" id="influencerTermsBtn">Terms & Conditions</button> and <button type="button" class="inline-link-btn" id="influencerPrivacyBtn">Data Privacy Notice</button>.</span>
+        </label>
         <button type="submit" id="referralRequestSubmitBtn">Proceed to get your Code/Link</button>
       </form>
       <div class="submit-message" id="referralSubmitMsg">
@@ -439,6 +447,14 @@
     </div>
   </div>
 
+  <div class="pwa-update-toast" id="pwaUpdateToast" hidden>
+    <div class="pwa-update-copy">
+      <strong>New version available</strong>
+      <span>A fresh build is ready. Update to load the latest poll data and fixes.</span>
+    </div>
+    <button type="button" class="notice-modal-btn" id="pwaUpdateBtn">Update Now</button>
+  </div>
+
   <footer class="site-footer">
     <div class="footer-main">
       <p class="footer-title">2027 Nigeria Election Permutation Poll</p>
@@ -462,6 +478,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="./script.js?v=20260405-3"></script>
+  <script src="./script.js?v=20260408-1"></script>
 </body>
 </html>
