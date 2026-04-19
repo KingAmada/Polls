@@ -13,7 +13,7 @@ By accessing or using the Platform, you agree to these Terms. If you do not agre
 
 “Platform” means the Nigerian Presidential Polling Platform, NIPPP, including its website, related pages, forms, mobile-accessible interfaces, backend integrations, comments features, ranking features, and any associated tools or services.
 
-“Operator,” “we,” “our,” or “us” means [Insert Legal Entity / Owner Name], the party responsible for operating the Platform.
+“Operator,” “we,” “our,” or “us” means Nigerian Presidential Polling Platform (NIPPP), the party responsible for operating the Platform.
 
 “User,” “you,” or “your” means any person who visits, accesses, votes on, comments on, shares, or otherwise uses the Platform.
 
@@ -135,7 +135,7 @@ To the maximum extent permitted by law, the Operator disclaims liability for use
 
 11. Notice, Complaint, and Takedown Procedure
 
-If you believe that any content on the Platform infringes your copyright, privacy rights, image rights, data protection rights, reputation, or other lawful interest, or is false, defamatory, misleading, inaccurate, unauthorized, or otherwise unlawful, please send a written complaint to [Insert Email] with sufficient details identifying:
+If you believe that any content on the Platform infringes your copyright, privacy rights, image rights, data protection rights, reputation, or other lawful interest, or is false, defamatory, misleading, inaccurate, unauthorized, or otherwise unlawful, please send a written complaint to info@nippp.com with sufficient details identifying:
 
 the content complained of;
 where it appears on the Platform;
@@ -217,16 +217,14 @@ We may update these Terms at any time. Updated Terms take effect when posted unl
 
 These Terms shall be governed by the laws of the Federal Republic of Nigeria, unless the Operator specifies another governing law in writing.
 
-Any dispute arising from these Terms or the Platform shall be subject to the competent courts of [Insert State / Jurisdiction, Nigeria], unless applicable law requires otherwise.
+Any dispute arising from these Terms or the Platform shall be subject to the Federal High Court, Abuja, unless applicable law requires otherwise.
 
 23. Contact
 
 For questions about these Terms, complaints, or takedown requests, contact:
 
-[Insert Legal Entity / Operator Name]
-Email: [Insert Email]
-Phone: [Insert Phone]
-Address: [Insert Address]`,
+Nigerian Presidential Polling Platform (NIPPP)
+Email: info@nippp.com`,
   privacy: `Privacy Statement
 
 Nigerian Presidential Polling Platform (NIPPP)
@@ -241,10 +239,8 @@ The uploaded files show that the Platform collects user-submitted voting details
 
 The data controller for the Platform is:
 
-[Insert Legal Entity / Owner Name]
-Email: [Insert Email]
-Phone: [Insert Phone]
-Address: [Insert Address]
+Nigerian Presidential Polling Platform (NIPPP)
+Email: info@nippp.com
 
 2. Data We Collect
 
@@ -414,8 +410,6 @@ We may update this Privacy Statement from time to time. The latest version will 
 
 For privacy questions, complaints, corrections, or takedown-related requests, contact:
 
-[Insert Legal Entity / Operator Name]
-Email: [Insert Privacy Email]
-Phone: [Insert Phone]
-Address: [Insert Address]`
+Nigerian Presidential Polling Platform (NIPPP)
+Email: info@nippp.com`
 };
