@@ -85,7 +85,7 @@
     const CANDIDATE_PROFILE_OVERRIDES = {
       "Martins Vincent Otse (VDM)": {
         age: 32,
-        zone: null
+        zone: "SS"
       },
       "Ahmed Isah": {
         age: "50+",
