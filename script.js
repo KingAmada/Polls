@@ -82,6 +82,16 @@
       "Martins Vincent Otse (VDM)": "https://en.wikipedia.org/wiki/VeryDarkMan",
       "Ahmed Isah": "https://en.wikipedia.org/wiki/Ahmed_Isah"
     };
+    const CANDIDATE_PROFILE_OVERRIDES = {
+      "Martins Vincent Otse (VDM)": {
+        age: 32,
+        zone: null
+      },
+      "Ahmed Isah": {
+        age: "50+",
+        zone: "NC"
+      }
+    };
     const supabaseClient = window.supabase?.createClient
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null;
@@ -1355,9 +1365,12 @@
     }
     function normalizeCandidateProfileRow(row) {
       const candidateName = canonicalizeCandidateName(row?.name);
+      const profileOverrides = CANDIDATE_PROFILE_OVERRIDES[candidateName] || {};
       return {
         ...row,
         name: candidateName,
+        age: Object.prototype.hasOwnProperty.call(profileOverrides, 'age') ? profileOverrides.age : row?.age,
+        zone: Object.prototype.hasOwnProperty.call(profileOverrides, 'zone') ? profileOverrides.zone : row?.zone,
         image_url: CANDIDATE_IMAGE_OVERRIDES[candidateName] || row?.image_url || "",
         wiki_url: CANDIDATE_WIKI_OVERRIDES[candidateName] || row?.wiki_url || ""
       };
