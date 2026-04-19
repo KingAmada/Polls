@@ -112,6 +112,17 @@
       if (!DEBUG_MODE) return;
       console.error(`[DEBUG:${scope}]`, message, error);
     }
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+    function renderLegalText(rawText) {
+      return `<div class="notice-doc-pre">${escapeHtml(rawText)}</div>`;
+    }
     function showPwaUpdateToast(worker) {
       const toast = document.getElementById('pwaUpdateToast');
       const updateBtn = document.getElementById('pwaUpdateBtn');
@@ -359,7 +370,7 @@
       btn?.addEventListener('click', () => {
         openNoticeModal({
           title: "Terms & Conditions",
-          message: "You agree to submit truthful details, avoid spam or automated voting, and use referral or mobilizer features only for legitimate participation in the poll.",
+          messageHtml: renderLegalText(window.LEGAL_NOTICE_TEXTS?.terms || ""),
           kicker: "Legal"
         });
       });
@@ -368,7 +379,7 @@
       btn?.addEventListener('click', () => {
         openNoticeModal({
           title: "Data Privacy Notice",
-          message: "Your submitted name, phone, location, and referral activity may be stored for vote integrity, anti-spam protection, leaderboard updates, and payment verification where applicable.",
+          messageHtml: renderLegalText(window.LEGAL_NOTICE_TEXTS?.privacy || ""),
           kicker: "Privacy"
         });
       });
@@ -657,11 +668,15 @@
     /********************************************
      * HELPER FUNCTIONS
      ********************************************/
-    function openNoticeModal({ title = "Update", message = "", kicker = "Notice" }) {
+    function openNoticeModal({ title = "Update", message = "", messageHtml = "", kicker = "Notice" }) {
       if (!noticeModalEl || !noticeModalTitle || !noticeModalMessage || !noticeModalKicker) return;
       noticeModalKicker.textContent = kicker;
       noticeModalTitle.textContent = title;
-      noticeModalMessage.textContent = message;
+      if (messageHtml) {
+        noticeModalMessage.innerHTML = messageHtml;
+      } else {
+        noticeModalMessage.textContent = message;
+      }
       noticeModalEl.classList.add('active');
       document.body.style.overflow = 'hidden';
     }
