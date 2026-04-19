@@ -40,7 +40,7 @@ body::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: url("https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Coat_of_arms_of_Nigeria.svg/1200px-Coat_of_arms_of_Nigeria.svg.png")
+  background: url("./NIPPP Logo.png")
     no-repeat center center;
   background-size: clamp(200px, 50vmin, 300px);
   opacity: 0.05;

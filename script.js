@@ -69,6 +69,9 @@
     const NIGERIAN_STATES_URL = "https://gist.githubusercontent.com/chrisidakwo/4ba3a4f03afc442305021be4ca67738e/raw/a8276ee3a756ae47ee853c4be5a82a11d6c8a313/nigerian-states.json";
     const SUPABASE_URL = "https://eeynpndieynavvxdyqhp.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVleW5wbmRpZXluYXZ2eGR5cWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyOTA3NTksImV4cCI6MjA5MDg2Njc1OX0.-IHvceypEfRZoO3OfJtZtcHiMpDCbqKDFdwEAQB9NbU";
+    const CANDIDATE_IMAGE_OVERRIDES = {
+      "Bola Tinubu": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQtdkmGXMzuLUhyXqFfFnLR7UOvn8rGaW3pZP94lS64Hbwpq6MBs6PHR7c4_Y-D2fKqsPGIyC_9wG8PX9Lf-f2uIecfehUIwNYTElXAA&s=10"
+    };
     const supabaseClient = window.supabase?.createClient
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null;
@@ -1328,6 +1331,13 @@
     function resetCandidateRoleVotes() {
       candidateRoleVotes = { president: {}, vicePresident: {} };
     }
+    function applyCandidateImageOverrides() {
+      Object.entries(CANDIDATE_IMAGE_OVERRIDES).forEach(([candidateName, imageUrl]) => {
+        if (imageUrl) {
+          candidateImages[candidateName] = imageUrl;
+        }
+      });
+    }
     function buildCandidateRoleVotes(comboRows, voteCounts) {
       resetCandidateRoleVotes();
       (comboRows || []).forEach((row) => {
@@ -1433,6 +1443,7 @@
           wikiLinks[row.name] = row.wiki_url;
         }
       });
+      applyCandidateImageOverrides();
 
       (combosRes.data || []).forEach((row) => {
         comboDefinitions.push(row.combo_key);
