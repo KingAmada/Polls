@@ -8,8 +8,8 @@
       "Aminu Tambuwal":     "https://en.wikipedia.org/wiki/Aminu_Tambuwal",
       "Rotimi Amaechi":     "https://en.wikipedia.org/wiki/Rotimi_Amaechi",
       "Bukola Saraki":      "https://en.wikipedia.org/wiki/Bukola_Saraki",
-      "Godswill Akpabio":   "https://en.wikipedia.org/wiki/Godswill_Akpabio",
-      "Nyesom Wike":        "https://en.wikipedia.org/wiki/Nyesom_Wike",
+      "Ahmed Isah":         "https://en.wikipedia.org/wiki/Ahmed_Isah",
+      "Martins Vincent Otse (VDM)": "https://en.wikipedia.org/wiki/VeryDarkMan",
       "Yemi Osinbajo":      "https://en.wikipedia.org/wiki/Yemi_Osinbajo",
       "Yakubu Dogara":      "https://en.wikipedia.org/wiki/Yakubu_Dogara",
       "Atiku Abubakar":     "https://en.wikipedia.org/wiki/Atiku_Abubakar",
@@ -69,8 +69,18 @@
     const NIGERIAN_STATES_URL = "https://gist.githubusercontent.com/chrisidakwo/4ba3a4f03afc442305021be4ca67738e/raw/a8276ee3a756ae47ee853c4be5a82a11d6c8a313/nigerian-states.json";
     const SUPABASE_URL = "https://eeynpndieynavvxdyqhp.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVleW5wbmRpZXluYXZ2eGR5cWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyOTA3NTksImV4cCI6MjA5MDg2Njc1OX0.-IHvceypEfRZoO3OfJtZtcHiMpDCbqKDFdwEAQB9NbU";
+    const CANDIDATE_REPLACEMENTS = {
+      "Nyesom Wike": "Martins Vincent Otse (VDM)",
+      "Godswill Akpabio": "Ahmed Isah"
+    };
     const CANDIDATE_IMAGE_OVERRIDES = {
-      "Bola Tinubu": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQtdkmGXMzuLUhyXqFfFnLR7UOvn8rGaW3pZP94lS64Hbwpq6MBs6PHR7c4_Y-D2fKqsPGIyC_9wG8PX9Lf-f2uIecfehUIwNYTElXAA&s=10"
+      "Bola Tinubu": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQtdkmGXMzuLUhyXqFfFnLR7UOvn8rGaW3pZP94lS64Hbwpq6MBs6PHR7c4_Y-D2fKqsPGIyC_9wG8PX9Lf-f2uIecfehUIwNYTElXAA&s=10",
+      "Martins Vincent Otse (VDM)": "https://scontent-los4-1.xx.fbcdn.net/v/t39.30808-6/669141578_810663598757891_96607208507527731_n.jpg?stp=dst-jpg_s1080x2048_tt6&_nc_cat=102&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeFrETdIW21X9EzThP7rgqLXRrtDsoOpZGxGu0Oyg6lkbFcJmo-WxsD-QXcrddwLC3TPeevZJO_bclD8NgPsXnEE&_nc_ohc=w9IlRfCQxeIQ7kNvwGbDtji&_nc_oc=AdocTe5FRmWN-qV63ZO5lFejysSkaynO19TGHQsEkO8yY5ihRZqXfDDLBiFDapUqm0hj-tOlxQWIkO8YpPZK0OKE&_nc_zt=23&_nc_ht=scontent-los4-1.xx&_nc_gid=k-2Tn5VuZBl0XIqsiB9N_Q&_nc_ss=7a3a8&oh=00_Af2R2BKGd1KkUh1K35o3Ax5sTOyXdID85DefSmKD2i7q7Q&oe=69EA5B24",
+      "Ahmed Isah": "https://scontent-los4-1.xx.fbcdn.net/v/t39.30808-6/499861531_2521475408253642_553495349111891313_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeGtWwCEhYURVwsmQAPTFDhz4mwJCJRAQ33ibAkIlEBDfR7Q_-hjr0JfzDtW9mP14Y9V69o7ImNxaoXWz7jfUu9U&_nc_ohc=a0G9RuWeRRcQ7kNvwG9x5DN&_nc_oc=AdrvEf2KSjoYDjLDxOkA9K15198G6tYl-bDJJy1l2jpQe6ujhriRXcHe1c46HhfKMrcRIUVizPCLFcvzrtdUR3Da&_nc_zt=23&_nc_ht=scontent-los4-1.xx&_nc_gid=TpgIhSs7n-1V0bVPHpTxHg&_nc_ss=7a3a8&oh=00_Af2b61Q1DCaRt9sf2nEYzJghThHP-MzllVycTsGdo4wahw&oe=69EA5CF2"
+    };
+    const CANDIDATE_WIKI_OVERRIDES = {
+      "Martins Vincent Otse (VDM)": "https://en.wikipedia.org/wiki/VeryDarkMan",
+      "Ahmed Isah": "https://en.wikipedia.org/wiki/Ahmed_Isah"
     };
     const supabaseClient = window.supabase?.createClient
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -1238,7 +1248,7 @@
     function normalizeSupabaseComment(commentRow) {
       return {
         id: commentRow.id,
-        comboKey: commentRow.combo_key,
+        comboKey: canonicalizeComboKey(commentRow.combo_key),
         parentID: commentRow.parent_id || 0,
         name: commentRow.author_name || "Anonymous",
         text: commentRow.body || "",
@@ -1318,10 +1328,11 @@
       const grouped = {};
       (voteRows || []).forEach((row) => {
         const state = normalizeStateName(row.state);
-        const comboKey = row.combo_key;
+        const comboKey = canonicalizeComboKey(row.combo_key);
+        const voteCount = Number(row.votes) || 1;
         if (!state || !comboKey) return;
         const bucketKey = `${state}|||${comboKey}`;
-        grouped[bucketKey] = (grouped[bucketKey] || 0) + 1;
+        grouped[bucketKey] = (grouped[bucketKey] || 0) + voteCount;
       });
       return Object.entries(grouped).map(([key, count]) => {
         const [state, comboKey] = key.split("|||");
@@ -1330,6 +1341,36 @@
     }
     function resetCandidateRoleVotes() {
       candidateRoleVotes = { president: {}, vicePresident: {} };
+    }
+    function canonicalizeCandidateName(name) {
+      const normalizedName = String(name || "").trim();
+      return CANDIDATE_REPLACEMENTS[normalizedName] || normalizedName;
+    }
+    function canonicalizeComboKey(comboKey) {
+      const normalizedComboKey = String(comboKey || "").trim();
+      if (!normalizedComboKey) return "";
+      const [presidentName, vicePresidentName] = normalizedComboKey.split(" & ");
+      if (!presidentName || !vicePresidentName) return normalizedComboKey;
+      return `${canonicalizeCandidateName(presidentName)} & ${canonicalizeCandidateName(vicePresidentName)}`;
+    }
+    function normalizeCandidateProfileRow(row) {
+      const candidateName = canonicalizeCandidateName(row?.name);
+      return {
+        ...row,
+        name: candidateName,
+        image_url: CANDIDATE_IMAGE_OVERRIDES[candidateName] || row?.image_url || "",
+        wiki_url: CANDIDATE_WIKI_OVERRIDES[candidateName] || row?.wiki_url || ""
+      };
+    }
+    function normalizeComboStatRow(row) {
+      const comboKey = canonicalizeComboKey(row?.combo_key || `${row?.president || ""} & ${row?.vice_president || ""}`);
+      const [presidentName = "", vicePresidentName = ""] = comboKey.split(" & ");
+      return {
+        ...row,
+        combo_key: comboKey,
+        president: presidentName,
+        vice_president: vicePresidentName
+      };
     }
     function applyCandidateImageOverrides() {
       Object.entries(CANDIDATE_IMAGE_OVERRIDES).forEach(([candidateName, imageUrl]) => {
@@ -1425,37 +1466,62 @@
       socialProofMessages = ((proofsRes.error ? [] : proofsRes.data) || []).map((row) => row.message).filter(Boolean);
       seenVoteIds.clear();
 
-      const stateVoteRows = stateVotesRes.error ? [] : (stateVotesRes.data || []);
-      const voteCounts = Object.fromEntries(((combosRes.error ? [] : combosRes.data) || []).map((row) => [row.combo_key, row.total_votes || 0]));
-      const comboInfluencerCounts = groupCounts(loyalistsRes.error ? [] : (loyalistsRes.data || []), (row) => row.combo_key);
-      mapStatesData = stateVoteRows.map((row) => ({
-        state: normalizeStateName(row.state),
-        combo_key: row.combo_key,
-        votes: row.votes || 0
+      const normalizedCandidateRows = (candidatesRes.data || []).map(normalizeCandidateProfileRow);
+      const normalizedComboRows = ((combosRes.error ? [] : combosRes.data) || []).map(normalizeComboStatRow);
+      const normalizedLoyalistRows = (loyalistsRes.error ? [] : (loyalistsRes.data || [])).map((row) => ({
+        ...row,
+        combo_key: canonicalizeComboKey(row.combo_key)
       }));
+      const stateVoteRows = buildStateVoteRows(stateVotesRes.error ? [] : (stateVotesRes.data || []));
+      const aggregatedComboStats = new Map();
+      normalizedComboRows.forEach((row) => {
+        if (!row.combo_key) return;
+        const existingRow = aggregatedComboStats.get(row.combo_key);
+        if (existingRow) {
+          existingRow.total_votes = (existingRow.total_votes || 0) + (row.total_votes || 0);
+          existingRow.share_count = (existingRow.share_count || 0) + (row.share_count || 0);
+          existingRow.display_order = Math.min(existingRow.display_order || Number.MAX_SAFE_INTEGER, row.display_order || Number.MAX_SAFE_INTEGER);
+          return;
+        }
+        aggregatedComboStats.set(row.combo_key, {
+          ...row,
+          total_votes: row.total_votes || 0,
+          share_count: row.share_count || 0,
+          display_order: row.display_order || Number.MAX_SAFE_INTEGER
+        });
+      });
+      const comboRows = Array.from(aggregatedComboStats.values()).sort((a, b) => (a.display_order || Number.MAX_SAFE_INTEGER) - (b.display_order || Number.MAX_SAFE_INTEGER));
+      const voteCounts = Object.fromEntries(comboRows.map((row) => [row.combo_key, row.total_votes || 0]));
+      const comboInfluencerCounts = groupCounts(normalizedLoyalistRows, (row) => row.combo_key);
+      mapStatesData = stateVoteRows;
 
-      (candidatesRes.data || []).forEach((row) => {
+      normalizedCandidateRows.forEach((row) => {
+        if (!row.name || candidates.includes(row.name)) return;
         candidates.push(row.name);
         candidateImages[row.name] = row.image_url || 'https://placehold.co/80x80/cccccc/ffffff?text=N/A';
         candidateDetails[row.name] = { age: row.age ?? '?', zone: row.zone ?? '?' };
-        candidateLikes[row.name] = row.likes || 0;
+        candidateLikes[row.name] = (candidateLikes[row.name] || 0) + (row.likes || 0);
         if (row.wiki_url) {
           wikiLinks[row.name] = row.wiki_url;
         }
       });
       applyCandidateImageOverrides();
+      Object.entries(CANDIDATE_WIKI_OVERRIDES).forEach(([candidateName, wikiUrl]) => {
+        if (wikiUrl) wikiLinks[candidateName] = wikiUrl;
+      });
 
-      (combosRes.data || []).forEach((row) => {
+      comboRows.forEach((row) => {
         comboDefinitions.push(row.combo_key);
         votesData[row.combo_key] = row.total_votes || 0;
         comboShares[row.combo_key] = row.share_count || 0;
       });
-      buildCandidateRoleVotes(combosRes.data || [], voteCounts);
+      buildCandidateRoleVotes(comboRows, voteCounts);
 
       hydrateComments(commentsRes.error ? [] : (commentsRes.data || []));
 
-      ((loyalistsRes.error ? [] : loyalistsRes.data) || []).forEach((row) => {
+      normalizedLoyalistRows.forEach((row) => {
         const code = (row.referral_code || "").toUpperCase();
+        const [presidentName = "", vicePresidentName = ""] = String(row.combo_key || "").split(" & ");
         loyalists[code] = {
           loyalistName: row.loyalist_name || "Anonymous",
           city: row.city || "",
@@ -1463,8 +1529,8 @@
           supporters: row.supporters || 0,
           totalInfluencers: comboInfluencerCounts[row.combo_key] || row.total_influencers || 0,
           donation: row.donation ?? 0,
-          comboImg1: row.combo_img1 || 'https://placehold.co/50x50/cccccc/ffffff?text=N/A',
-          comboImg2: row.combo_img2 || 'https://placehold.co/50x50/cccccc/ffffff?text=N/A'
+          comboImg1: candidateImages[presidentName] || row.combo_img1 || 'https://placehold.co/50x50/cccccc/ffffff?text=N/A',
+          comboImg2: candidateImages[vicePresidentName] || row.combo_img2 || 'https://placehold.co/50x50/cccccc/ffffff?text=N/A'
         };
       });
 
@@ -1550,7 +1616,7 @@
     }
     async function persistVoteRecord(votePayload) {
       if (dataBackend !== "supabase" || !supabaseClient) return;
-      const comboKey = votePayload.combo;
+      const comboKey = canonicalizeComboKey(votePayload.combo);
       debugLog("vote", "Persisting vote payload.", votePayload);
       const [presidentName, vicePresidentName] = comboKey.split(" & ");
       const { data, error } = await supabaseClient.rpc("submit_vote", {
@@ -1582,7 +1648,7 @@
       if (dataBackend !== "supabase" || !supabaseClient) return null;
       debugLog("comment", "Persisting comment.", commentPayload);
       const { data, error } = await supabaseClient.rpc("submit_comment", {
-        p_combo_key: sanitizePlainText(commentPayload.comboKey, 120),
+        p_combo_key: sanitizePlainText(canonicalizeComboKey(commentPayload.comboKey), 120),
         p_parent_id: commentPayload.parentID && commentPayload.parentID !== 0 ? commentPayload.parentID : null,
         p_author_name: sanitizePlainText(commentPayload.name, 80),
         p_body: sanitizeCommentText(commentPayload.text, 280),
@@ -1703,7 +1769,7 @@
     }
     function buildShareUrl(comboKey, referralCode = "") {
       const shareUrl = new URL('/_functions/pollShare', `${getPollBackendBase()}/`);
-      shareUrl.searchParams.set('combo', comboKey);
+      shareUrl.searchParams.set('combo', canonicalizeComboKey(comboKey));
       if (referralCode) {
         shareUrl.searchParams.set('ref', referralCode.toUpperCase());
       } else {
@@ -1733,7 +1799,7 @@
     }
     function applySharedSelectionFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      const sharedCombo = params.get('combo');
+      const sharedCombo = canonicalizeComboKey(params.get('combo'));
       const sharedReferral = params.get('ref');
       if (sharedCombo) {
         const [presName, vpName] = sharedCombo.split(' & ');
@@ -2008,18 +2074,20 @@
     }
     function updateStateVoteRow(stateName, comboKey, incrementBy = 1) {
       const normalizedState = normalizeStateName(stateName);
-      if (!normalizedState || !comboKey) return;
+      const normalizedComboKey = canonicalizeComboKey(comboKey);
+      if (!normalizedState || !normalizedComboKey) return;
       const existingRow = mapStatesData.find((row) => (
-        normalizeStateName(row.state) === normalizedState && row.combo_key === comboKey
+        normalizeStateName(row.state) === normalizedState && row.combo_key === normalizedComboKey
       ));
       if (existingRow) {
         existingRow.votes = (existingRow.votes || 0) + incrementBy;
         return;
       }
-      mapStatesData.push({ state: normalizedState, combo_key: comboKey, votes: incrementBy });
+      mapStatesData.push({ state: normalizedState, combo_key: normalizedComboKey, votes: incrementBy });
     }
     function appendCommentToLocalState(comment) {
       if (!comment?.comboKey || !comment.id) return;
+      comment.comboKey = canonicalizeComboKey(comment.comboKey);
       seenCommentIds.add(comment.id);
       if (!comboComments[comment.comboKey]) comboComments[comment.comboKey] = [];
       if (comment.parentID && comment.parentID !== 0) {
@@ -2047,12 +2115,13 @@
     function upsertLoyalistFromVote(votePayload) {
       const referralCode = votePayload.referralCodeUsed?.toUpperCase();
       if (!referralCode) return;
-      const [presName, vpName] = votePayload.combo.split(" & ");
+      const normalizedComboKey = canonicalizeComboKey(votePayload.combo);
+      const [presName, vpName] = normalizedComboKey.split(" & ");
       if (!loyalists[referralCode]) {
         loyalists[referralCode] = {
           loyalistName: "Referral User",
           city: votePayload.city,
-          combo: votePayload.combo,
+          combo: normalizedComboKey,
           supporters: 0,
           totalInfluencers: 0,
           donation: 0,
@@ -2061,15 +2130,15 @@
         };
       }
       loyalists[referralCode].supporters = (loyalists[referralCode].supporters || 0) + 1;
-      const comboInfluencerCount = Object.values(loyalists).filter((entry) => entry.combo === votePayload.combo).length;
+      const comboInfluencerCount = Object.values(loyalists).filter((entry) => entry.combo === normalizedComboKey).length;
       Object.values(loyalists).forEach((entry) => {
-        if (entry.combo === votePayload.combo) {
+        if (entry.combo === normalizedComboKey) {
           entry.totalInfluencers = comboInfluencerCount;
         }
       });
     }
     function applyVoteToLocalState(votePayload) {
-      const comboKey = votePayload.combo;
+      const comboKey = canonicalizeComboKey(votePayload.combo);
       const [presidentName, vicePresidentName] = comboKey.split(" & ");
       if (!comboDefinitions.includes(comboKey)) comboDefinitions.push(comboKey);
       votesData[comboKey] = (votesData[comboKey] || 0) + 1;
@@ -2097,7 +2166,7 @@
         city: row.city || "",
         gender: row.gender || "",
         age: row.age || 0,
-        combo: row.combo_key,
+        combo: canonicalizeComboKey(row.combo_key),
         referralCodeUsed: row.referral_code_used || null
       };
     }
@@ -2831,7 +2900,7 @@ function renderComboLoyalists() {
         }
         const keyToComboNameMap = {
             "Bola Tinubu & Kashim Shettima": "Bola Tinubu & Kashim Shettima", "tinubuKashim": "Bola Tinubu & Kashim Shettima",
-            "Atiku Abubakar & Nyesom Wike": "Atiku Abubakar & Nyesom Wike", "atikuWike": "Atiku Abubakar & Nyesom Wike",
+            "Atiku Abubakar & Martins Vincent Otse (VDM)": "Atiku Abubakar & Martins Vincent Otse (VDM)", "atikuWike": "Atiku Abubakar & Martins Vincent Otse (VDM)",
             "Peter Obi & Yemi Osinbajo": "Peter Obi & Yemi Osinbajo", "peterObiYemiOsinbajo": "Peter Obi & Yemi Osinbajo", "peterYemi": "Peter Obi & Yemi Osinbajo",
             "Goodluck Jonathan & Nasir El-Rufai": "Goodluck Jonathan & Nasir El-Rufai", "goodluckElRufai": "Goodluck Jonathan & Nasir El-Rufai",
             "Rabiu Kwankwaso & Rotimi Amaechi": "Rabiu Kwankwaso & Rotimi Amaechi", "rabiuAmaechi": "Rabiu Kwankwaso & Rotimi Amaechi",
@@ -2841,7 +2910,7 @@ function renderComboLoyalists() {
             "Yemi Osinbajo & Sanusi Lamido": "Yemi Osinbajo & Sanusi Lamido", "yemiSanusi": "Yemi Osinbajo & Sanusi Lamido",
             "Peter Obi & Sanusi Lamido": "Peter Obi & Sanusi Lamido", "peterSanusi": "Peter Obi & Sanusi Lamido", "peterObiSanusiLamidu": "Peter Obi & Sanusi Lamido",
             "Rotimi Amaechi & Bukola Saraki": "Rotimi Amaechi & Bukola Saraki", "rotimiBukola": "Rotimi Amaechi & Bukola Saraki",
-            "Aminu Tambuwal & Nyesom Wike": "Aminu Tambuwal & Nyesom Wike", "tambuwalWike": "Aminu Tambuwal & Nyesom Wike",
+            "Aminu Tambuwal & Martins Vincent Otse (VDM)": "Aminu Tambuwal & Martins Vincent Otse (VDM)", "tambuwalWike": "Aminu Tambuwal & Martins Vincent Otse (VDM)",
             "Goodluck Jonathan & Rabiu Kwankwaso": "Goodluck Jonathan & Rabiu Kwankwaso", "goodluckRabiu": "Goodluck Jonathan & Rabiu Kwankwaso",
             "Peter Obi & Nasir El-Rufai": "Peter Obi & Nasir El-Rufai", "peterNasir": "Peter Obi & Nasir El-Rufai",
             "Rabiu Kwankwaso & Peter Obi": "Rabiu Kwankwaso & Peter Obi", "rabiuPeter": "Rabiu Kwankwaso & Peter Obi",
@@ -2853,8 +2922,8 @@ function renderComboLoyalists() {
             "Peter Obi & Bukola Saraki": "Peter Obi & Bukola Saraki", "peterBukola": "Peter Obi & Bukola Saraki",
             "Peter Obi & Rabiu Kwankwaso": "Peter Obi & Rabiu Kwankwaso", "peterRabiu": "Peter Obi & Rabiu Kwankwaso",
             "Peter Obi & Aminu Tambuwal": "Peter Obi & Aminu Tambuwal", "peterTambuwal": "Peter Obi & Aminu Tambuwal",
-            "Nyesom Wike & Aminu Tambuwal": "Nyesom Wike & Aminu Tambuwal", "wikeTambuwal": "Nyesom Wike & Aminu Tambuwal",
-            "Nyesom Wike & Sanusi Lamido": "Nyesom Wike & Sanusi Lamido", "wikeSanusi": "Nyesom Wike & Sanusi Lamido",
+            "Martins Vincent Otse (VDM) & Aminu Tambuwal": "Martins Vincent Otse (VDM) & Aminu Tambuwal", "wikeTambuwal": "Martins Vincent Otse (VDM) & Aminu Tambuwal",
+            "Martins Vincent Otse (VDM) & Sanusi Lamido": "Martins Vincent Otse (VDM) & Sanusi Lamido", "wikeSanusi": "Martins Vincent Otse (VDM) & Sanusi Lamido",
             "Sanusi Lamido & Peter Obi": "Sanusi Lamido & Peter Obi", "sanusiPeter": "Sanusi Lamido & Peter Obi",
         };
         const unmappedKeys = new Set();
