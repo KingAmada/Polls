@@ -75,7 +75,7 @@
       "Godswill Akpabio": "Ahmed Isah"
     };
     const CANDIDATE_IMAGE_OVERRIDES = {
-      "Bola Tinubu": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQtdkmGXMzuLUhyXqFfFnLR7UOvn8rGaW3pZP94lS64Hbwpq6MBs6PHR7c4_Y-D2fKqsPGIyC_9wG8PX9Lf-f2uIecfehUIwNYTElXAA&s=10",
+      "Bola Tinubu": "https://cdn.guardian.ng/wp-content/uploads/2025/09/Bola_Tinubu_portrait.jpg",
       "Martins Vincent Otse (VDM)": "https://scontent-los4-1.xx.fbcdn.net/v/t39.30808-6/669141578_810663598757891_96607208507527731_n.jpg?stp=dst-jpg_s1080x2048_tt6&_nc_cat=102&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeFrETdIW21X9EzThP7rgqLXRrtDsoOpZGxGu0Oyg6lkbFcJmo-WxsD-QXcrddwLC3TPeevZJO_bclD8NgPsXnEE&_nc_ohc=w9IlRfCQxeIQ7kNvwGbDtji&_nc_oc=AdocTe5FRmWN-qV63ZO5lFejysSkaynO19TGHQsEkO8yY5ihRZqXfDDLBiFDapUqm0hj-tOlxQWIkO8YpPZK0OKE&_nc_zt=23&_nc_ht=scontent-los4-1.xx&_nc_gid=k-2Tn5VuZBl0XIqsiB9N_Q&_nc_ss=7a3a8&oh=00_Af2R2BKGd1KkUh1K35o3Ax5sTOyXdID85DefSmKD2i7q7Q&oe=69EA5B24",
       "Ahmed Isah": "https://scontent-los4-1.xx.fbcdn.net/v/t39.30808-6/499861531_2521475408253642_553495349111891313_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeGtWwCEhYURVwsmQAPTFDhz4mwJCJRAQ33ibAkIlEBDfR7Q_-hjr0JfzDtW9mP14Y9V69o7ImNxaoXWz7jfUu9U&_nc_ohc=a0G9RuWeRRcQ7kNvwG9x5DN&_nc_oc=AdrvEf2KSjoYDjLDxOkA9K15198G6tYl-bDJJy1l2jpQe6ujhriRXcHe1c46HhfKMrcRIUVizPCLFcvzrtdUR3Da&_nc_zt=23&_nc_ht=scontent-los4-1.xx&_nc_gid=TpgIhSs7n-1V0bVPHpTxHg&_nc_ss=7a3a8&oh=00_Af2b61Q1DCaRt9sf2nEYzJghThHP-MzllVycTsGdo4wahw&oe=69EA5CF2"
     };
