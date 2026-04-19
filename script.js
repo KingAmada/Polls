@@ -66,6 +66,7 @@
     const seenVoteIds = new Set();
     const seenCommentIds = new Set();
     let locationData = {};
+    let influencerNamesByReferralCode = {};
     const NIGERIAN_STATES_URL = "https://gist.githubusercontent.com/chrisidakwo/4ba3a4f03afc442305021be4ca67738e/raw/a8276ee3a756ae47ee853c4be5a82a11d6c8a313/nigerian-states.json";
     const SUPABASE_URL = "https://eeynpndieynavvxdyqhp.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVleW5wbmRpZXluYXZ2eGR5cWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyOTA3NTksImV4cCI6MjA5MDg2Njc1OX0.-IHvceypEfRZoO3OfJtZtcHiMpDCbqKDFdwEAQB9NbU";
@@ -1315,6 +1316,7 @@
       mapStatesData = [];
       comboDefinitions = [];
       socialProofMessages = [];
+      influencerNamesByReferralCode = {};
       seenVoteIds.clear();
       seenCommentIds.clear();
       dataBackend = "supabase";
@@ -1489,6 +1491,7 @@
       votesData = {};
       comboShares = {};
       loyalists = {};
+      influencerNamesByReferralCode = {};
       comboDefinitions = [];
       comboComments = {};
       socialProofMessages = ((proofsRes.error ? [] : proofsRes.data) || []).map((row) => row.message).filter(Boolean);
@@ -1550,8 +1553,12 @@
       normalizedLoyalistRows.forEach((row) => {
         const code = (row.referral_code || "").toUpperCase();
         const [presidentName = "", vicePresidentName = ""] = String(row.combo_key || "").split(" & ");
+        const resolvedName = getFirstName(row.loyalist_name);
+        if (code && resolvedName && resolvedName !== "Referral") {
+          influencerNamesByReferralCode[code] = resolvedName;
+        }
         loyalists[code] = {
-          loyalistName: row.loyalist_name || "Anonymous",
+          loyalistName: resolvedName || row.loyalist_name || "Anonymous",
           city: row.city || "",
           combo: row.combo_key || "",
           supporters: row.supporters || 0,
@@ -1561,6 +1568,7 @@
           comboImg2: candidateImages[vicePresidentName] || row.combo_img2 || 'https://placehold.co/50x50/cccccc/ffffff?text=N/A'
         };
       });
+      await hydrateLoyalistNamesFromReferralCodes(Object.keys(loyalists));
 
       dataBackend = "supabase";
       debugLog("loadSupabaseData", "Hydrated client store.", {
@@ -1795,6 +1803,11 @@
       if (num >= 1000)    return (num / 1000).toFixed(1).replace(/\.0$/, "") + "K";
       return String(num);
     }
+    function getFirstName(value) {
+      const cleanValue = sanitizePlainText(value, 80);
+      if (!cleanValue) return "";
+      return cleanValue.split(/\s+/)[0] || cleanValue;
+    }
     function buildShareUrl(comboKey, referralCode = "") {
       const shareUrl = new URL('/_functions/pollShare', `${getPollBackendBase()}/`);
       shareUrl.searchParams.set('combo', canonicalizeComboKey(comboKey));
@@ -1844,6 +1857,47 @@
         voterReferralEl.value = sharedReferral.toUpperCase();
       }
       updateProgress();
+    }
+    async function fetchInfluencerReferrals(referralCodes) {
+      const uniqueCodes = Array.from(new Set((referralCodes || [])
+        .map((code) => sanitizeReferralCode(code))
+        .filter(Boolean)));
+      if (!uniqueCodes.length) return [];
+      const chunkSize = 50;
+      const referrals = [];
+      for (let index = 0; index < uniqueCodes.length; index += chunkSize) {
+        const codesChunk = uniqueCodes.slice(index, index + chunkSize);
+        const response = await callPollApi('/_functions/apiPollInfluencerReferrals', {
+          query: { codes: codesChunk.join(',') }
+        });
+        referrals.push(...(response?.referrals || []));
+      }
+      return referrals;
+    }
+    async function hydrateLoyalistNamesFromReferralCodes(referralCodes) {
+      const codesToResolve = Array.from(new Set((referralCodes || [])
+        .map((code) => sanitizeReferralCode(code))
+        .filter((code) => code && !influencerNamesByReferralCode[code])));
+      if (!codesToResolve.length) return;
+      try {
+        const referrals = await fetchInfluencerReferrals(codesToResolve);
+        let updated = false;
+        referrals.forEach((referral) => {
+          const referralCode = sanitizeReferralCode(referral?.referralCode);
+          const firstName = getFirstName(referral?.firstName || referral?.fullName);
+          if (!referralCode || !firstName) return;
+          influencerNamesByReferralCode[referralCode] = firstName;
+          if (loyalists[referralCode] && loyalists[referralCode].loyalistName !== firstName) {
+            loyalists[referralCode].loyalistName = firstName;
+            updated = true;
+          }
+        });
+        if (updated) {
+          renderComboLoyalists();
+        }
+      } catch (error) {
+        debugError("loyalists", "Unable to hydrate influencer names from referral codes.", error);
+      }
     }
     function countCommentsForCombo(comboKey) {
       const commentsArray = comboComments[comboKey] || [];
@@ -2145,9 +2199,10 @@
       if (!referralCode) return;
       const normalizedComboKey = canonicalizeComboKey(votePayload.combo);
       const [presName, vpName] = normalizedComboKey.split(" & ");
+      const resolvedName = influencerNamesByReferralCode[referralCode] || "Referral User";
       if (!loyalists[referralCode]) {
         loyalists[referralCode] = {
-          loyalistName: "Referral User",
+          loyalistName: resolvedName,
           city: votePayload.city,
           combo: normalizedComboKey,
           supporters: 0,
@@ -2157,6 +2212,9 @@
           comboImg2: candidateImages[vpName] || 'https://placehold.co/50x50/cccccc/ffffff?text=N/A'
         };
       }
+      if (resolvedName && loyalists[referralCode].loyalistName !== resolvedName) {
+        loyalists[referralCode].loyalistName = resolvedName;
+      }
       loyalists[referralCode].supporters = (loyalists[referralCode].supporters || 0) + 1;
       const comboInfluencerCount = Object.values(loyalists).filter((entry) => entry.combo === normalizedComboKey).length;
       Object.values(loyalists).forEach((entry) => {
@@ -2164,6 +2222,9 @@
           entry.totalInfluencers = comboInfluencerCount;
         }
       });
+      if (!influencerNamesByReferralCode[referralCode]) {
+        void hydrateLoyalistNamesFromReferralCodes([referralCode]);
+      }
     }
     function applyVoteToLocalState(votePayload) {
       const comboKey = canonicalizeComboKey(votePayload.combo);
