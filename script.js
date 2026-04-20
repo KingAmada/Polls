@@ -2365,8 +2365,8 @@
         });
       } catch (error) {
         debugError("submitVote", "Vote persistence error.", error);
-        const message = /already voted/i.test(error?.message || "")
-          ? "This phone number has already been used to vote."
+        const message = /already voted|you just voted you can't vote again/i.test(error?.message || "")
+          ? "You Just voted you can't vote again"
           : "Your vote could not be saved to the database. No local counts were changed.";
         openNoticeModal({
           title: "Vote Failed",
